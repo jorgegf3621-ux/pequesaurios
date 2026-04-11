@@ -78,6 +78,7 @@ const Cotizador = () => {
       .filter(Boolean)
       .join(", ");
     localStorage.setItem("cotizador_seleccion", resumen);
+    localStorage.setItem("cotizador_ids", JSON.stringify(Object.keys(selectedSinExtraHuerfana)));
     navigate("/reservaciones");
   };
 

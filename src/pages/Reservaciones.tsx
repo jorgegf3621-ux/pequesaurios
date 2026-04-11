@@ -1,25 +1,32 @@
 import { useState, useEffect } from "react";
 import { format, isSameDay, isBefore, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
-import { CalendarIcon, PartyPopper, Phone, User, Mail, MessageSquare } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { PartyPopper, Phone, User, Mail, MessageSquare, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const packages = [
-  { value: "inflable", label: "Inflable Castillo Blanco" },
-  { value: "mobiliario", label: "Mobiliario Infantil" },
-  { value: "pintacaritas", label: "Pintacaritas" },
-  { value: "yesitos", label: "Kit de Yesitos" },
-  { value: "paquete-completo", label: "Paquete Completo (Todo incluido)" },
+  { group: "Baby Play Zone", value: "bpz-inflable",      label: "Inflable Castillo (solo)" },
+  { group: "Baby Play Zone", value: "bpz-basico",        label: "Paquete Básico (inflable + mesita)" },
+  { group: "Baby Play Zone", value: "bpz-plus",          label: "Paquete Plus (inflable + mesita arte)" },
+  { group: "Inflables",      value: "inflable",           label: "Inflable Castillo Blanco" },
+  { group: "Mesas",          value: "mesa-pastel",        label: "Mesa Infantil Pastel (6 sillas)" },
+  { group: "Mesas",          value: "mesa-blanca",        label: "Mesita Blanca (8 sillas madera)" },
+  { group: "Mesas",          value: "mesa-extra",         label: "Mesa extra adicional" },
+  { group: "Yesitos",        value: "yesito-basico",      label: "Kit Yesitos Básico (1 yesito)" },
+  { group: "Yesitos",        value: "yesito-intermedio",  label: "Kit Yesitos Intermedio (2 yesitos)" },
+  { group: "Yesitos",        value: "yesito-completo",    label: "Kit Yesitos Completo (3 yesitos)" },
+  { group: "Extras",         value: "arte",               label: "Arte en Mesa" },
+  { group: "Extras",         value: "globos",             label: "Guirnalda de Globos" },
+  { group: "Servicios",      value: "pintacaritas",       label: "Pintacaritas (1.5 hrs)" },
 ];
+
+const groups = [...new Set(packages.map((p) => p.group))];
 
 const Reservaciones = () => {
   const [date, setDate] = useState<Date>();
@@ -27,16 +34,18 @@ const Reservaciones = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [selectedPackage, setSelectedPackage] = useState("");
+  const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchBookedDates();
     const pre = localStorage.getItem("cotizador_seleccion");
-    if (pre) {
-      localStorage.removeItem("cotizador_seleccion");
-      setNotes(pre);
+    const ids = localStorage.getItem("cotizador_ids");
+    if (pre) { localStorage.removeItem("cotizador_seleccion"); setNotes(pre); }
+    if (ids) {
+      localStorage.removeItem("cotizador_ids");
+      try { setSelectedPackages(JSON.parse(ids)); } catch {}
     }
   }, []);
 
@@ -45,25 +54,30 @@ const Reservaciones = () => {
       .from("reservations")
       .select("event_date")
       .in("status", ["pendiente", "confirmada"]);
-
-    if (data) {
-      setBookedDates(data.map((r) => new Date(r.event_date + "T12:00:00")));
-    }
+    if (data) setBookedDates(data.map((r) => new Date(r.event_date + "T12:00:00")));
   };
 
-  const isDateBooked = (day: Date) => {
-    return bookedDates.some((d) => isSameDay(d, day));
+  const isDateBooked = (day: Date) => bookedDates.some((d) => isSameDay(d, day));
+
+  const togglePackage = (value: string) => {
+    setSelectedPackages((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!date || !name || !phone || !selectedPackage) {
+    if (!date || !name || !phone || selectedPackages.length === 0) {
       toast.error("Por favor completa todos los campos obligatorios");
       return;
     }
 
     setLoading(true);
+
+    const packageLabel = selectedPackages
+      .map((v) => packages.find((p) => p.value === v)?.label ?? v)
+      .join(", ");
 
     const { data: inserted, error } = await supabase
       .from("reservations")
@@ -72,7 +86,7 @@ const Reservaciones = () => {
         customer_phone: phone,
         customer_email: email || null,
         event_date: format(date, "yyyy-MM-dd"),
-        package: selectedPackage,
+        package: packageLabel,
         notes: notes || null,
       })
       .select("id")
@@ -85,23 +99,22 @@ const Reservaciones = () => {
       return;
     }
 
-    toast.success("¡Reservación enviada! Te contactaremos pronto para confirmar. 🎉");
+    toast.success("Reservacion enviada. Te contactaremos pronto para confirmar.");
 
-    // Reset form
     setDate(undefined);
     setName("");
     setPhone("");
     setEmail("");
-    setSelectedPackage("");
+    setSelectedPackages([]);
     setNotes("");
     fetchBookedDates();
   };
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
-      <h1 className="font-heading text-4xl font-bold text-center mb-2">Reserva tu Fecha 🗓️</h1>
+      <h1 className="font-heading text-4xl font-bold text-center mb-2">Reserva tu Fecha</h1>
       <p className="text-muted-foreground text-center mb-12">
-        Selecciona la fecha de tu evento y completa el formulario. Las fechas en rosa ya están reservadas.
+        Selecciona la fecha de tu evento y completa el formulario. Las fechas en rosa ya estan reservadas.
       </p>
 
       {/* Calendar */}
@@ -111,13 +124,9 @@ const Reservaciones = () => {
           selected={date}
           onSelect={setDate}
           locale={es}
-          disabled={(day) =>
-            isBefore(day, startOfDay(new Date())) || isDateBooked(day)
-          }
+          disabled={(day) => isBefore(day, startOfDay(new Date())) || isDateBooked(day)}
           modifiers={{ booked: bookedDates }}
-          modifiersClassNames={{
-            booked: "bg-primary/30 text-primary line-through",
-          }}
+          modifiersClassNames={{ booked: "bg-primary/30 text-primary line-through" }}
           className="rounded-2xl border border-border shadow-sm p-4 pointer-events-auto"
         />
       </div>
@@ -125,7 +134,7 @@ const Reservaciones = () => {
       {date && (
         <div className="bg-primary/10 rounded-xl p-4 mb-8 text-center">
           <p className="font-heading font-bold text-primary">
-            📅 Fecha seleccionada: {format(date, "EEEE d 'de' MMMM, yyyy", { locale: es })}
+            Fecha seleccionada: {format(date, "EEEE d 'de' MMMM, yyyy", { locale: es })}
           </p>
         </div>
       )}
@@ -171,22 +180,41 @@ const Reservaciones = () => {
           />
         </div>
 
-        <div className="space-y-2">
+        {/* Paquetes multi-selección */}
+        <div className="space-y-3">
           <Label className="flex items-center gap-2">
-            <PartyPopper size={16} /> Paquete o servicio *
+            <PartyPopper size={16} /> Paquete o servicio * (puedes elegir varios)
           </Label>
-          <Select value={selectedPackage} onValueChange={setSelectedPackage}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecciona un paquete" />
-            </SelectTrigger>
-            <SelectContent>
-              {packages.map((p) => (
-                <SelectItem key={p.value} value={p.value}>
-                  {p.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {groups.map((group) => (
+            <div key={group}>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                {group}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {packages.filter((p) => p.group === group).map((pkg) => {
+                  const active = selectedPackages.includes(pkg.value);
+                  return (
+                    <button
+                      key={pkg.value}
+                      type="button"
+                      onClick={() => togglePackage(pkg.value)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                        active
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-card text-foreground border-border hover:border-primary/50"
+                      }`}
+                    >
+                      {active && <Check size={13} />}
+                      {pkg.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+          {selectedPackages.length === 0 && (
+            <p className="text-xs text-muted-foreground">Selecciona al menos un servicio</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -209,7 +237,7 @@ const Reservaciones = () => {
           className="w-full"
           disabled={loading || !date}
         >
-          {loading ? "Enviando..." : "Enviar Reservación 🎉"}
+          {loading ? "Enviando..." : "Enviar Reservacion"}
         </Button>
       </form>
 
