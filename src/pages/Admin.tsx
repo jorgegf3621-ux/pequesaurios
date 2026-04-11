@@ -313,19 +313,29 @@ const Admin = () => {
   }, [authenticated]);
 
   const updateStatus = async (id: string, newStatus: string) => {
-    const { error, data } = await supabase
+    const { error } = await supabase
       .from("reservations")
       .update({ status: newStatus })
-      .eq("id", id)
-      .select();
+      .eq("id", id);
 
     if (error) {
-      toast.error(`Error: ${error.message}`);
-    } else if (!data || data.length === 0) {
-      toast.error("No se actualizó. Revisa los permisos RLS en Supabase.");
+      toast.error(`Error al actualizar: ${error.message}`);
+      fetchReservations(); // Refrescar para ver estado actual
     } else {
-      toast.success("Estado actualizado");
-      fetchReservations();
+      // Verificar que realmente se actualizó
+      const { data: check } = await supabase
+        .from("reservations")
+        .select("status")
+        .eq("id", id)
+        .single();
+
+      if (check?.status === newStatus) {
+        toast.success("Estado actualizado");
+        fetchReservations();
+      } else {
+        toast.error("No se pudo actualizar. Verifica las políticas RLS en Supabase:\n\n1. Ve a Supabase → Authentication → Policies\n2. En la tabla 'reservations', asegúrate de tener:\n   - Política UPDATE habilitada para usuarios autenticados\n   - O deshabilita RLS temporalmente para pruebas");
+        fetchReservations();
+      }
     }
   };
 
@@ -358,11 +368,25 @@ const Admin = () => {
       .eq("id", id);
 
     if (error) {
-      toast.error("Error al eliminar");
+      toast.error(`Error al eliminar: ${error.message}`);
+      fetchReservations();
+      return;
+    }
+
+    // Verificar que realmente se eliminó haciendo un query directo
+    const { data: check } = await supabase
+      .from("reservations")
+      .select("id")
+      .eq("id", id)
+      .single();
+
+    if (check) {
+      toast.error("No se pudo eliminar. Verifica las políticas RLS en Supabase:\n\n1. Ve a Supabase → Authentication → Policies\n2. En la tabla 'reservations', asegúrate de tener:\n   - Política DELETE habilitada para usuarios autenticados\n   - O deshabilita RLS temporalmente para pruebas");
     } else {
       toast.success("Eliminado correctamente");
-      fetchReservations();
     }
+    
+    fetchReservations();
   };
 
   const handleReservacionCreada = (notaData: NotaData) => {
