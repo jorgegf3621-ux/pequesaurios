@@ -34,6 +34,7 @@ type Prefill = {
   hora?: string;
   paqueteNombre?: string;
   servicios?: Record<string, number>;
+  precios?: Record<string, number>;
   flete?: number;
   metodoPago?: string;
   skipToPreview?: boolean;
@@ -56,6 +57,7 @@ const NotaTemplate = ({
   hora,
   paqueteNombre,
   servicios,
+  precios,
   flete,
   metodoPago,
 }: {
@@ -64,11 +66,26 @@ const NotaTemplate = ({
   hora: string;
   paqueteNombre: string;
   servicios: Record<string, number>;
+  precios?: Record<string, number>;
   flete: number;
   metodoPago: string;
 }) => {
+  const getServicePrice = (s: typeof SERVICIOS[0]) => {
+    // Map old service IDs to new ones and check custom prices
+    const priceMap: Record<string, number> = {
+      "inflable": 1300,
+      "mesa-pastel": 500,
+      "mesa-blanca": 750,
+      "arte": 150,
+      "yesitos": 20,
+      "pintacaritas": 800,
+      "globos": 200,
+    };
+    return precios?.[s.id] ?? priceMap[s.id] ?? s.price;
+  };
+
   const lineas = SERVICIOS.filter((s) => (servicios[s.id] ?? 0) > 0);
-  const totalServicios = lineas.reduce((sum, s) => sum + s.price * (servicios[s.id] ?? 0), 0);
+  const totalServicios = lineas.reduce((sum, s) => sum + getServicePrice(s) * (servicios[s.id] ?? 0), 0);
   const total = totalServicios + flete;
   const anticipo = Math.round(total * 0.5);
   const pendiente = total - anticipo;
@@ -303,6 +320,7 @@ const NotaPago = ({ reservation, open, onClose, prefill }: Props) => {
   const [hora, setHora] = useState(prefill?.hora ?? "");
   const [paqueteNombre, setPaqueteNombre] = useState(prefill?.paqueteNombre ?? "");
   const [servicios, setServicios] = useState<Record<string, number>>(prefill?.servicios ?? {});
+  const [precios, setPrecios] = useState<Record<string, number>>(prefill?.precios ?? {});
   const [flete, setFlete] = useState(prefill?.flete ?? 0);
   const [metodoPago, setMetodoPago] = useState(prefill?.metodoPago ?? "transferencia");
   const [generating, setGenerating] = useState(false);
@@ -314,6 +332,7 @@ const NotaPago = ({ reservation, open, onClose, prefill }: Props) => {
       setHora(prefill.hora ?? "");
       setPaqueteNombre(prefill.paqueteNombre ?? "");
       setServicios(prefill.servicios ?? {});
+      setPrecios(prefill.precios ?? {});
       setFlete(prefill.flete ?? 0);
       setMetodoPago(prefill.metodoPago ?? "transferencia");
       setPreview(prefill.skipToPreview ?? false);
@@ -322,10 +341,23 @@ const NotaPago = ({ reservation, open, onClose, prefill }: Props) => {
 
   if (!reservation) return null;
 
+  const getServicePrice = (s: typeof SERVICIOS[0]) => {
+    const priceMap: Record<string, number> = {
+      "inflable": 1300,
+      "mesa-pastel": 500,
+      "mesa-blanca": 750,
+      "arte": 150,
+      "yesitos": 20,
+      "pintacaritas": 800,
+      "globos": 200,
+    };
+    return precios?.[s.id] ?? priceMap[s.id] ?? s.price;
+  };
+
   const hayServicios = Object.values(servicios).some((v) => v > 0);
 
   const totalServicios = SERVICIOS.filter((s) => (servicios[s.id] ?? 0) > 0)
-    .reduce((sum, s) => sum + s.price * (servicios[s.id] ?? 0), 0);
+    .reduce((sum, s) => sum + getServicePrice(s) * (servicios[s.id] ?? 0), 0);
   const total = totalServicios + flete;
   const anticipo = Math.round(total * 0.5);
 
@@ -433,6 +465,7 @@ const NotaPago = ({ reservation, open, onClose, prefill }: Props) => {
               <div className="space-y-2">
                 {SERVICIOS.map((s) => {
                   const qty = servicios[s.id] ?? 0;
+                  const currentPrice = getServicePrice(s);
                   return (
                     <div
                       key={s.id}
@@ -442,7 +475,7 @@ const NotaPago = ({ reservation, open, onClose, prefill }: Props) => {
                     >
                       <div>
                         <p className="text-sm font-medium">{s.name}</p>
-                        <p className="text-xs text-muted-foreground">${s.price.toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground">${currentPrice.toLocaleString()}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <Button type="button" variant="outline" size="icon" className="h-7 w-7" onClick={() => cambiarCantidad(s.id, -1)} disabled={qty === 0}>
@@ -491,6 +524,7 @@ const NotaPago = ({ reservation, open, onClose, prefill }: Props) => {
                   hora={hora}
                   paqueteNombre={paqueteNombre}
                   servicios={servicios}
+                  precios={precios}
                   flete={flete}
                   metodoPago={metodoPago}
                 />

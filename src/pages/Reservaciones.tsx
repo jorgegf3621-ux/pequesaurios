@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { format, isSameDay, isBefore, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
-import { PartyPopper, Phone, User, Mail, MessageSquare, Check } from "lucide-react";
+import { PartyPopper, Phone, User, Mail, MessageSquare, Check, TableProperties } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -37,6 +38,7 @@ const Reservaciones = () => {
   const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showMesaPrompt, setShowMesaPrompt] = useState(false);
 
   useEffect(() => {
     fetchBookedDates();
@@ -59,10 +61,24 @@ const Reservaciones = () => {
 
   const isDateBooked = (day: Date) => bookedDates.some((d) => isSameDay(d, day));
 
+  const IDS_CON_MESITA = new Set(["mesa-pastel", "mesa-blanca", "bpz-basico", "bpz-plus"]);
+
   const togglePackage = (value: string) => {
+    setSelectedPackages((prev) => {
+      if (prev.includes(value)) return prev.filter((v) => v !== value);
+      // Al agregar un item con mesita, preguntar si quiere segunda mesa (si no la tiene ya)
+      if (IDS_CON_MESITA.has(value) && !prev.includes("mesa-extra")) {
+        setTimeout(() => setShowMesaPrompt(true), 50);
+      }
+      return [...prev, value];
+    });
+  };
+
+  const agregarMesaExtra = () => {
     setSelectedPackages((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+      prev.includes("mesa-extra") ? prev : [...prev, "mesa-extra"]
     );
+    setShowMesaPrompt(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

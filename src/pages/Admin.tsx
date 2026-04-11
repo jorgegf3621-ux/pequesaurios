@@ -373,6 +373,7 @@ const Admin = () => {
       hora: notaData.hora,
       paqueteNombre: notaData.paqueteNombre,
       servicios: notaData.servicios,
+      precios: notaData.precios,
       flete: notaData.flete,
       metodoPago: notaData.metodoPago,
       skipToPreview: Object.values(notaData.servicios).some((v) => v > 0),
