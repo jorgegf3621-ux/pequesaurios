@@ -28,15 +28,16 @@ const Reservaciones = () => {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [selectedPackage, setSelectedPackage] = useState("");
-  const [notes, setNotes] = useState(() => {
-    const pre = localStorage.getItem("cotizador_seleccion");
-    if (pre) { localStorage.removeItem("cotizador_seleccion"); return pre; }
-    return "";
-  });
+  const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchBookedDates();
+    const pre = localStorage.getItem("cotizador_seleccion");
+    if (pre) {
+      localStorage.removeItem("cotizador_seleccion");
+      setNotes(pre);
+    }
   }, []);
 
   const fetchBookedDates = async () => {

@@ -30,7 +30,7 @@ const categorias = [
     title: "Pintacaritas",
     desc: "Variedad de personajes, dibujos en cara y mano, glitter tattoos y glitter para cabello.",
     desde: "$800",
-    href: "/contacto",
+    href: "/pintacaritas",
     color: "from-purple-50 to-pink-50",
     border: "border-purple-200",
     iconColor: "text-purple-500",
