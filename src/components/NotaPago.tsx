@@ -21,6 +21,23 @@ const SERVICIOS = [
   { id: "globos",       name: "Guirnalda de Globos",                  price: 200  },
 ];
 
+// Mapeo de nuevos IDs a antiguos para compatibilidad
+const ID_MAP: Record<string, { oldId: string; name: string }> = {
+  "bpz-inflable":      { oldId: "bpz-inflable",      name: "BPZ · Inflable Castillo (solo)" },
+  "bpz-basico":        { oldId: "bpz-basico",        name: "BPZ · Paquete Básico (inflable + mesita)" },
+  "bpz-plus":          { oldId: "bpz-plus",          name: "BPZ · Paquete Plus (inflable + mesita arte)" },
+  "inflable":          { oldId: "inflable",          name: "Inflable Castillo Blanco 3×3 m" },
+  "mesa-pastel":       { oldId: "mesa-pastel",       name: "Mesita Infantil Pastel (6 sillas)" },
+  "mesa-blanca":       { oldId: "mesa-blanca",       name: "Mesita Blanca (8 sillas madera)" },
+  "mesa-extra":        { oldId: "mesa-extra",        name: "Mesa extra (segunda mesa)" },
+  "yesito-basico":     { oldId: "yesito-basico",     name: "Kit Yesitos Básico (1 yesito)" },
+  "yesito-intermedio": { oldId: "yesito-intermedio", name: "Kit Yesitos Intermedio (2 yesitos)" },
+  "yesito-completo":   { oldId: "yesito-completo",   name: "Kit Yesitos Completo (3 yesitos)" },
+  "arte":              { oldId: "arte",              name: "Arte en Mesa" },
+  "globos":            { oldId: "globos",            name: "Guirnalda de Globos" },
+  "pintacaritas":      { oldId: "pintacaritas",      name: "Pintacaritas (1.5 hrs)" },
+};
+
 type Reservation = {
   id: string;
   customer_name: string;
@@ -70,22 +87,38 @@ const NotaTemplate = ({
   flete: number;
   metodoPago: string;
 }) => {
-  const getServicePrice = (s: typeof SERVICIOS[0]) => {
-    // Map old service IDs to new ones and check custom prices
-    const priceMap: Record<string, number> = {
-      "inflable": 1300,
-      "mesa-pastel": 500,
-      "mesa-blanca": 750,
-      "arte": 150,
-      "yesitos": 20,
-      "pintacaritas": 800,
-      "globos": 200,
-    };
-    return precios?.[s.id] ?? priceMap[s.id] ?? s.price;
+  // Precios por defecto para cada servicio
+  const defaultPrices: Record<string, number> = {
+    "bpz-inflable": 800,
+    "bpz-basico": 1200,
+    "bpz-plus": 1400,
+    "inflable": 1300,
+    "mesa-pastel": 500,
+    "mesa-blanca": 750,
+    "mesa-extra": 350,
+    "yesito-basico": 20,
+    "yesito-intermedio": 25,
+    "yesito-completo": 30,
+    "arte": 150,
+    "globos": 200,
+    "pintacaritas": 800,
   };
 
-  const lineas = SERVICIOS.filter((s) => (servicios[s.id] ?? 0) > 0);
-  const totalServicios = lineas.reduce((sum, s) => sum + getServicePrice(s) * (servicios[s.id] ?? 0), 0);
+  const getServicePrice = (id: string) => {
+    return precios?.[id] ?? defaultPrices[id] ?? 0;
+  };
+
+  // Obtener servicios seleccionados como array
+  const lineas = Object.entries(servicios)
+    .filter(([, qty]) => qty > 0)
+    .map(([id, qty]) => ({
+      id,
+      name: ID_MAP[id]?.name || id,
+      qty,
+      price: getServicePrice(id),
+    }));
+
+  const totalServicios = lineas.reduce((sum, l) => sum + l.price * l.qty, 0);
   const total = totalServicios + flete;
   const anticipo = Math.round(total * 0.5);
   const pendiente = total - anticipo;
@@ -118,17 +151,17 @@ const NotaTemplate = ({
         overflow: "hidden",
       }}
     >
-      {/* ── Header ── */}
+      {/* ── Header con logo ── */}
       <div
         style={{
           background: "#fff",
-          paddingTop: 28,
+          paddingTop: 24,
           paddingBottom: 0,
           textAlign: "center",
           position: "relative",
         }}
       >
-        <img src={logo} alt="Pequesaurios" style={{ height: 80, objectFit: "contain" }} />
+        <img src={logo} alt="Pequesaurios" style={{ height: 72, objectFit: "contain", margin: "0 auto" }} />
 
         {/* Wavy divider */}
         <svg
@@ -194,35 +227,30 @@ const NotaTemplate = ({
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
               <tr style={{ background: pink }}>
-                <th style={{ color: "#fff", padding: "10px 14px", textAlign: "left", fontWeight: 600, width: "30%" }}>Paquete</th>
-                <th style={{ color: "#fff", padding: "10px 14px", textAlign: "left", fontWeight: 600 }}>Descripción</th>
-                <th style={{ color: "#fff", padding: "10px 14px", textAlign: "right", fontWeight: 600, width: "15%" }}>Precio</th>
+                <th style={{ color: "#fff", padding: "10px 14px", textAlign: "left", fontWeight: 600, width: "35%" }}>Paquete</th>
+                <th style={{ color: "#fff", padding: "10px 14px", textAlign: "center", fontWeight: 600, width: "15%" }}>Cant</th>
+                <th style={{ color: "#fff", padding: "10px 14px", textAlign: "right", fontWeight: 600, width: "25%" }}>Precio</th>
               </tr>
             </thead>
             <tbody>
+              {lineas.map((linea) => (
+                <tr key={linea.id} style={{ borderBottom: "1px solid #f0dde9" }}>
+                  <td style={{ padding: "12px 14px", verticalAlign: "middle" }}>
+                    {linea.name}
+                  </td>
+                  <td style={{ padding: "12px 14px", textAlign: "center", color: textGray }}>
+                    {linea.qty}
+                  </td>
+                  <td style={{ padding: "12px 14px", textAlign: "right", fontWeight: 600 }}>
+                    ${((linea.price * linea.qty)).toLocaleString("es-MX")}
+                  </td>
+                </tr>
+              ))}
               <tr style={{ borderBottom: "1px solid #f0dde9" }}>
-                <td style={{ padding: "14px", verticalAlign: "top", color: textGray, textAlign: "center" }}>
-                  {paqueteNombre || "Paquete"}
-                </td>
-                <td style={{ padding: "14px", verticalAlign: "top" }}>
-                  <ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.8 }}>
-                    {lineas.map((s) => (
-                      <li key={s.id}>
-                        {s.name}
-                        {(servicios[s.id] ?? 0) > 1 ? ` ×${servicios[s.id]}` : ""}
-                      </li>
-                    ))}
-                  </ul>
-                </td>
-                <td style={{ padding: "14px", textAlign: "right", fontWeight: 600, verticalAlign: "top" }}>
-                  {fmt(totalServicios)}
-                </td>
-              </tr>
-              <tr>
                 <td style={{ padding: "12px 14px", color: textGray, textAlign: "center" }}>Flete</td>
-                <td />
+                <td style={{ padding: "12px 14px", textAlign: "center", color: textGray }}>1</td>
                 <td style={{ padding: "12px 14px", textAlign: "right", fontWeight: 600 }}>
-                  {fmt(flete)}
+                  ${flete.toLocaleString("es-MX")}
                 </td>
               </tr>
             </tbody>
@@ -268,9 +296,9 @@ const NotaTemplate = ({
             }}
           >
             {[
-              { label: "Total", value: fmt(total), bold: false },
-              { label: "Anticipo", value: fmt(anticipo), bold: false },
-              { label: "Pendiente", value: fmt(pendiente), bold: true },
+              { label: "Total", value: total, bold: false },
+              { label: "Anticipo", value: anticipo, bold: false },
+              { label: "Pendiente", value: pendiente, bold: true },
             ].map((row, i) => (
               <div
                 key={row.label}
@@ -282,13 +310,13 @@ const NotaTemplate = ({
                 }}
               >
                 <span style={{ color: pink, fontWeight: 600 }}>{row.label}</span>
-                <span style={{ fontWeight: row.bold ? 800 : 600 }}>{row.value}</span>
+                <span style={{ fontWeight: row.bold ? 800 : 600 }}>${row.value.toLocaleString("es-MX")}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ── Footer ── */}
+        {/* ── Footer con redes sociales ── */}
         <div
           style={{
             marginTop: 20,
@@ -304,8 +332,10 @@ const NotaTemplate = ({
             <div>📍 Monterrey, N.L</div>
             <div>📞 8180540369</div>
           </div>
-          <div style={{ textAlign: "right", lineHeight: 1.8 }}>
-            <div>📸 🟦 @PEQUESAURIOSS</div>
+          <div style={{ textAlign: "right", lineHeight: 1.8, display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 18 }}>📸</span>
+            <span style={{ fontSize: 18, color: "#0066ff" }}>🟦</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: "#666" }}>@PEQUESAURIOSS</span>
           </div>
         </div>
       </div>
@@ -341,23 +371,29 @@ const NotaPago = ({ reservation, open, onClose, prefill }: Props) => {
 
   if (!reservation) return null;
 
-  const getServicePrice = (s: typeof SERVICIOS[0]) => {
-    const priceMap: Record<string, number> = {
+  const getServicePrice = (id: string) => {
+    const defaultPrices: Record<string, number> = {
+      "bpz-inflable": 800,
+      "bpz-basico": 1200,
+      "bpz-plus": 1400,
       "inflable": 1300,
       "mesa-pastel": 500,
       "mesa-blanca": 750,
+      "mesa-extra": 350,
+      "yesito-basico": 20,
+      "yesito-intermedio": 25,
+      "yesito-completo": 30,
       "arte": 150,
-      "yesitos": 20,
-      "pintacaritas": 800,
       "globos": 200,
+      "pintacaritas": 800,
     };
-    return precios?.[s.id] ?? priceMap[s.id] ?? s.price;
+    return precios?.[id] ?? defaultPrices[id] ?? 0;
   };
 
   const hayServicios = Object.values(servicios).some((v) => v > 0);
 
-  const totalServicios = SERVICIOS.filter((s) => (servicios[s.id] ?? 0) > 0)
-    .reduce((sum, s) => sum + getServicePrice(s) * (servicios[s.id] ?? 0), 0);
+  const totalServicios = Object.entries(servicios)
+    .reduce((sum, [id, qty]) => sum + getServicePrice(id) * qty, 0);
   const total = totalServicios + flete;
   const anticipo = Math.round(total * 0.5);
 
@@ -463,26 +499,26 @@ const NotaPago = ({ reservation, open, onClose, prefill }: Props) => {
             <div>
               <Label className="mb-2 block">Servicios incluidos</Label>
               <div className="space-y-2">
-                {SERVICIOS.map((s) => {
-                  const qty = servicios[s.id] ?? 0;
-                  const currentPrice = getServicePrice(s);
+                {Object.entries(ID_MAP).map(([id, { name }]) => {
+                  const qty = servicios[id] ?? 0;
+                  const currentPrice = getServicePrice(id);
                   return (
                     <div
-                      key={s.id}
+                      key={id}
                       className={`flex items-center justify-between rounded-xl border px-4 py-3 transition-colors ${
                         qty > 0 ? "border-primary/40 bg-primary/5" : "border-border"
                       }`}
                     >
                       <div>
-                        <p className="text-sm font-medium">{s.name}</p>
+                        <p className="text-sm font-medium">{name}</p>
                         <p className="text-xs text-muted-foreground">${currentPrice.toLocaleString()}</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button type="button" variant="outline" size="icon" className="h-7 w-7" onClick={() => cambiarCantidad(s.id, -1)} disabled={qty === 0}>
+                        <Button type="button" variant="outline" size="icon" className="h-7 w-7" onClick={() => cambiarCantidad(id, -1)} disabled={qty === 0}>
                           <Minus size={13} />
                         </Button>
                         <span className="w-5 text-center text-sm font-semibold">{qty}</span>
-                        <Button type="button" variant="outline" size="icon" className="h-7 w-7" onClick={() => cambiarCantidad(s.id, 1)}>
+                        <Button type="button" variant="outline" size="icon" className="h-7 w-7" onClick={() => cambiarCantidad(id, 1)}>
                           <Plus size={13} />
                         </Button>
                       </div>
