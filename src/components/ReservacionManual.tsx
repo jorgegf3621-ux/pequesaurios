@@ -18,22 +18,29 @@ type ServicioDef = {
   defaultPrice: number;
   unit: string;
   min?: number;
+  max?: number;
   category: string;
 };
 
 const SERVICIOS_DEF: ServicioDef[] = [
+  // Baby Play Zone
   { id: "bpz-inflable",      name: "BPZ · Inflable Castillo (solo)",              defaultPrice: 800,  unit: "renta 5hrs",  category: "Baby Play Zone" },
   { id: "bpz-basico",        name: "BPZ · Paquete Básico (inflable + mesita)",    defaultPrice: 1200, unit: "renta 5hrs",  category: "Baby Play Zone" },
   { id: "bpz-plus",          name: "BPZ · Paquete Plus (inflable + mesita arte)", defaultPrice: 1400, unit: "renta 5hrs",  category: "Baby Play Zone" },
+  // Inflables
   { id: "inflable",          name: "Inflable Castillo Blanco 3×3 m",              defaultPrice: 1300, unit: "pieza",       category: "Inflables" },
-  { id: "mesa-pastel",       name: "Mesa Infantil Pastel (6 sillas)",             defaultPrice: 500,  unit: "mesa",        category: "Mesas" },
+  // Mesas
+  { id: "mesa-pastel",       name: "Mesita Infantil Pastel (6 sillas)",           defaultPrice: 500,  unit: "mesa",        category: "Mesas" },
   { id: "mesa-blanca",       name: "Mesita Blanca (8 sillas madera)",             defaultPrice: 750,  unit: "mesa",        category: "Mesas" },
-  { id: "mesa-extra",        name: "Mesa extra (segunda mesa)",                   defaultPrice: 350,  unit: "mesa",        category: "Mesas", max: 1 },
-  { id: "yesito-basico",     name: "Kit Yesitos Básico (1 yesito)",               defaultPrice: 20,   unit: "kit",         category: "Yesitos", min: 10 },
-  { id: "yesito-intermedio", name: "Kit Yesitos Intermedio (2 yesitos)",          defaultPrice: 25,   unit: "kit",         category: "Yesitos", min: 10 },
-  { id: "yesito-completo",   name: "Kit Yesitos Completo (3 yesitos)",            defaultPrice: 30,   unit: "kit",         category: "Yesitos", min: 10 },
+  { id: "mesa-extra",        name: "Mesa extra (segunda mesa)",                   defaultPrice: 350,  unit: "mesa",        category: "Mesas",       max: 1 },
+  // Yesitos
+  { id: "yesito-basico",     name: "Kit Yesitos Básico (1 yesito)",               defaultPrice: 20,   unit: "kit",         category: "Yesitos",     min: 10 },
+  { id: "yesito-intermedio", name: "Kit Yesitos Intermedio (2 yesitos)",          defaultPrice: 25,   unit: "kit",         category: "Yesitos",     min: 10 },
+  { id: "yesito-completo",   name: "Kit Yesitos Completo (3 yesitos)",            defaultPrice: 30,   unit: "kit",         category: "Yesitos",     min: 10 },
+  // Extras
   { id: "arte",              name: "Arte en Mesa",                                defaultPrice: 150,  unit: "complemento", category: "Extras" },
   { id: "globos",            name: "Guirnalda de Globos",                         defaultPrice: 200,  unit: "pieza",       category: "Extras" },
+  // Servicios
   { id: "pintacaritas",      name: "Pintacaritas (1.5 hrs)",                      defaultPrice: 800,  unit: "servicio",    category: "Servicios" },
 ];
 
