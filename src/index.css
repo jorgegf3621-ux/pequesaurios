@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Fredoka:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 50% 98%;
+    --foreground: 280 20% 25%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 280 20% 25%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 280 20% 25%;
+
+    --primary: 330 60% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 170 40% 80%;
+    --secondary-foreground: 280 20% 25%;
+
+    --muted: 270 30% 95%;
+    --muted-foreground: 280 10% 50%;
+
+    --accent: 50 80% 80%;
+    --accent-foreground: 280 20% 25%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 270 20% 90%;
+    --input: 270 20% 90%;
+    --ring: 330 60% 65%;
+
+    --radius: 1rem;
+
+    --lavender: 270 50% 85%;
+    --lavender-foreground: 270 40% 30%;
+    --mint: 170 40% 80%;
+    --mint-foreground: 170 40% 25%;
+    --peach: 20 80% 88%;
+    --peach-foreground: 20 50% 30%;
+    --pastel-yellow: 50 80% 85%;
+    --pastel-yellow-foreground: 50 50% 30%;
+
+    --whatsapp: 142 70% 40%;
+    --whatsapp-foreground: 0 0% 100%;
+
+    --gradient-hero: linear-gradient(135deg, hsl(330 60% 65% / 0.1), hsl(270 50% 85% / 0.2), hsl(170 40% 80% / 0.1));
+    --gradient-pastel: linear-gradient(135deg, hsl(330 60% 90%), hsl(270 50% 90%), hsl(170 40% 90%));
+
+    --font-heading: 'Fredoka', sans-serif;
+    --font-body: 'Quicksand', sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+@layer utilities {
+  .text-gradient-brand {
+    background: linear-gradient(135deg, hsl(330 60% 65%), hsl(270 50% 70%), hsl(170 40% 55%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
