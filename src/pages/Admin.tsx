@@ -35,11 +35,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Lock, LogOut, CalendarOff, Trash2, RefreshCw, FileText, MessageCircle, Mail, CheckCheck } from "lucide-react";
+import { Lock, LogOut, CalendarOff, Trash2, RefreshCw, FileText, MessageCircle, Mail, CheckCheck, Copy, Fuel } from "lucide-react";
 import NotaPago from "@/components/NotaPago";
 import { isSameDay } from "date-fns";
 
-const ADMIN_PASSWORD = "pequesaurios2025";
+const ADMIN_PASSWORD = "Chapis3621$";
 
 type Reservation = {
   id: string;
@@ -66,6 +66,130 @@ const packageLabels: Record<string, string> = {
   yesitos: "Kit de Yesitos",
   "paquete-completo": "Paquete Completo",
   bloqueado: "🔒 Fecha Bloqueada",
+};
+
+// ─── Calculadora de Flete ────────────────────────────────────────────────────
+const FleteCalculator = () => {
+  const [km, setKm] = useState("");
+  const [gasolinaPrecio, setGasolinaPrecio] = useState(24.5);  // precio actual Magna Monterrey
+  const [rendimiento, setRendimiento] = useState(14);           // Yaris 2016 ciudad
+  const [margen, setMargen] = useState(20);
+  const [copiado, setCopiado] = useState(false);
+
+  const kmNum = parseFloat(km) || 0;
+  const kmTotal = kmNum * 2;
+  const litros = kmTotal / rendimiento;
+  const costoGasolina = litros * gasolinaPrecio;
+  const flete = Math.ceil(costoGasolina * (1 + margen / 100));
+
+  const copiar = () => {
+    navigator.clipboard.writeText(String(flete));
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 2000);
+  };
+
+  return (
+    <div className="max-w-lg mx-auto space-y-6">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="bg-primary/10 rounded-full p-2">
+          <Fuel size={22} className="text-primary" />
+        </div>
+        <div>
+          <h2 className="font-heading font-bold text-lg">Calculadora de Flete</h2>
+          <p className="text-xs text-muted-foreground">Yaris 2016 · ida y vuelta · {margen}% ganancia</p>
+        </div>
+      </div>
+
+      {/* Distancia */}
+      <div className="bg-white rounded-2xl border border-border p-5 space-y-4 shadow-sm">
+        <div>
+          <Label>Distancia al destino (km, solo ida)</Label>
+          <Input
+            type="number"
+            min={0}
+            value={km}
+            onChange={(e) => setKm(e.target.value)}
+            placeholder="Ej: 18"
+            className="mt-1 text-lg"
+            autoFocus
+          />
+          {kmNum > 0 && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Recorrido total: {kmTotal} km (ida y vuelta)
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Parámetros editables */}
+      <div className="bg-white rounded-2xl border border-border p-5 shadow-sm">
+        <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">Parámetros del vehículo</p>
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <Label className="text-xs">Precio gasolina ($/L)</Label>
+            <Input
+              type="number"
+              min={1}
+              step={0.5}
+              value={gasolinaPrecio}
+              onChange={(e) => setGasolinaPrecio(parseFloat(e.target.value) || 0)}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label className="text-xs">Rendimiento (km/L)</Label>
+            <Input
+              type="number"
+              min={1}
+              step={0.5}
+              value={rendimiento}
+              onChange={(e) => setRendimiento(parseFloat(e.target.value) || 1)}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label className="text-xs">Ganancia (%)</Label>
+            <Input
+              type="number"
+              min={0}
+              value={margen}
+              onChange={(e) => setMargen(parseFloat(e.target.value) || 0)}
+              className="mt-1"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Resultado */}
+      {kmNum > 0 && (
+        <div className="bg-primary/5 border-2 border-primary/30 rounded-2xl p-5 shadow-sm">
+          <p className="text-xs font-semibold text-muted-foreground uppercase mb-4">Desglose</p>
+          <div className="space-y-2 text-sm mb-5">
+            <div className="flex justify-between text-muted-foreground">
+              <span>{kmTotal} km ÷ {rendimiento} km/L</span>
+              <span>{litros.toFixed(2)} litros</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <span>{litros.toFixed(2)} L × ${gasolinaPrecio}/L</span>
+              <span>${costoGasolina.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <span>+ {margen}% ganancia</span>
+              <span>+ ${(costoGasolina * margen / 100).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold text-base pt-2 border-t border-primary/20">
+              <span>Flete sugerido</span>
+              <span className="text-primary text-xl">${flete.toLocaleString()}</span>
+            </div>
+          </div>
+          <Button variant="hero" className="w-full" onClick={copiar}>
+            <Copy size={15} />
+            {copiado ? "¡Copiado!" : "Copiar monto"}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
 };
 
 // ─── Login ───────────────────────────────────────────────────────────────────
@@ -311,6 +435,7 @@ const Admin = () => {
               </span>
             )}
           </TabsTrigger>
+          <TabsTrigger value="flete">Flete</TabsTrigger>
         </TabsList>
 
         {/* ── Tab 1: Reservaciones ── */}
@@ -617,6 +742,11 @@ const Admin = () => {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        {/* ── Tab 4: Flete ── */}
+        <TabsContent value="flete">
+          <FleteCalculator />
         </TabsContent>
       </Tabs>
 
