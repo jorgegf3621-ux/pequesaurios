@@ -5,13 +5,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Send, MapPin, Phone, Instagram, Clock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Contacto = () => {
   const { toast } = useToast();
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [sending, setSending] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
       toast({ title: "Campos requeridos", description: "Por favor llena nombre, email y mensaje.", variant: "destructive" });
@@ -19,15 +20,21 @@ const Contacto = () => {
     }
     setSending(true);
 
-    // Build mailto link as fallback (no backend yet)
-    const subject = encodeURIComponent(`Contacto web - ${form.name}`);
-    const body = encodeURIComponent(
-      `Nombre: ${form.name}\nEmail: ${form.email}\nTeléfono: ${form.phone}\n\nMensaje:\n${form.message}`
-    );
-    window.open(`mailto:pequesaurios@gmail.com?subject=${subject}&body=${body}`, "_blank");
+    const { error } = await (supabase as any).from("contacts").insert({
+      name: form.name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim() || null,
+      message: form.message.trim(),
+    });
 
-    toast({ title: "¡Mensaje listo!", description: "Se abrirá tu cliente de correo para enviar el mensaje." });
     setSending(false);
+
+    if (error) {
+      toast({ title: "Error", description: "No se pudo enviar el mensaje. Intenta de nuevo.", variant: "destructive" });
+      return;
+    }
+
+    toast({ title: "¡Mensaje enviado!", description: "Te responderemos pronto. 🎉" });
     setForm({ name: "", email: "", phone: "", message: "" });
   };
 

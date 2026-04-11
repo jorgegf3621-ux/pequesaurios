@@ -12,6 +12,8 @@ import Catalogo from "./pages/Catalogo";
 import Cotizador from "./pages/Cotizador";
 import Reservaciones from "./pages/Reservaciones";
 import Contacto from "./pages/Contacto";
+import Admin from "./pages/Admin";
+import Accion from "./pages/Accion";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +33,8 @@ const App = () => (
             <Route path="/cotizador" element={<Cotizador />} />
             <Route path="/reservaciones" element={<Reservaciones />} />
             <Route path="/contacto" element={<Contacto />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/accion" element={<Accion />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

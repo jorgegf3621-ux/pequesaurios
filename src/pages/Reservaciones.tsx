@@ -60,18 +60,22 @@ const Reservaciones = () => {
 
     setLoading(true);
 
-    const { error } = await supabase.from("reservations").insert({
-      customer_name: name,
-      customer_phone: phone,
-      customer_email: email || null,
-      event_date: format(date, "yyyy-MM-dd"),
-      package: selectedPackage,
-      notes: notes || null,
-    });
+    const { data: inserted, error } = await supabase
+      .from("reservations")
+      .insert({
+        customer_name: name,
+        customer_phone: phone,
+        customer_email: email || null,
+        event_date: format(date, "yyyy-MM-dd"),
+        package: selectedPackage,
+        notes: notes || null,
+      })
+      .select("id")
+      .single();
 
     setLoading(false);
 
-    if (error) {
+    if (error || !inserted) {
       toast.error("Hubo un error al enviar tu reservación. Intenta de nuevo.");
       return;
     }
