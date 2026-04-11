@@ -601,7 +601,12 @@ const Admin = () => {
                           size="icon"
                           className="text-primary hover:text-primary/80"
                           title="Crear nota de pago"
-                          onClick={() => { setNotaPrefill(undefined); setNotaReservation(r); }}
+                          onClick={() => {
+                            setNotaPrefill({
+                              skipToPreview: true,
+                            });
+                            setNotaReservation(r);
+                          }}
                         >
                           <FileText size={16} />
                         </Button>
@@ -610,7 +615,13 @@ const Admin = () => {
                           size="icon"
                           className="text-purple-500 hover:text-purple-700"
                           title="Generar contrato de renta"
-                          onClick={() => { setContratoPrefill(undefined); setContratoReservation(r); }}
+                          onClick={() => {
+                            setContratoPrefill({
+                              servicios: [],
+                              skipToPreview: true,
+                            });
+                            setContratoReservation(r);
+                          }}
                         >
                           <ScrollText size={16} />
                         </Button>

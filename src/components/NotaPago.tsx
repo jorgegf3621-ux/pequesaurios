@@ -187,28 +187,28 @@ const NotaTemplate = ({
             fontSize: 14,
           }}
         >
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 20px" }}>
             <div>
-              <span style={{ fontWeight: 700 }}>Fecha: </span>
+              <span style={{ fontWeight: 700 }}>Fecha:&nbsp;</span>
               <span style={{ color: textGray }}>{fechaStr}</span>
             </div>
             <div>
-              <span style={{ fontWeight: 700 }}>Teléfono: </span>
+              <span style={{ fontWeight: 700 }}>Teléfono:&nbsp;</span>
               <span style={{ color: textGray }}>{reservation.customer_phone}</span>
             </div>
             <div>
-              <span style={{ fontWeight: 700 }}>Nombre: </span>
+              <span style={{ fontWeight: 700 }}>Nombre:&nbsp;</span>
               <span style={{ color: textGray }}>{reservation.customer_name}</span>
             </div>
             {hora && (
               <div>
-                <span style={{ fontWeight: 700 }}>Hora: </span>
+                <span style={{ fontWeight: 700 }}>Hora:&nbsp;</span>
                 <span style={{ color: textGray }}>{hora}</span>
               </div>
             )}
             {address && (
               <div style={{ gridColumn: "1 / -1" }}>
-                <span style={{ fontWeight: 700 }}>Dirección: </span>
+                <span style={{ fontWeight: 700 }}>Dirección:&nbsp;</span>
                 <span style={{ color: textGray }}>{address}</span>
               </div>
             )}
