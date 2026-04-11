@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check, Minus, Plus } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Item {
   id: string;
@@ -23,6 +24,7 @@ const items: Item[] = [
 
 const Cotizador = () => {
   const [selected, setSelected] = useState<Record<string, number>>({});
+  const [sending, setSending] = useState(false);
 
   const toggle = (id: string, delta: number, min?: number) => {
     setSelected((prev) => {
@@ -52,6 +54,20 @@ const Cotizador = () => {
   const waMessage = encodeURIComponent(
     `¡Hola! Me gustaría cotizar lo siguiente:\n\n${summary}\n\nTotal estimado: $${total.toLocaleString()} MXN`
   );
+
+  const handleEnviar = async () => {
+    setSending(true);
+    const itemsGuardar = Object.entries(selected)
+      .map(([id, qty]) => {
+        const item = items.find((i) => i.id === id);
+        return item ? { id, name: item.name, qty, price: item.price, subtotal: item.price * qty } : null;
+      })
+      .filter(Boolean);
+
+    await (supabase as any).from("quotes").insert({ items: itemsGuardar, total });
+    setSending(false);
+    window.open(`https://wa.me/528180540369?text=${waMessage}`, "_blank");
+  };
 
   const categories = [...new Set(items.map((i) => i.category))];
 
@@ -129,10 +145,8 @@ const Cotizador = () => {
                 );
               })}
             </ul>
-            <Button variant="whatsapp" className="w-full" size="lg" asChild>
-              <a href={`https://wa.me/528180540369?text=${waMessage}`} target="_blank" rel="noopener noreferrer">
-                Enviar cotización por WhatsApp
-              </a>
+            <Button variant="whatsapp" className="w-full" size="lg" onClick={handleEnviar} disabled={sending}>
+              {sending ? "Guardando..." : "Enviar cotización por WhatsApp"}
             </Button>
           </>
         ) : (

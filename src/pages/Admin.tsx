@@ -245,7 +245,8 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
 const Admin = () => {
   const [authenticated, setAuthenticated] = useState(false);
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [contacts, setContacts] = useState<any[]>([]);
+  const [contacts, setContacts] = useState<Record<string, unknown>[]>([]);
+  const [quotes, setQuotes] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
   const [blockedDate, setBlockedDate] = useState<Date | undefined>();
   const [blockReason, setBlockReason] = useState("");
@@ -254,6 +255,21 @@ const Admin = () => {
   const fetchContacts = async () => {
     const { data } = await (supabase as any).from("contacts").select("*").order("created_at", { ascending: false });
     if (data) setContacts(data);
+  };
+
+  const fetchQuotes = async () => {
+    const { data } = await (supabase as any).from("quotes").select("*").order("created_at", { ascending: false });
+    if (data) setQuotes(data);
+  };
+
+  const markQuoteRead = async (id: string) => {
+    await (supabase as any).from("quotes").update({ read: true }).eq("id", id);
+    setQuotes((prev) => prev.map((q) => q.id === id ? { ...q, read: true } : q));
+  };
+
+  const deleteQuote = async (id: string) => {
+    await (supabase as any).from("quotes").delete().eq("id", id);
+    setQuotes((prev) => prev.filter((q) => q.id !== id));
   };
 
   const markContactRead = async (id: string) => {
@@ -285,6 +301,7 @@ const Admin = () => {
     if (authenticated) {
       fetchReservations();
       fetchContacts();
+      fetchQuotes();
     }
   }, [authenticated]);
 
@@ -432,6 +449,14 @@ const Admin = () => {
             {contacts.filter((c) => !c.read).length > 0 && (
               <span className="ml-2 bg-primary text-white text-xs rounded-full px-1.5 py-0.5">
                 {contacts.filter((c) => !c.read).length}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="cotizaciones" className="relative">
+            Cotizaciones
+            {quotes.filter((q) => !q.read).length > 0 && (
+              <span className="ml-2 bg-primary text-white text-xs rounded-full px-1.5 py-0.5">
+                {quotes.filter((q) => !q.read).length}
               </span>
             )}
           </TabsTrigger>
@@ -744,7 +769,77 @@ const Admin = () => {
           )}
         </TabsContent>
 
-        {/* ── Tab 4: Flete ── */}
+        {/* ── Tab 4: Cotizaciones ── */}
+        <TabsContent value="cotizaciones">
+          {quotes.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground">No hay cotizaciones aún</div>
+          ) : (
+            <div className="space-y-3">
+              {quotes.map((q) => {
+                const qItems = q.items as { name: string; qty: number; subtotal: number }[];
+                return (
+                  <div
+                    key={q.id as string}
+                    className={`rounded-xl border p-5 transition-colors ${
+                      q.read ? "border-border bg-white" : "border-primary/30 bg-primary/5"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-3">
+                          {!q.read && <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />}
+                          <span className="text-xs text-muted-foreground">
+                            {format(new Date(q.created_at as string), "dd MMM yyyy, HH:mm", { locale: es })}
+                          </span>
+                        </div>
+                        <ul className="space-y-1 mb-3">
+                          {qItems.map((item, i) => (
+                            <li key={i} className="flex justify-between text-sm">
+                              <span className="text-foreground/80">{item.qty}x {item.name}</span>
+                              <span className="font-medium">${item.subtotal.toLocaleString()}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="flex justify-between font-bold text-primary border-t border-border pt-2">
+                          <span>Total estimado</span>
+                          <span>${(q.total as number).toLocaleString()} MXN</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-1 flex-shrink-0">
+                        {!q.read && (
+                          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" title="Marcar como leída" onClick={() => markQuoteRead(q.id as string)}>
+                            <CheckCheck size={16} />
+                          </Button>
+                        )}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-600">
+                              <Trash2 size={16} />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>¿Eliminar cotización?</AlertDialogTitle>
+                              <AlertDialogDescription>Se eliminará permanentemente esta cotización.</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={() => deleteQuote(q.id as string)}>
+                                Eliminar
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* ── Tab 5: Flete ── */}
         <TabsContent value="flete">
           <FleteCalculator />
         </TabsContent>
