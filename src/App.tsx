@@ -14,6 +14,8 @@ import Reservaciones from "./pages/Reservaciones";
 import Contacto from "./pages/Contacto";
 import Admin from "./pages/Admin";
 import Accion from "./pages/Accion";
+import BabyPlayZone from "./pages/BabyPlayZone";
+import ActividadCreativa from "./pages/ActividadCreativa";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +35,8 @@ const App = () => (
             <Route path="/cotizador" element={<Cotizador />} />
             <Route path="/reservaciones" element={<Reservaciones />} />
             <Route path="/contacto" element={<Contacto />} />
+            <Route path="/baby-play-zone" element={<BabyPlayZone />} />
+            <Route path="/actividad-creativa" element={<ActividadCreativa />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/accion" element={<Accion />} />
             <Route path="*" element={<NotFound />} />

@@ -13,13 +13,24 @@ interface Item {
 }
 
 const items: Item[] = [
+  // Baby Play Zone
+  { id: "bpz-inflable",  name: "Baby Play Zone · Inflable Castillo (solo)", price: 800,  unit: "renta 5hrs",  category: "Baby Play Zone" },
+  { id: "bpz-basico",   name: "Baby Play Zone · Paquete Básico (inflable + mesita)", price: 1200, unit: "renta 5hrs", category: "Baby Play Zone" },
+  { id: "bpz-plus",     name: "Baby Play Zone · Paquete Plus (inflable + mesita de arte)", price: 1400, unit: "renta 5hrs", category: "Baby Play Zone" },
+  // Inflables
   { id: "inflable",     name: "Inflable Castillo Blanco",        price: 1300, unit: "pieza",       category: "Inflables" },
+  // Mesas
   { id: "mesa-pastel",  name: "Mesa Infantil Pastel (6 sillas)",  price: 500,  unit: "mesa", min: 2, category: "Mesas" },
   { id: "mesa-blanca",  name: "Mesita Blanca (8 sillas madera)",  price: 750,  unit: "mesa", min: 2, category: "Mesas" },
+  // Yesitos
+  { id: "yesito-basico",      name: "Kit Yesitos Básico (1 yesito)",      price: 20, unit: "kit", min: 10, category: "Yesitos" },
+  { id: "yesito-intermedio",  name: "Kit Yesitos Intermedio (2 yesitos)", price: 25, unit: "kit", min: 10, category: "Yesitos" },
+  { id: "yesito-completo",    name: "Kit Yesitos Completo (3 yesitos)",   price: 30, unit: "kit", min: 10, category: "Yesitos" },
+  // Extras
   { id: "arte",         name: "Arte en Mesa",                     price: 150,  unit: "complemento", category: "Extras" },
-  { id: "yesitos",      name: "Kit de Yesitos",                   price: 20,   unit: "kit",         category: "Extras" },
-  { id: "pintacaritas", name: "Pintacaritas (1.5 hrs)",           price: 800,  unit: "servicio",    category: "Servicios" },
   { id: "globos",       name: "Guirnalda de Globos",              price: 200,  unit: "pieza",       category: "Extras" },
+  // Servicios
+  { id: "pintacaritas", name: "Pintacaritas (1.5 hrs)",           price: 800,  unit: "servicio",    category: "Servicios" },
 ];
 
 const Cotizador = () => {
