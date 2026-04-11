@@ -245,7 +245,7 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
 
 // ─── Main Admin ───────────────────────────────────────────────────────────────
 const Admin = () => {
-  const [authenticated, setAuthenticated] = useState(false);
+  const [authenticated, setAuthenticated] = useState(() => localStorage.getItem("admin_auth") === "true");
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [contacts, setContacts] = useState<Record<string, unknown>[]>([]);
   const [quotes, setQuotes] = useState<Record<string, unknown>[]>([]);
@@ -312,13 +312,16 @@ const Admin = () => {
   }, [authenticated]);
 
   const updateStatus = async (id: string, newStatus: string) => {
-    const { error } = await supabase
+    const { error, data } = await supabase
       .from("reservations")
       .update({ status: newStatus })
-      .eq("id", id);
+      .eq("id", id)
+      .select();
 
     if (error) {
-      toast.error("Error al actualizar");
+      toast.error(`Error: ${error.message}`);
+    } else if (!data || data.length === 0) {
+      toast.error("No se actualizó. Revisa los permisos RLS en Supabase.");
     } else {
       toast.success("Estado actualizado");
       fetchReservations();
@@ -419,7 +422,7 @@ const Admin = () => {
     .map((r) => new Date(r.event_date + "T12:00:00"));
 
   if (!authenticated) {
-    return <LoginScreen onLogin={() => setAuthenticated(true)} />;
+    return <LoginScreen onLogin={() => { localStorage.setItem("admin_auth", "true"); setAuthenticated(true); }} />;
   }
 
   return (
@@ -438,7 +441,7 @@ const Admin = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setAuthenticated(false)}
+            onClick={() => { localStorage.removeItem("admin_auth"); setAuthenticated(false); }}
           >
             <LogOut size={15} /> Salir
           </Button>
