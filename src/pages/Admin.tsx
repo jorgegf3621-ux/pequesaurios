@@ -378,6 +378,16 @@ const Admin = () => {
       metodoPago: notaData.metodoPago,
       skipToPreview: Object.values(notaData.servicios).some((v) => v > 0),
     });
+    // También prellenar el contrato con los servicios seleccionados
+    setContratoPrefill({
+      address: notaData.address,
+      hora: notaData.hora,
+      horaFin: notaData.horaFin,
+      servicios: Object.keys(notaData.servicios).filter((id) => notaData.servicios[id] > 0),
+      total: notaData.total,
+      anticipo: notaData.anticipo,
+    });
+    setContratoReservation(notaData.reservation);
   };
 
   const addBlockedDate = async () => {

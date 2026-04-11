@@ -36,14 +36,27 @@ type Props = {
   prefill?: ContratoPrefill;
 };
 
+// Valores de reposición para penalizaciones por daños
 const SERVICIOS_OPCIONES = [
-  { id: "inflable",      label: "Inflable Castillo Blanco 3×3 m",              valor: 3500 },
-  { id: "mesa-pastel",   label: "Mesita Infantil Pastel (6 sillas plástico)",   valor: 800  },
-  { id: "mesa-blanca",   label: "Mesita Blanca (8 sillas madera)",              valor: 1200 },
-  { id: "arte",          label: "Arte en Mesa",                                 valor: 300  },
-  { id: "yesitos",       label: "Kit de Yesitos",                               valor: 150  },
-  { id: "pintacaritas",  label: "Pintacaritas (1.5 hrs)",                       valor: 800  },
-  { id: "globos",        label: "Guirnalda de Globos",                          valor: 400  },
+  // Baby Play Zone
+  { id: "bpz-inflable",      label: "BPZ · Inflable Castillo (solo)",                valor: 2500 },
+  { id: "bpz-basico",        label: "BPZ · Paquete Básico (inflable + mesita)",      valor: 3500 },
+  { id: "bpz-plus",          label: "BPZ · Paquete Plus (inflable + mesita arte)",   valor: 4000 },
+  // Inflables
+  { id: "inflable",          label: "Inflable Castillo Blanco 3×3 m",                valor: 3500 },
+  // Mesas
+  { id: "mesa-pastel",       label: "Mesita Infantil Pastel (6 sillas plástico)",    valor: 800  },
+  { id: "mesa-blanca",       label: "Mesita Blanca (8 sillas madera)",               valor: 1200 },
+  { id: "mesa-extra",        label: "Mesa extra (segunda mesa)",                     valor: 800  },
+  // Yesitos
+  { id: "yesito-basico",     label: "Kit Yesitos Básico (1 yesito)",                 valor: 150  },
+  { id: "yesito-intermedio", label: "Kit Yesitos Intermedio (2 yesitos)",            valor: 200  },
+  { id: "yesito-completo",   label: "Kit Yesitos Completo (3 yesitos)",              valor: 250  },
+  // Extras
+  { id: "arte",              label: "Arte en Mesa",                                  valor: 300  },
+  { id: "globos",            label: "Guirnalda de Globos",                           valor: 400  },
+  // Servicios
+  { id: "pintacaritas",      label: "Pintacaritas (1.5 hrs)",                        valor: 800  },
 ];
 
 // ── Plantilla visual ──────────────────────────────────────────────────────────
