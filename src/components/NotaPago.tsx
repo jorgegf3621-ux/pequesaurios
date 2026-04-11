@@ -1,5 +1,6 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -28,10 +29,21 @@ type Reservation = {
   event_date: string;
 };
 
+type Prefill = {
+  address?: string;
+  hora?: string;
+  paqueteNombre?: string;
+  servicios?: Record<string, number>;
+  flete?: number;
+  metodoPago?: string;
+  skipToPreview?: boolean;
+};
+
 type Props = {
   reservation: Reservation | null;
   open: boolean;
   onClose: () => void;
+  prefill?: Prefill;
 };
 
 const fmt = (n: number) =>
@@ -285,16 +297,28 @@ const NotaTemplate = ({
 };
 
 // ── Dialog ────────────────────────────────────────────────────────────────────
-const NotaPago = ({ reservation, open, onClose }: Props) => {
+const NotaPago = ({ reservation, open, onClose, prefill }: Props) => {
   const notaRef = useRef<HTMLDivElement>(null);
-  const [address, setAddress] = useState("");
-  const [hora, setHora] = useState("");
-  const [paqueteNombre, setPaqueteNombre] = useState("");
-  const [servicios, setServicios] = useState<Record<string, number>>({});
-  const [flete, setFlete] = useState(0);
-  const [metodoPago, setMetodoPago] = useState("transferencia");
+  const [address, setAddress] = useState(prefill?.address ?? "");
+  const [hora, setHora] = useState(prefill?.hora ?? "");
+  const [paqueteNombre, setPaqueteNombre] = useState(prefill?.paqueteNombre ?? "");
+  const [servicios, setServicios] = useState<Record<string, number>>(prefill?.servicios ?? {});
+  const [flete, setFlete] = useState(prefill?.flete ?? 0);
+  const [metodoPago, setMetodoPago] = useState(prefill?.metodoPago ?? "transferencia");
   const [generating, setGenerating] = useState(false);
-  const [preview, setPreview] = useState(false);
+  const [preview, setPreview] = useState(prefill?.skipToPreview ?? false);
+
+  useEffect(() => {
+    if (open && prefill) {
+      setAddress(prefill.address ?? "");
+      setHora(prefill.hora ?? "");
+      setPaqueteNombre(prefill.paqueteNombre ?? "");
+      setServicios(prefill.servicios ?? {});
+      setFlete(prefill.flete ?? 0);
+      setMetodoPago(prefill.metodoPago ?? "transferencia");
+      setPreview(prefill.skipToPreview ?? false);
+    }
+  }, [open]);
 
   if (!reservation) return null;
 
@@ -313,20 +337,20 @@ const NotaPago = ({ reservation, open, onClose }: Props) => {
     });
   };
 
-  const descargarImagen = async () => {
+  const descargarPDF = async () => {
     if (!notaRef.current) return;
     setGenerating(true);
     try {
       const canvas = await html2canvas(notaRef.current, {
         scale: 2,
         useCORS: true,
-        backgroundColor: null,
+        backgroundColor: "#fce8f3",
       });
-      const link = document.createElement("a");
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "portrait", unit: "px", format: [canvas.width / 2, canvas.height / 2] });
+      pdf.addImage(imgData, "PNG", 0, 0, canvas.width / 2, canvas.height / 2);
       const fechaStr = format(new Date(), "yyyyMMdd");
-      link.download = `nota-${reservation.customer_name.split(" ")[0]}-${fechaStr}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
+      pdf.save(`nota-${reservation.customer_name.split(" ")[0]}-${fechaStr}.pdf`);
     } finally {
       setGenerating(false);
     }
@@ -476,9 +500,9 @@ const NotaPago = ({ reservation, open, onClose }: Props) => {
               <Button variant="outline" className="flex-1" onClick={() => setPreview(false)}>
                 <ChevronLeft size={15} /> Editar
               </Button>
-              <Button variant="hero" className="flex-1" onClick={descargarImagen} disabled={generating}>
+              <Button variant="hero" className="flex-1" onClick={descargarPDF} disabled={generating}>
                 <Download size={16} />
-                {generating ? "Generando..." : "Descargar imagen"}
+                {generating ? "Generando PDF..." : "Descargar PDF"}
               </Button>
             </div>
           </div>

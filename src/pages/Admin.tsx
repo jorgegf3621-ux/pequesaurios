@@ -35,8 +35,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Lock, LogOut, CalendarOff, Trash2, RefreshCw, FileText, MessageCircle, Mail, CheckCheck, Copy, Fuel } from "lucide-react";
+import { Lock, LogOut, CalendarOff, Trash2, RefreshCw, FileText, MessageCircle, Mail, CheckCheck, Copy, Fuel, PlusCircle, ScrollText } from "lucide-react";
 import NotaPago from "@/components/NotaPago";
+import Contrato from "@/components/Contrato";
+import ReservacionManual, { type NotaData } from "@/components/ReservacionManual";
 import { isSameDay } from "date-fns";
 
 const ADMIN_PASSWORD = "Chapis3621$";
@@ -251,6 +253,10 @@ const Admin = () => {
   const [blockedDate, setBlockedDate] = useState<Date | undefined>();
   const [blockReason, setBlockReason] = useState("");
   const [notaReservation, setNotaReservation] = useState<Reservation | null>(null);
+  const [notaPrefill, setNotaPrefill] = useState<Parameters<typeof NotaPago>[0]["prefill"]>(undefined);
+  const [contratoReservation, setContratoReservation] = useState<Reservation | null>(null);
+  const [contratoPrefill, setContratoPrefill] = useState<import("@/components/Contrato").ContratoPrefill | undefined>(undefined);
+  const [reservacionManualOpen, setReservacionManualOpen] = useState(false);
 
   const fetchContacts = async () => {
     const { data } = await (supabase as any).from("contacts").select("*").order("created_at", { ascending: false });
@@ -353,6 +359,20 @@ const Admin = () => {
       toast.success("Eliminado correctamente");
       fetchReservations();
     }
+  };
+
+  const handleReservacionCreada = (notaData: NotaData) => {
+    fetchReservations();
+    setNotaReservation(notaData.reservation);
+    setNotaPrefill({
+      address: notaData.address,
+      hora: notaData.hora,
+      paqueteNombre: notaData.paqueteNombre,
+      servicios: notaData.servicios,
+      flete: notaData.flete,
+      metodoPago: notaData.metodoPago,
+      skipToPreview: Object.values(notaData.servicios).some((v) => v > 0),
+    });
   };
 
   const addBlockedDate = async () => {
@@ -465,6 +485,11 @@ const Admin = () => {
 
         {/* ── Tab 1: Reservaciones ── */}
         <TabsContent value="reservaciones">
+          <div className="flex justify-end mb-4">
+            <Button variant="hero" size="sm" onClick={() => setReservacionManualOpen(true)}>
+              <PlusCircle size={15} /> Nueva reservación manual
+            </Button>
+          </div>
           {realReservations.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               {loading ? "Cargando..." : "No hay reservaciones aún"}
@@ -536,9 +561,18 @@ const Admin = () => {
                           size="icon"
                           className="text-primary hover:text-primary/80"
                           title="Crear nota de pago"
-                          onClick={() => setNotaReservation(r)}
+                          onClick={() => { setNotaPrefill(undefined); setNotaReservation(r); }}
                         >
                           <FileText size={16} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-purple-500 hover:text-purple-700"
+                          title="Generar contrato de renta"
+                          onClick={() => { setContratoPrefill(undefined); setContratoReservation(r); }}
+                        >
+                          <ScrollText size={16} />
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
@@ -845,11 +879,28 @@ const Admin = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Nota de pago dialog */}
+      {/* Nota de pago */}
       <NotaPago
         reservation={notaReservation}
         open={!!notaReservation}
-        onClose={() => setNotaReservation(null)}
+        onClose={() => { setNotaReservation(null); setNotaPrefill(undefined); }}
+        prefill={notaPrefill}
+      />
+
+      {/* Contrato de renta */}
+      <Contrato
+        reservation={contratoReservation}
+        open={!!contratoReservation}
+        onClose={() => { setContratoReservation(null); setContratoPrefill(undefined); }}
+        prefill={contratoPrefill}
+      />
+
+      {/* Reservación manual */}
+      <ReservacionManual
+        open={reservacionManualOpen}
+        onClose={() => setReservacionManualOpen(false)}
+        bookedDates={bookedDatesForCalendar}
+        onCreated={handleReservacionCreada}
       />
     </div>
   );
