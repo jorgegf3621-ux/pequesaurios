@@ -35,7 +35,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Lock, LogOut, CalendarOff, Trash2, RefreshCw, FileText, MessageCircle, Mail, CheckCheck, Copy, Fuel, PlusCircle, ScrollText } from "lucide-react";
+import { Lock, LogOut, CalendarOff, Trash2, RefreshCw, FileText, MessageCircle, Mail, CheckCheck, Copy, Fuel, PlusCircle, ScrollText, ShoppingBag } from "lucide-react";
+import AdminProductos from "@/components/AdminProductos";
 import NotaPago from "@/components/NotaPago";
 import Contrato from "@/components/Contrato";
 import ReservacionManual, { type NotaData } from "@/components/ReservacionManual";
@@ -483,6 +484,7 @@ const Admin = () => {
               </span>
             )}
           </TabsTrigger>
+          <TabsTrigger value="productos">Productos</TabsTrigger>
           <TabsTrigger value="flete">Flete</TabsTrigger>
         </TabsList>
 
@@ -876,7 +878,12 @@ const Admin = () => {
           )}
         </TabsContent>
 
-        {/* ── Tab 5: Flete ── */}
+        {/* ── Tab 5: Productos ── */}
+        <TabsContent value="productos">
+          <AdminProductos />
+        </TabsContent>
+
+        {/* ── Tab 6: Flete ── */}
         <TabsContent value="flete">
           <FleteCalculator />
         </TabsContent>
