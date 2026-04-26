@@ -35,7 +35,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Lock, LogOut, CalendarOff, Trash2, RefreshCw, FileText, MessageCircle, Mail, CheckCheck, Copy, Fuel, PlusCircle, ScrollText, ShoppingBag } from "lucide-react";
+import { Lock, LogOut, CalendarOff, Trash2, RefreshCw, FileText, MessageCircle, Mail, CheckCheck, Copy, Fuel, PlusCircle, ScrollText, ShoppingBag, CheckCircle2, History } from "lucide-react";
 import AdminProductos from "@/components/AdminProductos";
 import NotaPago from "@/components/NotaPago";
 import Contrato from "@/components/Contrato";
@@ -60,6 +60,7 @@ const statusColors: Record<string, string> = {
   pendiente: "bg-yellow-100 text-yellow-800 border-yellow-300",
   confirmada: "bg-green-100 text-green-800 border-green-300",
   cancelada: "bg-red-100 text-red-800 border-red-300",
+  completada: "bg-blue-100 text-blue-800 border-blue-300",
 };
 
 const packageLabels: Record<string, string> = {
@@ -452,6 +453,8 @@ const Admin = () => {
 
   // Separate actual reservations from admin-blocked dates
   const realReservations = reservations.filter((r) => r.package !== "bloqueado");
+  const activeReservations = realReservations.filter((r) => r.status !== "completada");
+  const completedReservations = realReservations.filter((r) => r.status === "completada");
   const blockedDates = reservations.filter((r) => r.package === "bloqueado");
   const bookedDatesForCalendar = reservations
     .filter((r) => r.status === "pendiente" || r.status === "confirmada")
@@ -485,12 +488,13 @@ const Admin = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
         {[
           { label: "Total", value: realReservations.length, color: "text-foreground" },
           { label: "Pendientes", value: realReservations.filter((r) => r.status === "pendiente").length, color: "text-yellow-600" },
           { label: "Confirmadas", value: realReservations.filter((r) => r.status === "confirmada").length, color: "text-green-600" },
           { label: "Canceladas", value: realReservations.filter((r) => r.status === "cancelada").length, color: "text-red-500" },
+          { label: "Completadas", value: completedReservations.length, color: "text-blue-600" },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-xl border border-border p-4 text-center shadow-sm">
             <p className={`text-3xl font-bold ${s.color}`}>{s.value}</p>
@@ -521,6 +525,14 @@ const Admin = () => {
           </TabsTrigger>
           <TabsTrigger value="productos">Productos</TabsTrigger>
           <TabsTrigger value="flete">Flete</TabsTrigger>
+          <TabsTrigger value="historial" className="relative">
+            Historial
+            {completedReservations.length > 0 && (
+              <span className="ml-2 bg-blue-500 text-white text-xs rounded-full px-1.5 py-0.5">
+                {completedReservations.length}
+              </span>
+            )}
+          </TabsTrigger>
         </TabsList>
 
         {/* ── Tab 1: Reservaciones ── */}
@@ -530,9 +542,9 @@ const Admin = () => {
               <PlusCircle size={15} /> Nueva reservación manual
             </Button>
           </div>
-          {realReservations.length === 0 ? (
+          {activeReservations.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
-              {loading ? "Cargando..." : "No hay reservaciones aún"}
+              {loading ? "Cargando..." : "No hay reservaciones activas"}
             </div>
           ) : (
             <div className="rounded-xl border border-border overflow-hidden shadow-sm">
@@ -549,7 +561,7 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {realReservations.map((r) => (
+                  {activeReservations.map((r) => (
                     <TableRow key={r.id}>
                       <TableCell className="font-medium whitespace-nowrap">
                         {format(parseISO(r.event_date + "T12:00:00"), "dd MMM yyyy", { locale: es })}
@@ -582,11 +594,21 @@ const Admin = () => {
                             <SelectItem value="pendiente">Pendiente</SelectItem>
                             <SelectItem value="confirmada">Confirmada</SelectItem>
                             <SelectItem value="cancelada">Cancelada</SelectItem>
+                            <SelectItem value="completada">Completada</SelectItem>
                           </SelectContent>
                         </Select>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-blue-500 hover:text-blue-700"
+                          title="Marcar como completada"
+                          onClick={() => updateStatus(r.id, "completada")}
+                        >
+                          <CheckCircle2 size={16} />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -932,6 +954,104 @@ const Admin = () => {
         {/* ── Tab 6: Flete ── */}
         <TabsContent value="flete">
           <FleteCalculator />
+        </TabsContent>
+
+        {/* ── Tab 7: Historial ── */}
+        <TabsContent value="historial">
+          <div className="flex items-center gap-2 mb-4">
+            <History size={18} className="text-blue-500" />
+            <h2 className="font-heading font-bold text-lg">Reservaciones completadas</h2>
+            <span className="text-xs text-muted-foreground">({completedReservations.length} eventos)</span>
+          </div>
+          {completedReservations.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground">
+              Aún no hay eventos completados. Marca una reservación confirmada con el ✓ azul para moverla aquí.
+            </div>
+          ) : (
+            <div className="rounded-xl border border-border overflow-hidden shadow-sm">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-blue-50/50">
+                    <TableHead>Fecha evento</TableHead>
+                    <TableHead>Cliente</TableHead>
+                    <TableHead>Contacto</TableHead>
+                    <TableHead>Paquete</TableHead>
+                    <TableHead>Notas</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {completedReservations.map((r) => (
+                    <TableRow key={r.id} className="bg-blue-50/20">
+                      <TableCell className="font-medium whitespace-nowrap">
+                        {format(parseISO(r.event_date + "T12:00:00"), "dd MMM yyyy", { locale: es })}
+                      </TableCell>
+                      <TableCell>{r.customer_name}</TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <a href={`tel:${r.customer_phone}`} className="text-primary hover:underline block">
+                            {r.customer_phone}
+                          </a>
+                          {r.customer_email && (
+                            <a href={`mailto:${r.customer_email}`} className="text-muted-foreground hover:underline text-xs block">
+                              {r.customer_email}
+                            </a>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm">{packageLabels[r.package] ?? r.package}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground max-w-[150px] truncate">
+                        {r.notes ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-yellow-500 hover:text-yellow-700"
+                            title="Regresar a confirmada"
+                            onClick={() => updateStatus(r.id, "confirmada")}
+                          >
+                            <RefreshCw size={15} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-primary hover:text-primary/80"
+                            title="Crear nota de pago"
+                            onClick={() => { setNotaPrefill({ skipToPreview: true }); setNotaReservation(r); }}
+                          >
+                            <FileText size={16} />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-600">
+                                <Trash2 size={16} />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>¿Eliminar del historial?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Se eliminará permanentemente el evento de <strong>{r.customer_name}</strong>.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={() => deleteReservation(r.id)}>
+                                  Eliminar
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 

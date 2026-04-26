@@ -5,21 +5,40 @@ import heroImg from "@/assets/hero-party.jpg";
 import inflableImg from "@/assets/inflable-castillo.png";
 import pintacaritasImg from "@/assets/pintacaritas.jpg";
 import yesitosImg from "@/assets/yesitos.jpg";
-
 import mesitaImg from "@/assets/mesita-blanca.png";
 import { Table } from "lucide-react";
 
 const services = [
-  { icon: PartyPopper, title: "Inflables", desc: "Castillo inflable blanco con resbaladilla y alberca de pelotas", color: "bg-lavender", img: inflableImg },
-  { icon: Table, title: "Mobiliario Infantil", desc: "Mesitas y sillitas en tonos pastel, perfectas para los más pequeños", color: "bg-peach", img: mesitaImg },
-  { icon: Palette, title: "Pintacaritas", desc: "Variedad de personajes, glitter tattoos y más diversión", color: "bg-mint", img: pintacaritasImg },
-  { icon: Sparkles, title: "Kits de Yesitos", desc: "Figuritas para pintar, perfectas como recuerdos de fiesta", color: "bg-pastel-yellow", img: yesitosImg },
+  { icon: PartyPopper, title: "Inflables", desc: "Castillo inflable blanco con resbaladilla y alberca de pelotas", desde: 1200, color: "bg-lavender", img: inflableImg },
+  { icon: Table, title: "Mobiliario Infantil", desc: "Mesitas y sillitas en tonos pastel, perfectas para los más pequeños", desde: 450, color: "bg-peach", img: mesitaImg },
+  { icon: Palette, title: "Pintacaritas", desc: "Variedad de personajes, glitter tattoos y más diversión", desde: 700, color: "bg-mint", img: pintacaritasImg },
+  { icon: Sparkles, title: "Kits de Yesitos", desc: "Figuritas para pintar, perfectas como recuerdos de fiesta", desde: 280, color: "bg-pastel-yellow", img: yesitosImg },
 ];
 
 const testimonials = [
-  { name: "María G.", text: "¡Los niños la pasaron increíble! El inflable y la mesita quedaron hermosos. 100% recomendado.", rating: 5 },
-  { name: "Ana L.", text: "Excelente servicio, puntuales y todo muy limpio. Mis hijos no querían que se acabara la fiesta.", rating: 5 },
-  { name: "Sofía R.", text: "Los yesitos fueron el hit de la fiesta. Los niños se divirtieron muchísimo pintando.", rating: 5 },
+  {
+    name: "Daniela Hernández",
+    text: "¡Los niños la pasaron increíble! El inflable y la mesita quedaron hermosos. 100% recomendado, todo súper limpio y a tiempo.",
+    rating: 5,
+  },
+  {
+    name: "Paola Martínez",
+    text: "Excelente servicio, puntuales y muy amables. Mis hijos no querían que se acabara la fiesta. Definitivamente volvemos.",
+    rating: 5,
+  },
+  {
+    name: "Karen Reyes",
+    text: "Los kits de yesitos fueron el hit de la fiesta. Todos los niños se divirtieron muchísimo pintando sus figuritas.",
+    rating: 5,
+  },
+];
+
+const galleryImages = [
+  { src: inflableImg, alt: "Inflable castillo blanco", className: "col-span-2 row-span-2" },
+  { src: pintacaritasImg, alt: "Pintacaritas en fiesta" },
+  { src: yesitosImg, alt: "Kits de yesitos" },
+  { src: mesitaImg, alt: "Mobiliario infantil pastel", className: "col-span-2" },
+  { src: heroImg, alt: "Fiesta Pequesaurios" },
 ];
 
 const Index = () => {
@@ -29,7 +48,7 @@ const Index = () => {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
           <img src={heroImg} alt="Fiesta infantil Pequesaurios" className="w-full h-full object-cover" width={1920} height={1080} />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/25 to-background" />
         </div>
         <div className="relative container mx-auto px-4 py-24 md:py-36 text-center">
           <h1 className="font-heading text-4xl md:text-6xl font-bold text-foreground mb-4 animate-fade-in-up">
@@ -66,7 +85,10 @@ const Index = () => {
                   <s.icon size={24} className="text-foreground" />
                 </div>
                 <h3 className="font-heading text-xl font-bold mb-2">{s.title}</h3>
-                <p className="text-muted-foreground text-sm">{s.desc}</p>
+                <p className="text-muted-foreground text-sm mb-3">{s.desc}</p>
+                <p className="text-primary font-heading font-bold text-sm">
+                  Desde ${s.desde.toLocaleString()} MXN
+                </p>
               </div>
             </div>
           ))}
@@ -98,12 +120,63 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Gallery */}
+      <section className="container mx-auto px-4 py-16">
+        <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-2">Nuestros eventos 📸</h2>
+        <p className="text-muted-foreground text-center mb-10">Momentos reales, fiestas inolvidables</p>
+        <div className="grid grid-cols-3 grid-rows-2 gap-3 h-[480px]">
+          <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden">
+            <img
+              src={inflableImg}
+              alt="Inflable castillo blanco"
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+              loading="lazy"
+            />
+          </div>
+          <div className="rounded-2xl overflow-hidden">
+            <img
+              src={pintacaritasImg}
+              alt="Pintacaritas en fiesta"
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+              loading="lazy"
+            />
+          </div>
+          <div className="rounded-2xl overflow-hidden">
+            <img
+              src={mesitaImg}
+              alt="Mobiliario infantil pastel"
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+              loading="lazy"
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3 mt-3 h-[220px]">
+          <div className="rounded-2xl overflow-hidden">
+            <img
+              src={yesitosImg}
+              alt="Kits de yesitos"
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+              loading="lazy"
+            />
+          </div>
+          <div className="rounded-2xl overflow-hidden">
+            <img
+              src={heroImg}
+              alt="Fiesta Pequesaurios"
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="bg-gradient-to-r from-lavender/30 via-mint/30 to-peach/30 rounded-3xl p-12">
-          <h2 className="font-heading text-3xl font-bold mb-4">¿Lista para la fiesta? 🎉</h2>
+          <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-2">¡Fechas de mayo casi agotadas!</p>
+          <h2 className="font-heading text-3xl font-bold mb-4">Asegura tu fecha antes de que se ocupe 🎉</h2>
           <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-            Cotiza tu paquete en minutos o usa nuestro cotizador interactivo
+            Cotiza en minutos o escríbenos por WhatsApp — respondemos en menos de 1 hora.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button variant="hero" size="lg" asChild>
