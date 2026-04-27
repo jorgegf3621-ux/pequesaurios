@@ -1,64 +1,52 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Star, Check } from "lucide-react";
+import { Star } from "lucide-react";
 import heroImg from "@/assets/hero-party.jpg";
-import inflableImg from "@/assets/inflable-castillo.png";
-import mesitaImg from "@/assets/mesita-blanca.png";
 import bpzImg from "@/assets/baby-play-zone.jpg";
 import catalogInflableImg from "@/assets/catalog-inflable.jpg";
 import catalogMesitaImg from "@/assets/catalog-mesita.jpg";
 import paquetePlusImg from "@/assets/paquete-plus.jpg";
 
-const paquetes = [
+const servicios = [
   {
-    title: "Inflable Castillo",
-    subtitulo: "Ideal para bebés y toddlers de 1 a 5 años",
-    precio: 800,
-    nota: "No incluye flete · Agrega guirnalda de globos por $200",
-    items: [
-      "Inflable blanco 3×3 × 2.5 m de alto",
-      "Resbaladilla incluida",
-      "Alberca de pelotas",
-      "Renta por 5 horas",
-    ],
-    img: inflableImg,
-    color: "bg-lavender",
-    popular: false,
+    titulo: "Baby Play Zone",
+    subtitulo: "Inflable Castillo",
+    desc: "Inflable blanco con resbaladilla y alberca de pelotas. Seguro y divertido para bebés de 1 a 5 años.",
+    desde: "Desde $800",
+    img: catalogInflableImg,
+    href: "/catalogo",
+    color: "from-lavender/40 to-white",
+    textColor: "text-lavender-foreground",
   },
   {
-    title: "Paquete Básico",
-    subtitulo: "Inflable & mesita",
-    precio: 1200,
-    nota: "Flete incluido en San Nicolás",
-    items: [
-      "Inflable blanco 3×3 × 2.5 m de alto",
-      "Resbaladilla y alberca de pelotas",
-      "Mesita de madera color blanco",
-      "8 sillas infantiles (arcoiris y conejito)",
-      "Montaje e instalación",
-      "Renta por 5 horas",
-    ],
-    img: mesitaImg,
-    color: "bg-peach",
-    popular: false,
+    titulo: "Mobiliario Infantil",
+    subtitulo: "Mesita & sillas",
+    desc: "Mesita de madera blanca con 8 sillas infantiles arcoíris y conejito. Perfecta para snacks y actividades.",
+    desde: "Desde $1,200",
+    img: catalogMesitaImg,
+    href: "/catalogo",
+    color: "from-peach/40 to-white",
+    textColor: "text-peach-foreground",
   },
   {
-    title: "Paquete Plus",
-    subtitulo: "Inflable & mesita de arte",
-    precio: 1400,
-    nota: "Flete incluido en San Nicolás",
-    items: [
-      "Inflable blanco 3×3 × 2.5 m de alto",
-      "Resbaladilla y alberca de pelotas",
-      "Mesita de madera color blanco",
-      "8 sillas infantiles (arcoiris y conejito)",
-      "Área creativa: dibujitos, crayolas, papel kraft y stickers",
-      "Montaje e instalación",
-      "Renta por 5 horas",
-    ],
+    titulo: "Actividad Creativa",
+    subtitulo: "Kit de Yesitos",
+    desc: "Los peques pintan su propia figura de yeso y se la llevan de recuerdo. Bolsas personalizadas.",
+    desde: "Desde $20 c/u",
     img: paquetePlusImg,
-    color: "bg-mint",
-    popular: true,
+    href: "/actividad-creativa",
+    color: "from-yellow-100/60 to-white",
+    textColor: "text-yellow-700",
+  },
+  {
+    titulo: "Pintacaritas",
+    subtitulo: "Arte en carita",
+    desc: "Diseños en cara y mano, glitter tattoos y glitter para cabello. 1.5 horas de pura magia.",
+    desde: "$800 · 1.5 hrs",
+    img: null,
+    href: "/pintacaritas",
+    color: "from-purple-100/60 to-white",
+    textColor: "text-purple-700",
   },
 ];
 
@@ -110,45 +98,46 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Paquetes */}
+      {/* Servicios */}
       <section className="container mx-auto px-4 py-16">
-        <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-2">Nuestros Paquetes</h2>
-        <p className="text-muted-foreground text-center mb-12">Renta por 5 horas · Bebés y toddlers de 1 a 5 años</p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {paquetes.map((p) => (
-            <div key={p.title} className={`group rounded-2xl overflow-hidden bg-card border-2 shadow-sm hover:shadow-lg transition-all relative ${p.popular ? "border-primary" : "border-border"}`}>
-              {p.popular && (
-                <div className="absolute top-3 right-3 z-10 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">
-                  Más popular
+        <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-2">Nuestros Servicios</h2>
+        <p className="text-muted-foreground text-center mb-12">Todo lo que necesitas para hacer tu fiesta inolvidable</p>
+        <div className="grid sm:grid-cols-2 gap-6">
+          {servicios.map((s) => (
+            <Link
+              key={s.titulo}
+              to={s.href}
+              className="group rounded-2xl overflow-hidden bg-card border-2 border-border shadow-sm hover:shadow-lg hover:border-primary transition-all flex flex-col"
+            >
+              {s.img ? (
+                <div className="h-48 overflow-hidden">
+                  <img
+                    src={s.img}
+                    alt={s.titulo}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </div>
+              ) : (
+                <div className={`h-48 bg-gradient-to-br ${s.color} flex items-center justify-center`}>
+                  <span className="text-6xl">✨</span>
                 </div>
               )}
-              <div className="h-52 overflow-hidden">
-                <img src={p.img} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" width={800} height={600} />
-              </div>
-              <div className="p-6">
-                <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${p.color} mb-3`}>
-                  {p.subtitulo}
-                </div>
-                <h3 className="font-heading text-xl font-bold mb-3">{p.title}</h3>
-                <ul className="space-y-1.5 mb-4">
-                  {p.items.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <Check size={14} className="text-primary mt-0.5 flex-shrink-0" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <div className="border-t border-border pt-4">
-                  <p className="text-primary font-heading font-bold text-2xl">${p.precio.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">MXN</span></p>
-                  <p className="text-xs text-muted-foreground mt-1">{p.nota}</p>
+              <div className={`p-6 flex flex-col flex-1 bg-gradient-to-b ${s.color}`}>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">{s.subtitulo}</p>
+                <h3 className="font-heading text-xl font-bold mb-2 group-hover:text-primary transition-colors">{s.titulo}</h3>
+                <p className="text-sm text-muted-foreground flex-1 mb-4">{s.desc}</p>
+                <div className="flex items-center justify-between">
+                  <span className="font-heading font-bold text-primary text-lg">{s.desde}</span>
+                  <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors">Ver más →</span>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
         <div className="text-center mt-10">
           <Button variant="outline" size="lg" asChild>
-            <Link to="/catalogo">Ver catálogo completo</Link>
+            <Link to="/servicios">Ver todos los servicios</Link>
           </Button>
         </div>
       </section>

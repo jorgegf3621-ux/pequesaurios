@@ -28,8 +28,6 @@ const items: Item[] = [
   { id: "bpz-inflable",       name: "Baby Play Zone · Inflable Castillo (solo)",              price: 800,  unit: "renta 5hrs",  category: "Baby Play Zone" },
   { id: "bpz-basico",         name: "Baby Play Zone · Paquete Básico (inflable + mesita)",    price: 1200, unit: "renta 5hrs",  category: "Baby Play Zone" },
   { id: "bpz-plus",           name: "Baby Play Zone · Paquete Plus (inflable + mesita arte)", price: 1400, unit: "renta 5hrs",  category: "Baby Play Zone" },
-  // Inflables
-  { id: "inflable",           name: "Inflable Castillo Blanco",                               price: 1300, unit: "pieza",       category: "Inflables" },
   // Mesas
   { id: "mesa-pastel",        name: "Mesa Infantil Pastel (6 sillas)",                        price: 500,  unit: "mesa",        category: "Mesas" },
   { id: "mesa-blanca",        name: "Mesita Blanca (8 sillas madera)",                        price: 750,  unit: "mesa",        category: "Mesas" },
@@ -57,7 +55,7 @@ const MUNICIPIOS_FALLBACK: MunicipioFlete[] = [
   { nombre: "Otro municipio",           distancia_km: 0 },
 ];
 
-const IDS_ENTREGA_FISICA = ["bpz-inflable", "bpz-basico", "bpz-plus", "inflable", "mesa-pastel", "mesa-blanca"];
+const IDS_ENTREGA_FISICA = ["bpz-inflable", "bpz-basico", "bpz-plus", "mesa-pastel", "mesa-blanca"];
 const IDS_CON_MESITA = new Set(["mesa-pastel", "mesa-blanca", "bpz-basico", "bpz-plus"]);
 const MESA_EXTRA: Item = { id: "mesa-extra", name: "Mesa extra (segunda mesa)", price: 350, unit: "mesa", category: "Mesas" };
 
@@ -371,11 +369,6 @@ const Cotizador = () => {
               {!calculandoFlete && errorGeo && direccionEvento.trim().length >= 8 && (
                 <p className="text-xs text-amber-700 mt-2">
                   No se pudo calcular la distancia exacta. Usando estimado por municipio.
-                </p>
-              )}
-              {!calculandoFlete && !usandoDistanciaReal && !errorGeo && municipioData && municipioData.distancia_km > 0 && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  Estimado por municipio: ~{municipioData.distancia_km} km · Flete aprox. ${fleteCalculado?.toLocaleString() ?? "—"} MXN. Ingresa tu dirección para calcular el costo exacto.
                 </p>
               )}
             </div>
