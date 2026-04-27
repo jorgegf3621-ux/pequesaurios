@@ -1,4 +1,4 @@
-import { Palette, Sparkles, Baby, ArrowRight } from "lucide-react";
+import { Palette, Sparkles, Baby, ArrowRight, Armchair } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -13,6 +13,17 @@ const categorias = [
     border: "border-sky-200",
     iconColor: "text-sky-500",
     tag: "Bebés 1–5 años",
+  },
+  {
+    icon: Armchair,
+    title: "Mobiliario Infantil",
+    desc: "Mesita de madera blanca con sillas infantiles arcoíris. Perfecta para snacks, manualidades y actividades durante tu fiesta.",
+    desde: "$500",
+    href: "/servicios",
+    color: "from-teal-50 to-green-50",
+    border: "border-teal-200",
+    iconColor: "text-teal-500",
+    tag: "Mesitas & sillas",
   },
   {
     icon: Sparkles,
@@ -38,19 +49,6 @@ const categorias = [
   },
 ];
 
-const extras = [
-  { nombre: "Inflable Castillo (renta solo)", precio: "$800", nota: "5 hrs · sin flete" },
-  { nombre: "Paquete Básico (inflable + mesita)", precio: "$1,200", nota: "5 hrs · flete incluido SNL" },
-  { nombre: "Paquete Plus (inflable + mesita de arte)", precio: "$1,400", nota: "5 hrs · flete incluido SNL" },
-  { nombre: "Mesa Infantil Pastel (6 sillas)", precio: "$500", nota: "mín. 2" },
-  { nombre: "Mesita Blanca (8 sillas madera)", precio: "$750", nota: "mín. 2" },
-  { nombre: "Arte en Mesa", precio: "$150", nota: "complemento" },
-  { nombre: "Guirnalda de Globos", precio: "$200", nota: "decoración" },
-  { nombre: "Kit Yesitos Básico", precio: "$20 c/u", nota: "mín. 10 pzas" },
-  { nombre: "Kit Yesitos Intermedio", precio: "$25 c/u", nota: "mín. 10 pzas" },
-  { nombre: "Kit Yesitos Completo", precio: "$30 c/u", nota: "mín. 10 pzas" },
-  { nombre: "Pintacaritas", precio: "$800", nota: "1.5 hrs · + flete según ubicación" },
-];
 
 const Servicios = () => (
   <div className="min-h-screen">
@@ -66,7 +64,7 @@ const Servicios = () => (
 
     {/* Categorías principales */}
     <section className="container mx-auto px-4 py-14 max-w-5xl">
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {categorias.map((cat) => (
           <Link
             key={cat.href}
@@ -94,33 +92,6 @@ const Servicios = () => (
       </div>
     </section>
 
-    {/* Lista de precios */}
-    <section className="bg-muted/30 py-14 px-4">
-      <div className="container mx-auto max-w-3xl">
-        <h2 className="font-heading text-2xl font-bold text-center mb-2">Lista de precios</h2>
-        <p className="text-muted-foreground text-center text-sm mb-8">Todos los servicios y precios</p>
-        <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
-          {extras.map((e, i) => (
-            <div
-              key={e.nombre}
-              className={`flex items-center justify-between px-5 py-3 text-sm ${
-                i !== extras.length - 1 ? "border-b border-border" : ""
-              }`}
-            >
-              <div>
-                <span className="font-medium">{e.nombre}</span>
-                {e.nota && (
-                  <span className="ml-2 text-xs text-muted-foreground">· {e.nota}</span>
-                )}
-              </div>
-              <span className="font-heading font-bold text-primary whitespace-nowrap ml-4">
-                {e.precio}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
 
     {/* CTA */}
     <section className="py-14 px-4 text-center">

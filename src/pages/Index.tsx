@@ -1,6 +1,8 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import heroImg from "@/assets/hero-party.jpg";
 import bpzImg from "@/assets/baby-play-zone.jpg";
 import catalogInflableImg from "@/assets/catalog-inflable.jpg";
@@ -14,7 +16,7 @@ const servicios = [
     desc: "Inflable blanco con resbaladilla y alberca de pelotas. Seguro y divertido para bebés de 1 a 5 años.",
     desde: "Desde $800",
     img: catalogInflableImg,
-    href: "/catalogo",
+    href: "/servicios",
     color: "from-lavender/40 to-white",
     textColor: "text-lavender-foreground",
   },
@@ -22,9 +24,9 @@ const servicios = [
     titulo: "Mobiliario Infantil",
     subtitulo: "Mesita & sillas",
     desc: "Mesita de madera blanca con 8 sillas infantiles arcoíris y conejito. Perfecta para snacks y actividades.",
-    desde: "Desde $1,200",
+    desde: "Desde $500",
     img: catalogMesitaImg,
-    href: "/catalogo",
+    href: "/servicios",
     color: "from-peach/40 to-white",
     textColor: "text-peach-foreground",
   },
@@ -68,7 +70,22 @@ const testimonials = [
   },
 ];
 
+type FotoGaleria = { id: string; url: string; alt: string; orden: number };
+
 const Index = () => {
+  const [galeria, setGaleria] = useState<FotoGaleria[]>([]);
+
+  useEffect(() => {
+    (supabase as any)
+      .from("galeria")
+      .select("id, url, alt, orden")
+      .eq("activa", true)
+      .order("orden")
+      .then(({ data }: { data: FotoGaleria[] | null }) => {
+        if (data && data.length > 0) setGaleria(data);
+      });
+  }, []);
+
   return (
     <div>
       {/* Hero */}
@@ -87,7 +104,7 @@ const Index = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button variant="hero" size="lg" asChild>
-              <Link to="/catalogo">Ver paquetes</Link>
+              <Link to="/servicios">Ver servicios</Link>
             </Button>
             <Button variant="whatsapp" size="lg" asChild>
               <a href="https://wa.me/528180540369?text=%C2%A1Hola!%20Quiero%20cotizar%20Baby%20Play%20Zone" target="_blank" rel="noopener noreferrer">
@@ -98,41 +115,58 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Servicios */}
+      {/* Servicios — 3D Flip Cards */}
       <section className="container mx-auto px-4 py-16">
         <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-2">Nuestros Servicios</h2>
         <p className="text-muted-foreground text-center mb-12">Todo lo que necesitas para hacer tu fiesta inolvidable</p>
         <div className="grid sm:grid-cols-2 gap-6">
           {servicios.map((s) => (
-            <Link
-              key={s.titulo}
-              to={s.href}
-              className="group rounded-2xl overflow-hidden bg-card border-2 border-border shadow-sm hover:shadow-lg hover:border-primary transition-all flex flex-col"
-            >
-              {s.img ? (
-                <div className="h-48 overflow-hidden">
-                  <img
-                    src={s.img}
-                    alt={s.titulo}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
+            <div key={s.titulo} className="group h-72 [perspective:1200px]">
+              <div className="relative w-full h-full [transform-style:preserve-3d] transition-all duration-700 ease-out group-hover:[transform:rotateY(180deg)]">
+
+                {/* Front — acts as direct link on mobile */}
+                <Link
+                  to={s.href}
+                  className="absolute inset-0 [backface-visibility:hidden] rounded-2xl overflow-hidden block"
+                  tabIndex={-1}
+                >
+                  {s.img ? (
+                    <img src={s.img} alt={s.titulo} className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className={`w-full h-full bg-gradient-to-br ${s.color} flex items-center justify-center`}>
+                      <span className="text-8xl">✨</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-white/70 mb-1">{s.subtitulo}</p>
+                    <h3 className="font-heading text-2xl font-bold text-white">{s.titulo}</h3>
+                    <span className="text-sm font-bold text-white/90">{s.desde}</span>
+                  </div>
+                  <div className="absolute top-3 right-3 hidden sm:flex items-center gap-1 bg-white/20 backdrop-blur-sm text-white text-[11px] px-2.5 py-1 rounded-full">
+                    <span>↻</span> Voltear
+                  </div>
+                </Link>
+
+                {/* Back */}
+                <div className={`absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-2xl p-6 flex flex-col bg-gradient-to-br ${s.color} border-2 border-primary/20 shadow-xl`}>
+                  <p className={`text-xs font-semibold uppercase tracking-wider mb-2 ${s.textColor}`}>{s.subtitulo}</p>
+                  <h3 className="font-heading text-2xl font-bold mb-3">{s.titulo}</h3>
+                  <p className="text-sm text-foreground/70 flex-1">{s.desc}</p>
+                  <div className="flex items-center justify-between mt-4">
+                    <span className="font-heading font-bold text-primary text-xl">{s.desde}</span>
+                    <Link
+                      to={s.href}
+                      onClick={(e) => e.stopPropagation()}
+                      className="bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-primary/90 transition-colors"
+                    >
+                      Ver más →
+                    </Link>
+                  </div>
                 </div>
-              ) : (
-                <div className={`h-48 bg-gradient-to-br ${s.color} flex items-center justify-center`}>
-                  <span className="text-6xl">✨</span>
-                </div>
-              )}
-              <div className={`p-6 flex flex-col flex-1 bg-gradient-to-b ${s.color}`}>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">{s.subtitulo}</p>
-                <h3 className="font-heading text-xl font-bold mb-2 group-hover:text-primary transition-colors">{s.titulo}</h3>
-                <p className="text-sm text-muted-foreground flex-1 mb-4">{s.desc}</p>
-                <div className="flex items-center justify-between">
-                  <span className="font-heading font-bold text-primary text-lg">{s.desde}</span>
-                  <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors">Ver más →</span>
-                </div>
+
               </div>
-            </Link>
+            </div>
           ))}
         </div>
         <div className="text-center mt-10">
@@ -166,20 +200,38 @@ const Index = () => {
       <section className="container mx-auto px-4 py-16">
         <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-2">Nuestros eventos 📸</h2>
         <p className="text-muted-foreground text-center mb-10">Momentos reales, fiestas inolvidables</p>
-        <div className="grid grid-cols-3 gap-3 h-[460px]">
-          <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden">
-            <img src={bpzImg} alt="Baby Play Zone completo" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" />
+
+        {galeria.length > 0 ? (
+          <div className="columns-2 md:columns-3 gap-3 space-y-3">
+            {galeria.map((foto) => (
+              <div key={foto.id} className="break-inside-avoid rounded-2xl overflow-hidden">
+                <img
+                  src={foto.url}
+                  alt={foto.alt || "Foto Pequesaurios"}
+                  className="w-full object-cover hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+              </div>
+            ))}
           </div>
-          <div className="rounded-2xl overflow-hidden">
-            <img src={catalogInflableImg} alt="Inflable castillo" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" />
-          </div>
-          <div className="rounded-2xl overflow-hidden">
-            <img src={catalogMesitaImg} alt="Mesita y sillas infantiles" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" />
-          </div>
-        </div>
-        <div className="mt-3 h-[220px] rounded-2xl overflow-hidden">
-          <img src={paquetePlusImg} alt="Paquete plus - área creativa" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" />
-        </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-3 h-[460px]">
+              <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden">
+                <img src={bpzImg} alt="Baby Play Zone completo" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" />
+              </div>
+              <div className="rounded-2xl overflow-hidden">
+                <img src={catalogInflableImg} alt="Inflable castillo" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" />
+              </div>
+              <div className="rounded-2xl overflow-hidden">
+                <img src={catalogMesitaImg} alt="Mesita y sillas infantiles" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" />
+              </div>
+            </div>
+            <div className="mt-3 h-[220px] rounded-2xl overflow-hidden">
+              <img src={paquetePlusImg} alt="Paquete plus - área creativa" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" />
+            </div>
+          </>
+        )}
       </section>
 
       {/* CTA */}

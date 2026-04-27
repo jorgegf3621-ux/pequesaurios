@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,7 +35,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Lock, LogOut, CalendarOff, Trash2, RefreshCw, FileText, MessageCircle, Mail, CheckCheck, Copy, Fuel, PlusCircle, ScrollText, ShoppingBag, CheckCircle2, History, Pencil } from "lucide-react";
+import { Lock, LogOut, CalendarOff, Trash2, RefreshCw, FileText, MessageCircle, Mail, CheckCheck, Copy, Fuel, PlusCircle, ScrollText, ShoppingBag, CheckCircle2, History, Pencil, Image as ImageIcon, ImagePlus } from "lucide-react";
 import AdminProductos from "@/components/AdminProductos";
 import NotaPago from "@/components/NotaPago";
 import Contrato from "@/components/Contrato";
@@ -289,6 +289,162 @@ const FleteCalculator = () => {
           </div>
         )}
       </div>
+    </div>
+  );
+};
+
+// ─── Galería ─────────────────────────────────────────────────────────────────
+type GaleriaItem = { id: string; url: string; alt: string; orden: number; activa: boolean };
+
+const GaleriaAdmin = () => {
+  const [items, setItems] = useState<GaleriaItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [urlInput, setUrlInput] = useState("");
+  const [altInput, setAltInput] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const loadGaleria = async () => {
+    const { data } = await (supabase as any).from("galeria").select("*").order("orden");
+    if (data) setItems(data);
+    setLoading(false);
+  };
+
+  useEffect(() => { loadGaleria(); }, []);
+
+  const handleFileUpload = async (e: { target: HTMLInputElement }) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const fileName = `${Date.now()}-${file.name.replace(/[^a-z0-9.]/gi, "_")}`;
+    const { data, error } = await supabase.storage.from("galeria").upload(fileName, file);
+    if (error) {
+      toast.error("Error al subir la imagen");
+      setUploading(false);
+      return;
+    }
+    const { data: { publicUrl } } = supabase.storage.from("galeria").getPublicUrl(data.path);
+    const maxOrden = items.length > 0 ? Math.max(...items.map((i) => i.orden)) + 1 : 1;
+    await (supabase as any).from("galeria").insert({ url: publicUrl, alt: altInput || file.name, orden: maxOrden });
+    setAltInput("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    await loadGaleria();
+    setUploading(false);
+    toast.success("Foto agregada");
+  };
+
+  const addByUrl = async () => {
+    if (!urlInput.trim()) return;
+    const maxOrden = items.length > 0 ? Math.max(...items.map((i) => i.orden)) + 1 : 1;
+    await (supabase as any).from("galeria").insert({ url: urlInput.trim(), alt: altInput || "Foto Pequesaurios", orden: maxOrden });
+    setUrlInput("");
+    setAltInput("");
+    await loadGaleria();
+    toast.success("Foto agregada");
+  };
+
+  const deleteItem = async (item: GaleriaItem) => {
+    await (supabase as any).from("galeria").delete().eq("id", item.id);
+    if (item.url.includes("/storage/v1/object/public/galeria/")) {
+      const path = item.url.split("/storage/v1/object/public/galeria/")[1];
+      await supabase.storage.from("galeria").remove([path]);
+    }
+    setItems((prev) => prev.filter((i) => i.id !== item.id));
+    toast.success("Foto eliminada");
+  };
+
+  const toggleActive = async (item: GaleriaItem) => {
+    await (supabase as any).from("galeria").update({ activa: !item.activa }).eq("id", item.id);
+    setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, activa: !i.activa } : i)));
+  };
+
+  if (loading) return <div className="text-center py-10 text-muted-foreground">Cargando galería...</div>;
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-6">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="bg-primary/10 rounded-full p-2">
+          <ImageIcon size={22} className="text-primary" />
+        </div>
+        <div>
+          <h2 className="font-heading font-bold text-lg">Galería de Fotos</h2>
+          <p className="text-xs text-muted-foreground">Las fotos activas aparecen en "Nuestros eventos" en la página de inicio</p>
+        </div>
+      </div>
+
+      {/* Agregar foto */}
+      <div className="bg-white rounded-2xl border border-border p-5 shadow-sm space-y-4">
+        <p className="text-xs font-semibold text-muted-foreground uppercase">Agregar foto</p>
+        <div>
+          <Label className="text-xs">Descripción (opcional)</Label>
+          <Input value={altInput} onChange={(e) => setAltInput(e.target.value)}
+            placeholder="Ej: Baby Play Zone en fiesta de cumpleaños" className="mt-1 text-sm" />
+        </div>
+        <div>
+          <Label className="text-xs">Subir desde dispositivo</Label>
+          <div className="mt-1">
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+            <Button variant="outline" className="w-full" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+              <ImagePlus size={16} />
+              {uploading ? "Subiendo..." : "Seleccionar imagen (JPG, PNG, WebP)"}
+            </Button>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex-1 border-t border-border" />
+          <span className="text-xs text-muted-foreground">o pegar link</span>
+          <div className="flex-1 border-t border-border" />
+        </div>
+        <div className="flex gap-2">
+          <Input value={urlInput} onChange={(e) => setUrlInput(e.target.value)}
+            placeholder="https://..." className="text-sm flex-1"
+            onKeyDown={(e) => e.key === "Enter" && addByUrl()} />
+          <Button variant="hero" onClick={addByUrl} disabled={!urlInput.trim()}>Agregar</Button>
+        </div>
+      </div>
+
+      {/* Grid de fotos */}
+      {items.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground border-2 border-dashed border-border rounded-2xl">
+          <ImageIcon size={40} className="mx-auto mb-2 opacity-30" />
+          <p className="text-sm">No hay fotos en la galería todavía</p>
+          <p className="text-xs mt-1">Sube o pega un link arriba para comenzar</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {items.map((item) => (
+            <div key={item.id}
+              className={`relative group rounded-xl overflow-hidden border-2 ${item.activa ? "border-border" : "border-red-200 opacity-60"}`}>
+              <img src={item.url} alt={item.alt} className="w-full h-36 object-cover" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                <Button size="sm" className="h-7 text-xs bg-white text-black hover:bg-gray-100 border-0"
+                  onClick={() => toggleActive(item)}>
+                  {item.activa ? "Ocultar" : "Mostrar"}
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button size="sm" variant="destructive" className="h-7 px-2"><Trash2 size={12} /></Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Eliminar foto?</AlertDialogTitle>
+                      <AlertDialogDescription>Esta acción no se puede deshacer.</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => deleteItem(item)}>Eliminar</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+              {!item.activa && (
+                <div className="absolute top-1 left-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded">Oculta</div>
+              )}
+              {item.alt && <p className="text-xs text-muted-foreground px-2 py-1 truncate bg-white/90">{item.alt}</p>}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -622,6 +778,7 @@ const Admin = () => {
           </TabsTrigger>
           <TabsTrigger value="productos">Productos</TabsTrigger>
           <TabsTrigger value="flete">Flete</TabsTrigger>
+          <TabsTrigger value="galeria">Galería</TabsTrigger>
           <TabsTrigger value="historial" className="relative">
             Historial
             {completedReservations.length > 0 && (
@@ -1051,6 +1208,11 @@ const Admin = () => {
         {/* ── Tab 6: Flete ── */}
         <TabsContent value="flete">
           <FleteCalculator />
+        </TabsContent>
+
+        {/* ── Tab: Galería ── */}
+        <TabsContent value="galeria">
+          <GaleriaAdmin />
         </TabsContent>
 
         {/* ── Tab 7: Historial ── */}
