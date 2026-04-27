@@ -49,6 +49,7 @@ const extras = [
   { nombre: "Kit Yesitos Básico", precio: "$20 c/u", nota: "mín. 10 pzas" },
   { nombre: "Kit Yesitos Intermedio", precio: "$25 c/u", nota: "mín. 10 pzas" },
   { nombre: "Kit Yesitos Completo", precio: "$30 c/u", nota: "mín. 10 pzas" },
+  { nombre: "Pintacaritas", precio: "$800", nota: "1.5 hrs · + flete según ubicación" },
 ];
 
 const Servicios = () => (
@@ -58,7 +59,7 @@ const Servicios = () => (
       <div className="container mx-auto max-w-2xl">
         <h1 className="font-heading text-4xl font-bold mb-3">Nuestros Servicios</h1>
         <p className="text-muted-foreground text-lg">
-          Todo lo que necesitas para crear una experiencia magica para los mas pequenos.
+          Todo lo que necesitas para crear una experiencia mágica para los más pequeños.
         </p>
       </div>
     </section>
@@ -97,7 +98,7 @@ const Servicios = () => (
     <section className="bg-muted/30 py-14 px-4">
       <div className="container mx-auto max-w-3xl">
         <h2 className="font-heading text-2xl font-bold text-center mb-2">Lista de precios</h2>
-        <p className="text-muted-foreground text-center text-sm mb-8">Todos los servicios · Renta 5 horas</p>
+        <p className="text-muted-foreground text-center text-sm mb-8">Todos los servicios y precios</p>
         <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
           {extras.map((e, i) => (
             <div
@@ -124,9 +125,9 @@ const Servicios = () => (
     {/* CTA */}
     <section className="py-14 px-4 text-center">
       <div className="container mx-auto max-w-xl">
-        <h2 className="font-heading text-2xl font-bold mb-3">Listo para reservar?</h2>
+        <h2 className="font-heading text-2xl font-bold mb-3">¿Listo para reservar?</h2>
         <p className="text-muted-foreground mb-6">
-          Arma tu paquete ideal o contactanos directamente.
+          Arma tu paquete ideal o contáctanos directamente.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button variant="hero" size="lg" asChild>

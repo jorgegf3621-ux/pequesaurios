@@ -126,7 +126,7 @@ const ActividadCreativa = () => {
         <div className="container mx-auto max-w-3xl">
           <h2 className="font-heading text-2xl font-bold text-center mb-2">Personajes disponibles</h2>
           <p className="text-muted-foreground text-center mb-8 text-sm">
-            Tenemos una gran variedad — si no ves tu personaje, preguntanos.
+            Tenemos una gran variedad — si no ves tu personaje, pregúntanos.
           </p>
           <div className="flex flex-wrap justify-center gap-2">
             {personajes.map((p) => (
@@ -163,10 +163,10 @@ const ActividadCreativa = () => {
       {/* CTA */}
       <section className="bg-gradient-to-r from-yellow-100 to-pink-100 py-14 px-4 text-center">
         <h2 className="font-heading text-2xl font-bold mb-3">
-          Lista para pedir tus Yesitos?
+          ¿Lista para pedir tus Yesitos?
         </h2>
         <p className="text-muted-foreground mb-6 text-sm">
-          Recuerda pedirlos con al menos 7 dias de anticipacion
+          Recuerda pedirlos con al menos 7 días de anticipación
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button variant="whatsapp" size="lg" asChild>

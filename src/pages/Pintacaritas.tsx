@@ -150,7 +150,7 @@ const Pintacaritas = () => {
         <h2 className="font-heading text-2xl font-bold mb-3">
           Agrega pintacaritas a tu fiesta
         </h2>
-        <p className="text-muted-foreground mb-6">$800 MXN · 1.5 horas · A domicilio</p>
+        <p className="text-muted-foreground mb-6">$800 MXN · 1.5 horas · + flete según ubicación</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button variant="whatsapp" size="lg" asChild>
             <a

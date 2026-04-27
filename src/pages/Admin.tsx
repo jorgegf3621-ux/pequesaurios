@@ -35,7 +35,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Lock, LogOut, CalendarOff, Trash2, RefreshCw, FileText, MessageCircle, Mail, CheckCheck, Copy, Fuel, PlusCircle, ScrollText, ShoppingBag, CheckCircle2, History } from "lucide-react";
+import { Lock, LogOut, CalendarOff, Trash2, RefreshCw, FileText, MessageCircle, Mail, CheckCheck, Copy, Fuel, PlusCircle, ScrollText, ShoppingBag, CheckCircle2, History, Pencil } from "lucide-react";
 import AdminProductos from "@/components/AdminProductos";
 import NotaPago from "@/components/NotaPago";
 import Contrato from "@/components/Contrato";
@@ -72,14 +72,78 @@ const packageLabels: Record<string, string> = {
   bloqueado: "🔒 Fecha Bloqueada",
 };
 
-// ─── Calculadora de Flete ────────────────────────────────────────────────────
+// ─── Configuración de Flete ──────────────────────────────────────────────────
+type MunicipioFlete = { id: string; nombre: string; distancia_km: number };
+
 const FleteCalculator = () => {
-  const [km, setKm] = useState("");
-  const [gasolinaPrecio, setGasolinaPrecio] = useState(24.5);  // precio actual Magna Monterrey
-  const [rendimiento, setRendimiento] = useState(14);           // Yaris 2016 ciudad
+  const [gasolinaPrecio, setGasolinaPrecio] = useState(24.5);
+  const [rendimiento, setRendimiento] = useState(14);
   const [margen, setMargen] = useState(20);
+  const [direccionBase, setDireccionBase] = useState("San Nicolás de los Garza, Nuevo León, México");
+  const [savingConfig, setSavingConfig] = useState(false);
+  const [loadingConfig, setLoadingConfig] = useState(true);
+
+  const [municipios, setMunicipios] = useState<MunicipioFlete[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingKm, setEditingKm] = useState("");
+
+  const [km, setKm] = useState("");
   const [copiado, setCopiado] = useState(false);
 
+  useEffect(() => {
+    const load = async () => {
+      const [{ data: cfg }, { data: munis }] = await Promise.all([
+        (supabase as any).from("flete_config").select("*").eq("id", 1).single(),
+        (supabase as any).from("municipios_flete").select("*").order("sort_order"),
+      ]);
+      if (cfg) {
+        setGasolinaPrecio(cfg.precio_gasolina);
+        setRendimiento(cfg.rendimiento_kmpl);
+        setMargen(cfg.margen_pct);
+        if (cfg.direccion_base) setDireccionBase(cfg.direccion_base);
+      }
+      if (munis) setMunicipios(munis);
+      setLoadingConfig(false);
+    };
+    load();
+  }, []);
+
+  const saveConfig = async () => {
+    setSavingConfig(true);
+    await (supabase as any).from("flete_config").upsert({
+      id: 1,
+      precio_gasolina: gasolinaPrecio,
+      rendimiento_kmpl: rendimiento,
+      margen_pct: margen,
+      direccion_base: direccionBase,
+    });
+    setSavingConfig(false);
+    toast.success("Configuración guardada — el cotizador ya refleja los nuevos valores");
+  };
+
+  const startEdit = (m: MunicipioFlete) => {
+    setEditingId(m.id);
+    setEditingKm(String(m.distancia_km));
+  };
+
+  const saveDistancia = async (id: string) => {
+    const kmVal = parseFloat(editingKm);
+    if (isNaN(kmVal) || kmVal < 0) { toast.error("Distancia inválida"); return; }
+    await (supabase as any).from("municipios_flete").update({ distancia_km: kmVal }).eq("id", id);
+    setMunicipios((prev) => prev.map((m) => m.id === id ? { ...m, distancia_km: kmVal } : m));
+    setEditingId(null);
+    toast.success("Distancia actualizada");
+  };
+
+  const calcFlete = (kmDist: number) => {
+    if (kmDist === 0) return 0;
+    const kmTotal = kmDist * 2;
+    const litros = kmTotal / rendimiento;
+    const costoGas = litros * gasolinaPrecio;
+    return Math.ceil(costoGas * (1 + margen / 100));
+  };
+
+  // Calculadora manual
   const kmNum = parseFloat(km) || 0;
   const kmTotal = kmNum * 2;
   const litros = kmTotal / rendimiento;
@@ -92,106 +156,139 @@ const FleteCalculator = () => {
     setTimeout(() => setCopiado(false), 2000);
   };
 
+  if (loadingConfig) {
+    return <div className="text-center py-10 text-muted-foreground">Cargando configuración...</div>;
+  }
+
   return (
-    <div className="max-w-lg mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-3 mb-2">
         <div className="bg-primary/10 rounded-full p-2">
           <Fuel size={22} className="text-primary" />
         </div>
         <div>
-          <h2 className="font-heading font-bold text-lg">Calculadora de Flete</h2>
-          <p className="text-xs text-muted-foreground">Yaris 2016 · ida y vuelta · {margen}% ganancia</p>
+          <h2 className="font-heading font-bold text-lg">Configuración de Flete</h2>
+          <p className="text-xs text-muted-foreground">Los cambios se aplican automáticamente en el cotizador del cliente</p>
         </div>
       </div>
 
-      {/* Distancia */}
-      <div className="bg-white rounded-2xl border border-border p-5 space-y-4 shadow-sm">
-        <div>
-          <Label>Distancia al destino (km, solo ida)</Label>
-          <Input
-            type="number"
-            min={0}
-            value={km}
-            onChange={(e) => setKm(e.target.value)}
-            placeholder="Ej: 18"
-            className="mt-1 text-lg"
-            autoFocus
-          />
-          {kmNum > 0 && (
-            <p className="text-xs text-muted-foreground mt-1">
-              Recorrido total: {kmTotal} km (ida y vuelta)
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Parámetros editables */}
+      {/* Parámetros del vehículo */}
       <div className="bg-white rounded-2xl border border-border p-5 shadow-sm">
-        <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">Parámetros del vehículo</p>
-        <div className="grid grid-cols-3 gap-4">
+        <p className="text-xs font-semibold text-muted-foreground uppercase mb-4">Parámetros del vehículo</p>
+        <div className="mb-4">
+          <Label className="text-xs">Dirección base (tu punto de salida)</Label>
+          <Input
+            value={direccionBase}
+            onChange={(e) => setDireccionBase(e.target.value)}
+            placeholder="Ej: Calle Roble 123, Col. Las Brisas, San Nicolás de los Garza, NL"
+            className="mt-1 text-sm"
+          />
+          <p className="text-xs text-muted-foreground mt-1">Usada para calcular distancia real con el mapa cuando el cliente ingresa su dirección.</p>
+        </div>
+        <div className="grid grid-cols-3 gap-4 mb-4">
           <div>
             <Label className="text-xs">Precio gasolina ($/L)</Label>
-            <Input
-              type="number"
-              min={1}
-              step={0.5}
-              value={gasolinaPrecio}
-              onChange={(e) => setGasolinaPrecio(parseFloat(e.target.value) || 0)}
-              className="mt-1"
-            />
+            <Input type="number" min={1} step={0.5} value={gasolinaPrecio}
+              onChange={(e) => setGasolinaPrecio(parseFloat(e.target.value) || 0)} className="mt-1" />
           </div>
           <div>
             <Label className="text-xs">Rendimiento (km/L)</Label>
-            <Input
-              type="number"
-              min={1}
-              step={0.5}
-              value={rendimiento}
-              onChange={(e) => setRendimiento(parseFloat(e.target.value) || 1)}
-              className="mt-1"
-            />
+            <Input type="number" min={1} step={0.5} value={rendimiento}
+              onChange={(e) => setRendimiento(parseFloat(e.target.value) || 1)} className="mt-1" />
           </div>
           <div>
             <Label className="text-xs">Ganancia (%)</Label>
-            <Input
-              type="number"
-              min={0}
-              value={margen}
-              onChange={(e) => setMargen(parseFloat(e.target.value) || 0)}
-              className="mt-1"
-            />
+            <Input type="number" min={0} value={margen}
+              onChange={(e) => setMargen(parseFloat(e.target.value) || 0)} className="mt-1" />
           </div>
         </div>
+        <Button variant="hero" className="w-full" onClick={saveConfig} disabled={savingConfig}>
+          {savingConfig ? "Guardando..." : "Guardar configuración del vehículo"}
+        </Button>
       </div>
 
-      {/* Resultado */}
-      {kmNum > 0 && (
-        <div className="bg-primary/5 border-2 border-primary/30 rounded-2xl p-5 shadow-sm">
-          <p className="text-xs font-semibold text-muted-foreground uppercase mb-4">Desglose</p>
-          <div className="space-y-2 text-sm mb-5">
-            <div className="flex justify-between text-muted-foreground">
-              <span>{kmTotal} km ÷ {rendimiento} km/L</span>
-              <span>{litros.toFixed(2)} litros</span>
-            </div>
-            <div className="flex justify-between text-muted-foreground">
-              <span>{litros.toFixed(2)} L × ${gasolinaPrecio}/L</span>
-              <span>${costoGasolina.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-muted-foreground">
-              <span>+ {margen}% ganancia</span>
-              <span>+ ${(costoGasolina * margen / 100).toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between font-bold text-base pt-2 border-t border-primary/20">
-              <span>Flete sugerido</span>
-              <span className="text-primary text-xl">${flete.toLocaleString()}</span>
-            </div>
+      {/* Distancias por municipio */}
+      {municipios.length > 0 && (
+        <div className="bg-white rounded-2xl border border-border p-5 shadow-sm">
+          <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Distancias por municipio (km, solo ida)</p>
+          <p className="text-xs text-muted-foreground mb-4">El flete se calcula ida y vuelta automáticamente. San Nicolás = 0 km = sin flete.</p>
+          <div className="space-y-1">
+            {municipios.map((m) => {
+              const fleteM = calcFlete(m.distancia_km);
+              const isEditing = editingId === m.id;
+              return (
+                <div key={m.id} className="flex items-center gap-3 py-2.5 border-b border-border last:border-0">
+                  <span className="flex-1 text-sm font-medium">{m.nombre}</span>
+                  {isEditing ? (
+                    <>
+                      <Input
+                        type="number" min={0} step={0.5} value={editingKm}
+                        onChange={(e) => setEditingKm(e.target.value)}
+                        className="w-24 h-8 text-sm"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveDistancia(m.id);
+                          if (e.key === "Escape") setEditingId(null);
+                        }}
+                      />
+                      <Button size="sm" variant="hero" onClick={() => saveDistancia(m.id)}>Guardar</Button>
+                      <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>Cancelar</Button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-xs text-muted-foreground w-14 text-right">{m.distancia_km} km</span>
+                      <span className={`text-sm font-bold w-20 text-right ${fleteM === 0 ? "text-green-600" : "text-primary"}`}>
+                        {fleteM === 0 ? "Incluido" : `$${fleteM}`}
+                      </span>
+                      <Button size="sm" variant="outline" className="h-7 px-2" onClick={() => startEdit(m)}>
+                        <Pencil size={12} />
+                      </Button>
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
-          <Button variant="hero" className="w-full" onClick={copiar}>
-            <Copy size={15} />
-            {copiado ? "¡Copiado!" : "Copiar monto"}
-          </Button>
         </div>
       )}
+
+      {/* Calculadora manual */}
+      <div className="bg-white rounded-2xl border border-border p-5 shadow-sm">
+        <p className="text-xs font-semibold text-muted-foreground uppercase mb-4">Calculadora manual (destino no listado)</p>
+        <div>
+          <Label>Distancia al destino (km, solo ida)</Label>
+          <Input type="number" min={0} value={km} onChange={(e) => setKm(e.target.value)}
+            placeholder="Ej: 18" className="mt-1" autoFocus />
+          {kmNum > 0 && (
+            <p className="text-xs text-muted-foreground mt-1">Recorrido total: {kmTotal} km (ida y vuelta)</p>
+          )}
+        </div>
+        {kmNum > 0 && (
+          <div className="mt-4 bg-primary/5 border border-primary/20 rounded-xl p-4">
+            <div className="space-y-1.5 text-sm mb-4 text-muted-foreground">
+              <div className="flex justify-between">
+                <span>{kmTotal} km ÷ {rendimiento} km/L</span>
+                <span>{litros.toFixed(2)} L</span>
+              </div>
+              <div className="flex justify-between">
+                <span>{litros.toFixed(2)} L × ${gasolinaPrecio}/L</span>
+                <span>${costoGasolina.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>+ {margen}% ganancia</span>
+                <span>+${(costoGasolina * margen / 100).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-bold text-base text-foreground pt-2 border-t border-primary/20">
+                <span>Flete sugerido</span>
+                <span className="text-primary text-xl">${flete.toLocaleString()}</span>
+              </div>
+            </div>
+            <Button variant="hero" className="w-full" onClick={copiar}>
+              <Copy size={15} /> {copiado ? "¡Copiado!" : "Copiar monto"}
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
