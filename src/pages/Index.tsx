@@ -87,9 +87,16 @@ const Index = () => {
 
   /* Hero parallax */
   useEffect(() => {
+    let ticking = false;
     const onScroll = () => {
-      const img = heroImgRef.current;
-      if (img) img.style.transform = `translateY(${window.scrollY * 0.28}px) scale(1.12)`;
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const img = heroImgRef.current;
+          if (img) img.style.transform = `translateY(${window.scrollY * 0.3}px) scale(1.12)`;
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -137,6 +144,7 @@ const Index = () => {
             src={heroImg}
             alt="Baby Play Zone Pequesaurios"
             className="w-full h-full object-cover scale-110"
+            style={{ willChange: "transform" }}
             width={1920}
             height={1080}
           />
