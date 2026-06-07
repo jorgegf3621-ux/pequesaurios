@@ -363,7 +363,7 @@ const Index = () => {
               <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground">Momentos reales.</h2>
             </div>
             <a
-              href="https://www.instagram.com/pequesaurios/"
+              href="https://www.instagram.com/pequesaurioss"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:block text-sm font-body font-semibold text-foreground hover:text-primary transition-colors underline underline-offset-4"
@@ -396,7 +396,7 @@ const Index = () => {
           )}
 
           <div className="sm:hidden reveal text-center mt-8">
-            <a href="https://www.instagram.com/pequesaurios/" target="_blank" rel="noopener noreferrer"
+            <a href="https://www.instagram.com/pequesaurioss" target="_blank" rel="noopener noreferrer"
               className="text-sm font-body font-semibold text-foreground hover:text-primary transition-colors underline underline-offset-4">
               Ver más en Instagram →
             </a>
