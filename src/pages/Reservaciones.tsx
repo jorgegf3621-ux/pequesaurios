@@ -12,17 +12,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const packages = [
-  { group: "Baby Play Zone", value: "bpz-inflable",      label: "Inflable Castillo (solo)" },
-  { group: "Baby Play Zone", value: "bpz-basico",        label: "Paquete Básico (inflable + mesita)" },
-  { group: "Baby Play Zone", value: "bpz-plus",          label: "Paquete Plus (inflable + mesita arte)" },
-  { group: "Inflables",      value: "inflable",           label: "Inflable Castillo Blanco" },
+  { group: "Baby Play Zone", value: "bpz-inflable",       label: "Inflable Castillo (solo)" },
+  { group: "Baby Play Zone", value: "bpz-basico",         label: "Paquete Básico (inflable + mesita)" },
+  { group: "Baby Play Zone", value: "bpz-plus",           label: "Paquete Plus (inflable + mesita arte)" },
+  { group: "Caballetes",     value: "cab-dino-baby",      label: "Paquete Dino Baby" },
+  { group: "Caballetes",     value: "cab-dino-creativo",  label: "Paquete Dino Creativo (+ yesitos)" },
+  { group: "Caballetes",     value: "cab-dino-fun",       label: "Paquete Dino Fun (+ pintacaritas)" },
   { group: "Mesas",          value: "mesa-pastel",        label: "Mesa Infantil Pastel (6 sillas)" },
   { group: "Mesas",          value: "mesa-blanca",        label: "Mesita Blanca (8 sillas madera)" },
   { group: "Mesas",          value: "mesa-extra",         label: "Mesa extra adicional" },
-  { group: "Yesitos",        value: "yesito-basico",      label: "Kit Yesitos Básico (1 yesito)" },
-  { group: "Yesitos",        value: "yesito-intermedio",  label: "Kit Yesitos Intermedio (2 yesitos)" },
-  { group: "Yesitos",        value: "yesito-completo",    label: "Kit Yesitos Completo (3 yesitos)" },
-  { group: "Extras",         value: "arte",               label: "Arte en Mesa" },
   { group: "Extras",         value: "globos",             label: "Guirnalda de Globos" },
   { group: "Servicios",      value: "pintacaritas",       label: "Pintacaritas (1.5 hrs)" },
 ];

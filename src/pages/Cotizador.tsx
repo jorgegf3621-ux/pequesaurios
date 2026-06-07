@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Check, Minus, Plus, TableProperties, MapPin, Loader2, Navigation } from "lucide-react";
@@ -93,7 +93,11 @@ async function getRoadDistanceKm(from: Coords, to: Coords): Promise<number | nul
 
 const Cotizador = () => {
   const navigate = useNavigate();
-  const [selected, setSelected] = useState<Record<string, number>>({});
+  const [searchParams] = useSearchParams();
+  const [selected, setSelected] = useState<Record<string, number>>(() => {
+    const paquete = searchParams.get("paquete");
+    return paquete ? { [paquete]: 1 } : {};
+  });
   const [showMesaPrompt, setShowMesaPrompt] = useState(false);
   const [municipio, setMunicipio] = useState("");
   const [direccionEvento, setDireccionEvento] = useState("");
@@ -447,6 +451,23 @@ const Cotizador = () => {
             </ul>
             <Button variant="hero" className="w-full" size="lg" onClick={handleReservar}>
               Reservar ahora
+            </Button>
+            <Button variant="whatsapp" className="w-full mt-2" size="lg" asChild>
+              <a
+                href={`https://wa.me/528180540369?text=${encodeURIComponent(
+                  `¡Hola! Me interesa cotizar:\n${Object.entries(selectedFinal)
+                    .map(([id, qty]) => {
+                      const item = allItems.find((i) => i.id === id);
+                      return item ? `• ${qty}x ${item.name}` : "";
+                    })
+                    .filter(Boolean)
+                    .join("\n")}${fleteAplicado > 0 ? `\n• Flete: $${fleteAplicado.toLocaleString()}` : ""}\n\nTotal estimado: $${totalConFlete.toLocaleString()} MXN`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Preguntar por WhatsApp
+              </a>
             </Button>
           </>
         ) : (

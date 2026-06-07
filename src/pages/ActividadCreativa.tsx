@@ -1,11 +1,11 @@
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const paquetes = [
   {
-    id: "dino-baby",
+    id: "cab-dino-baby",
     nombre: "Paquete Dino Baby",
     subtitulo: "Caballetes dobles",
     descripcion: "Ideal para cumpleaños o reuniones: cada niño pinta y se lleva su obra de arte.",
@@ -24,7 +24,7 @@ const paquetes = [
     bg: "from-yellow-50 to-white",
   },
   {
-    id: "dino-creativo",
+    id: "cab-dino-creativo",
     nombre: "Paquete Dino Creativo",
     subtitulo: "Caballetes & yesitos",
     descripcion: "¡El match perfecto! Pintura en caballete más yesitos para llevarse de recuerdo.",
@@ -45,7 +45,7 @@ const paquetes = [
     bg: "from-purple-50 to-white",
   },
   {
-    id: "dino-fun",
+    id: "cab-dino-fun",
     nombre: "Paquete Dino Fun",
     subtitulo: "Caballetes & pintacaritas",
     descripcion: "Creatividad + diversión: ¡los niños pintan y se transforman en sus personajes favoritos!",
@@ -70,6 +70,7 @@ const paquetes = [
 ];
 
 const ActividadCreativa = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen">
       {/* Hero */}
@@ -126,17 +127,9 @@ const ActividadCreativa = () => {
                 <Button
                   variant={pkg.popular ? "hero" : "outline"}
                   className="w-full"
-                  asChild
+                  onClick={() => navigate(`/cotizador?paquete=${pkg.id}`)}
                 >
-                  <a
-                    href={`https://wa.me/528180540369?text=${encodeURIComponent(
-                      `Hola! Me interesa el ${pkg.nombre} de Actividad Creativa ($${pkg.precio.toLocaleString()} MXN)`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Cotizar este paquete
-                  </a>
+                  Cotizar este paquete
                 </Button>
               </div>
             </div>

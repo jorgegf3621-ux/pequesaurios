@@ -2,10 +2,11 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const paquetes = [
   {
-    id: "inflable-solo",
+    id: "bpz-inflable",
     nombre: "Inflable Castillo",
     subtitulo: "Ideal para bebés y toddlers de 1 a 5 años",
     precio: 1000,
@@ -21,7 +22,7 @@ const paquetes = [
     bg: "from-sky-50 to-white",
   },
   {
-    id: "paquete-basico",
+    id: "bpz-basico",
     nombre: "Paquete Básico",
     subtitulo: "Inflable & mesita",
     precio: 1400,
@@ -38,7 +39,7 @@ const paquetes = [
     bg: "from-green-50 to-white",
   },
   {
-    id: "paquete-plus",
+    id: "bpz-plus",
     nombre: "Paquete Plus",
     subtitulo: "Inflable & mesita de arte",
     precio: 1550,
@@ -58,6 +59,7 @@ const paquetes = [
 ];
 
 const BabyPlayZone = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen">
       {/* Hero */}
@@ -114,17 +116,9 @@ const BabyPlayZone = () => {
                 <Button
                   variant={pkg.popular ? "hero" : "outline"}
                   className="w-full"
-                  asChild
+                  onClick={() => navigate(`/cotizador?paquete=${pkg.id}`)}
                 >
-                  <a
-                    href={`https://wa.me/528180540369?text=${encodeURIComponent(
-                      `Hola! Me interesa el ${pkg.nombre} de Baby Play Zone ($${pkg.precio.toLocaleString()} MXN)`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Cotizar este paquete
-                  </a>
+                  Cotizar este paquete
                 </Button>
               </div>
             </div>
