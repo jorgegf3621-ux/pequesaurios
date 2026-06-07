@@ -68,7 +68,11 @@ async function fetchSuggestions(input: string): Promise<Suggestion[]> {
         },
       }),
     });
-    if (!res.ok) return [];
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.error("Places API error:", res.status, JSON.stringify(err));
+      return [];
+    }
     const data = await res.json();
     return (data.suggestions ?? [])
       .map((s: any) => ({
