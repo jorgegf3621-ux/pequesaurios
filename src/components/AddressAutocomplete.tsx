@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
+import { useState, useEffect, useRef } from "react";
 import { MapPin, Loader2, X } from "lucide-react";
 
 export interface AddressResult {
@@ -16,8 +15,8 @@ interface Props {
   className?: string;
 }
 
-// Monterrey metro center — bias de búsqueda
-const MTY_CENTER = { lat: 25.6866, lng: -100.3161 };
+const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY as string;
+const MTY_CENTER = { latitude: 25.6866, longitude: -100.3161 };
 
 const MUNICIPIOS_MAP: [string, string][] = [
   ["san pedro garza", "San Pedro Garza García"],
@@ -31,12 +30,12 @@ const MUNICIPIOS_MAP: [string, string][] = [
   ["guadalupe", "Guadalupe"],
 ];
 
-function detectMunicipio(components: google.maps.GeocoderAddressComponent[]): string | null {
-  const types = ["locality", "sublocality", "administrative_area_level_2"];
-  for (const type of types) {
+function detectMunicipio(components: { types: string[]; longText: string }[]): string | null {
+  const priority = ["locality", "sublocality_level_1", "administrative_area_level_2"];
+  for (const type of priority) {
     const comp = components.find((c) => c.types.includes(type));
     if (comp) {
-      const lower = comp.long_name.toLowerCase();
+      const lower = comp.longText.toLowerCase();
       for (const [key, value] of MUNICIPIOS_MAP) {
         if (lower.includes(key)) return value;
       }
@@ -45,32 +44,56 @@ function detectMunicipio(components: google.maps.GeocoderAddressComponent[]): st
   return null;
 }
 
-// Singleton — inicializa solo una vez
-let autocompleteService: google.maps.places.AutocompleteService | null = null;
-let placesService: google.maps.places.PlacesService | null = null;
-let loadPromise: Promise<void> | null = null;
+interface Suggestion {
+  placeId: string;
+  mainText: string;
+  secondaryText: string;
+}
 
-async function ensureLoaded() {
-  if (autocompleteService) return;
-  if (!loadPromise) {
-    loadPromise = (async () => {
-      setOptions({
-        apiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY as string,
-        language: "es",
-        region: "MX",
-      });
-      const places = await importLibrary("places") as typeof google.maps.places;
-      autocompleteService = new places.AutocompleteService();
-      const div = document.createElement("div");
-      placesService = new places.PlacesService(div);
-    })();
-  }
-  await loadPromise;
+async function fetchSuggestions(input: string): Promise<Suggestion[]> {
+  const res = await fetch("https://places.googleapis.com/v1/places:autocomplete", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Goog-Api-Key": API_KEY,
+    },
+    body: JSON.stringify({
+      input,
+      languageCode: "es",
+      includedRegionCodes: ["mx"],
+      locationBias: {
+        circle: { center: MTY_CENTER, radius: 60000.0 },
+      },
+    }),
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return (data.suggestions ?? []).map((s: any) => ({
+    placeId: s.placePrediction?.placeId ?? "",
+    mainText: s.placePrediction?.structuredFormat?.mainText?.text ?? s.placePrediction?.text?.text ?? "",
+    secondaryText: s.placePrediction?.structuredFormat?.secondaryText?.text ?? "",
+  })).filter((s: Suggestion) => s.placeId);
+}
+
+async function fetchPlaceDetails(placeId: string): Promise<AddressResult | null> {
+  const fields = "location,addressComponents,formattedAddress";
+  const res = await fetch(
+    `https://places.googleapis.com/v1/places/${placeId}?fields=${fields}&languageCode=es`,
+    { headers: { "X-Goog-Api-Key": API_KEY } }
+  );
+  if (!res.ok) return null;
+  const place = await res.json();
+  const coords = {
+    lat: place.location?.latitude ?? 0,
+    lng: place.location?.longitude ?? 0,
+  };
+  const municipio = detectMunicipio(place.addressComponents ?? []);
+  return { shortDisplay: place.formattedAddress ?? "", coords, municipio };
 }
 
 export const AddressAutocomplete = ({ value, onSelect, onClear, placeholder, className }: Props) => {
   const [query, setQuery] = useState(value);
-  const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(!!value);
@@ -78,7 +101,7 @@ export const AddressAutocomplete = ({ value, onSelect, onClear, placeholder, cla
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!value) { setQuery(""); setSelected(false); setPredictions([]); setOpen(false); }
+    if (!value) { setQuery(""); setSelected(false); setSuggestions([]); setOpen(false); }
   }, [value]);
 
   useEffect(() => {
@@ -91,72 +114,42 @@ export const AddressAutocomplete = ({ value, onSelect, onClear, placeholder, cla
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const search = useCallback(async (text: string) => {
-    if (text.trim().length < 4) { setPredictions([]); setOpen(false); return; }
-    setLoading(true);
-    try {
-      await ensureLoaded();
-      autocompleteService!.getPlacePredictions(
-        {
-          input: text,
-          componentRestrictions: { country: "mx" },
-          locationBias: new google.maps.Circle({
-            center: MTY_CENTER,
-            radius: 60000,
-          }),
-          types: ["address", "establishment", "geocode"],
-        },
-        (results, status) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-            setPredictions(results);
-            setOpen(true);
-          } else {
-            setPredictions([]);
-            setOpen(false);
-          }
-          setLoading(false);
-        }
-      );
-    } catch {
-      setLoading(false);
-    }
-  }, []);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;
     setQuery(text);
     setSelected(false);
     if (onClear) onClear();
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => search(text), 350);
+
+    if (text.trim().length < 4) { setSuggestions([]); setOpen(false); return; }
+
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true);
+      const results = await fetchSuggestions(text);
+      setSuggestions(results);
+      setOpen(results.length > 0);
+      setLoading(false);
+    }, 350);
   };
 
-  const handleSelect = (prediction: google.maps.places.AutocompletePrediction) => {
-    setQuery(prediction.structured_formatting.main_text);
+  const handleSelect = async (s: Suggestion) => {
+    setQuery(s.mainText + (s.secondaryText ? `, ${s.secondaryText}` : ""));
     setSelected(true);
     setOpen(false);
-    setPredictions([]);
+    setSuggestions([]);
     setLoading(true);
-
-    placesService!.getDetails(
-      { placeId: prediction.place_id, fields: ["geometry", "address_components", "formatted_address"] },
-      (place, status) => {
-        setLoading(false);
-        if (status !== google.maps.places.PlacesServiceStatus.OK || !place?.geometry?.location) return;
-        const coords = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
-        const municipio = detectMunicipio(place.address_components ?? []);
-        const short = prediction.structured_formatting.main_text +
-          (prediction.structured_formatting.secondary_text ? ", " + prediction.structured_formatting.secondary_text : "");
-        setQuery(short);
-        onSelect({ shortDisplay: short, coords, municipio });
-      }
-    );
+    const detail = await fetchPlaceDetails(s.placeId);
+    setLoading(false);
+    if (!detail) return;
+    const display = s.mainText + (s.secondaryText ? `, ${s.secondaryText}` : "");
+    setQuery(display);
+    onSelect({ ...detail, shortDisplay: display });
   };
 
   const handleClear = () => {
     setQuery("");
     setSelected(false);
-    setPredictions([]);
+    setSuggestions([]);
     setOpen(false);
     if (onClear) onClear();
   };
@@ -169,7 +162,7 @@ export const AddressAutocomplete = ({ value, onSelect, onClear, placeholder, cla
           type="text"
           value={query}
           onChange={handleChange}
-          onFocus={() => predictions.length > 0 && setOpen(true)}
+          onFocus={() => suggestions.length > 0 && setOpen(true)}
           placeholder={placeholder ?? "Ej. Av. Constitución 450, Col. Centro"}
           className={`w-full border rounded-lg pl-9 pr-9 py-2 text-sm bg-background transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 ${
             selected ? "border-green-400" : "border-border"
@@ -186,19 +179,19 @@ export const AddressAutocomplete = ({ value, onSelect, onClear, placeholder, cla
         </div>
       </div>
 
-      {open && predictions.length > 0 && (
+      {open && suggestions.length > 0 && (
         <ul className="absolute z-50 top-full mt-1 w-full bg-white border border-border rounded-xl shadow-lg overflow-hidden">
-          {predictions.map((p) => (
-            <li key={p.place_id}>
+          {suggestions.map((s) => (
+            <li key={s.placeId}>
               <button
                 type="button"
-                onClick={() => handleSelect(p)}
+                onClick={() => handleSelect(s)}
                 className="w-full text-left px-4 py-3 text-sm hover:bg-primary/5 border-b border-border/50 last:border-0 flex items-start gap-2"
               >
                 <MapPin size={13} className="text-primary mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-medium leading-tight">{p.structured_formatting.main_text}</p>
-                  <p className="text-xs text-muted-foreground">{p.structured_formatting.secondary_text}</p>
+                  <p className="font-medium leading-tight">{s.mainText}</p>
+                  {s.secondaryText && <p className="text-xs text-muted-foreground">{s.secondaryText}</p>}
                 </div>
               </button>
             </li>
