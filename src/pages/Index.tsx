@@ -250,33 +250,47 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex gap-3 pb-4 snap-x snap-mandatory px-4 sm:px-8 w-max mx-auto">
-          {serviciosCards.map((s) => (
-            <Link
-              key={s.id}
-              to={s.href}
-              className="flex-none w-44 sm:w-52 snap-center rounded-3xl overflow-hidden relative group aspect-[9/16] shadow-lg hover:shadow-2xl transition-shadow duration-300 block"
-            >
-              {s.img_url ? (
-                <img src={s.img_url} alt={s.titulo} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-lavender/40 to-pink-100 flex items-center justify-center">
-                  <Sparkles size={48} className="text-primary/30" />
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {serviciosCards.map((s) => (
+              <Link
+                key={s.id}
+                to={s.href}
+                className="group rounded-3xl overflow-hidden border border-border bg-card shadow-[var(--shadow-card)] hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
+              >
+                {/* Image */}
+                <div className="relative w-full h-52 overflow-hidden flex-shrink-0">
+                  {s.img_url ? (
+                    <img
+                      src={s.img_url}
+                      alt={s.titulo}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-lavender/40 to-pink-100 flex items-center justify-center">
+                      <Sparkles size={48} className="text-primary/30" />
+                    </div>
+                  )}
+                  {s.subtitulo && (
+                    <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider bg-white/85 backdrop-blur-sm text-foreground/70 px-2.5 py-1 rounded-full border border-white/60">
+                      {s.subtitulo}
+                    </span>
+                  )}
                 </div>
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                {s.subtitulo && (
-                  <span className="text-[9px] font-bold uppercase tracking-wider bg-white/20 backdrop-blur-sm text-white px-2 py-0.5 rounded-full mb-1.5 inline-block border border-white/20">
-                    {s.subtitulo}
-                  </span>
-                )}
-                <h3 className="font-display text-lg font-bold text-white leading-tight">{s.titulo}</h3>
-                {s.desde && <p className="text-xs font-semibold text-white/80 mt-0.5">{s.desde}</p>}
-              </div>
-            </Link>
-          ))}
+                {/* Content */}
+                <div className="p-5 flex flex-col flex-1">
+                  <h3 className="font-display text-xl font-bold text-foreground mb-1">{s.titulo}</h3>
+                  <p className="text-sm text-foreground/55 leading-relaxed flex-1">{s.descripcion}</p>
+                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
+                    <span className="font-heading font-bold text-primary text-sm">{s.desde}</span>
+                    <span className="text-xs font-semibold text-foreground/40 group-hover:text-primary transition-colors">
+                      Ver más →
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
