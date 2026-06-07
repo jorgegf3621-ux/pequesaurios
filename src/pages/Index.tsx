@@ -107,7 +107,7 @@ const Index = () => {
       });
   }, []);
 
-  /* Supabase servicios cards */
+  /* Supabase servicios cards — merge with local fallback images */
   useEffect(() => {
     (supabase as any)
       .from("servicios_cards")
@@ -115,7 +115,13 @@ const Index = () => {
       .eq("activa", true)
       .order("orden")
       .then(({ data }: { data: ServicioCard[] | null }) => {
-        if (data && data.length > 0) setServiciosCards(data);
+        if (data && data.length > 0) {
+          const merged = data.map((card) => ({
+            ...card,
+            img_url: card.img_url ?? defaultServicios.find((d) => d.titulo === card.titulo)?.img_url ?? null,
+          }));
+          setServiciosCards(merged);
+        }
       });
   }, []);
 
@@ -147,14 +153,14 @@ const Index = () => {
         <div className="relative container mx-auto px-4 py-28 md:py-36">
           <div className="max-w-2xl">
             {/* Badge */}
-            <div className="animate-fade-in inline-flex items-center gap-2 bg-white/70 backdrop-blur-md border border-white/60 text-primary text-xs font-semibold px-4 py-1.5 rounded-full mb-6 shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              Baby Play Zone · Monterrey N.L.
+            <div className="animate-fade-in inline-flex items-center gap-2 bg-white/75 backdrop-blur-md border border-white/60 text-foreground/65 text-[10px] font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full mb-6 shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#e05252] flex-shrink-0 animate-pulse" />
+              Monterrey N.L. · Disponible este mes
             </div>
 
-            <h1 className="animate-fade-in animation-delay-200 font-heading text-4xl md:text-6xl font-bold text-foreground mb-5 leading-tight [text-wrap:balance]">
+            <h1 className="animate-fade-in animation-delay-200 font-display text-4xl md:text-6xl font-bold text-foreground mb-5 leading-tight [text-wrap:balance]">
               Un espacio especial para los{" "}
-              <span className="text-gradient-brand">más pequeños</span>
+              <em className="not-italic text-gradient-brand">más pequeños</em>
             </h1>
 
             <p className="animate-fade-in animation-delay-400 text-lg md:text-xl text-foreground/75 max-w-xl mb-10 font-body leading-relaxed">
@@ -218,7 +224,7 @@ const Index = () => {
       </section>
 
       {/* ── Servicios — Header + Story Cards ────────────────── */}
-      <section className="py-20">
+      <section id="servicios" className="py-20">
         <div className="container mx-auto px-4">
           <div className="reveal flex flex-col md:flex-row md:items-end gap-8 mb-14">
             <div className="md:w-1/2">
@@ -236,7 +242,8 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-4 sm:px-8">
+        <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex gap-3 pb-4 snap-x snap-mandatory px-4 sm:px-8 w-max mx-auto">
           {serviciosCards.map((s) => (
             <Link
               key={s.id}
@@ -262,6 +269,7 @@ const Index = () => {
               </div>
             </Link>
           ))}
+          </div>
         </div>
       </section>
 
@@ -274,9 +282,9 @@ const Index = () => {
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { num: "01", title: "Cotiza", desc: "Mándanos un WhatsApp con tu fecha y lo que imaginas. Respondemos en menos de 1 hora.", bg: "#F4A07A", text: "#4a2010", muted: "#c07848" },
-              { num: "02", title: "Reserva", desc: "Apartas tu fecha con 30%. Coordinamos detalles y te confirmamos por mail.", bg: "#6ECFC3", text: "#0f3a35", muted: "#3aada0" },
-              { num: "03", title: "Disfruta", desc: "Llegamos antes, montamos contigo, y al final levantamos todo. Tú solo disfrutas.", bg: "#F5D76E", text: "#4a3a00", muted: "#c9a830" },
+              { num: "01", title: "Cotiza", desc: "Mándanos un WhatsApp con tu fecha y lo que imaginas. Respondemos en menos de 1 hora.", bg: "#FBBDAA", text: "#5c2e18", muted: "#D4906E" },
+              { num: "02", title: "Reserva", desc: "Apartas tu fecha con 30%. Coordinamos detalles y te confirmamos por mail.", bg: "#A8DDD7", text: "#1a4540", muted: "#56b5af" },
+              { num: "03", title: "Disfruta", desc: "Llegamos antes, montamos contigo, y al final levantamos todo. Tú solo disfrutas.", bg: "#FAE9A0", text: "#4a3800", muted: "#C9AD30" },
             ].map((step, i) => (
               <div
                 key={step.num}

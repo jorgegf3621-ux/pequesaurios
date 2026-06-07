@@ -15,37 +15,37 @@
     --popover: 0 0% 100%;
     --popover-foreground: 280 20% 22%;
 
-    --primary: 330 60% 62%;
+    --primary: 335 52% 67%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 170 40% 80%;
-    --secondary-foreground: 280 20% 22%;
+    --secondary: 170 38% 84%;
+    --secondary-foreground: 280 20% 28%;
 
-    --muted: 270 30% 96%;
-    --muted-foreground: 280 10% 52%;
+    --muted: 270 25% 96%;
+    --muted-foreground: 280 10% 55%;
 
-    --accent: 50 80% 80%;
-    --accent-foreground: 280 20% 22%;
+    --accent: 48 72% 84%;
+    --accent-foreground: 280 20% 28%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 270 20% 91%;
     --input: 270 20% 91%;
-    --ring: 330 60% 62%;
+    --ring: 335 52% 67%;
 
     --radius: 1rem;
 
-    --lavender: 270 50% 85%;
-    --lavender-foreground: 270 40% 30%;
-    --mint: 170 40% 80%;
-    --mint-foreground: 170 40% 25%;
-    --peach: 20 80% 88%;
-    --peach-foreground: 20 50% 30%;
-    --pastel-yellow: 50 80% 85%;
-    --pastel-yellow-foreground: 50 50% 30%;
+    --lavender: 270 42% 89%;
+    --lavender-foreground: 270 35% 35%;
+    --mint: 170 38% 85%;
+    --mint-foreground: 170 38% 28%;
+    --peach: 20 62% 91%;
+    --peach-foreground: 20 45% 32%;
+    --pastel-yellow: 50 68% 88%;
+    --pastel-yellow-foreground: 50 45% 32%;
 
-    --whatsapp: 142 70% 40%;
+    --whatsapp: 142 38% 56%;
     --whatsapp-foreground: 0 0% 100%;
 
     --shadow-card: 0 4px 24px -4px hsl(270 40% 50% / 0.10), 0 1px 4px hsl(270 40% 50% / 0.06);
@@ -80,7 +80,7 @@
 @layer utilities {
   /* ── Gradient text ─────────────────────────────────── */
   .text-gradient-brand {
-    background: linear-gradient(135deg, hsl(330 60% 62%), hsl(270 50% 68%), hsl(170 40% 50%));
+    background: linear-gradient(135deg, hsl(335 52% 67%), hsl(270 42% 74%), hsl(170 38% 58%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
