@@ -16,7 +16,7 @@ interface Props {
 }
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY as string;
-const MTY_CENTER = { latitude: 25.6866, longitude: -100.3161 };
+const MTY_CENTER = { lat: 25.6866, lng: -100.3161 };
 
 const MUNICIPIOS_MAP: [string, string][] = [
   ["san pedro garza", "San Pedro Garza García"],
@@ -30,12 +30,12 @@ const MUNICIPIOS_MAP: [string, string][] = [
   ["guadalupe", "Guadalupe"],
 ];
 
-function detectMunicipio(components: { types: string[]; longText: string }[]): string | null {
+function detectMunicipio(components: google.maps.GeocoderAddressComponent[]): string | null {
   const priority = ["locality", "sublocality_level_1", "administrative_area_level_2"];
   for (const type of priority) {
     const comp = components.find((c) => c.types.includes(type));
     if (comp) {
-      const lower = comp.longText.toLowerCase();
+      const lower = comp.long_name.toLowerCase();
       for (const [key, value] of MUNICIPIOS_MAP) {
         if (lower.includes(key)) return value;
       }
@@ -44,51 +44,27 @@ function detectMunicipio(components: { types: string[]; longText: string }[]): s
   return null;
 }
 
+// Carga el script de Google Maps una sola vez
+let scriptPromise: Promise<void> | null = null;
+function loadGoogleMaps(): Promise<void> {
+  if (scriptPromise) return scriptPromise;
+  scriptPromise = new Promise((resolve, reject) => {
+    if ((window as any).google?.maps?.places) { resolve(); return; }
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places&language=es&region=MX`;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("No se pudo cargar Google Maps"));
+    document.head.appendChild(script);
+  });
+  return scriptPromise;
+}
+
 interface Suggestion {
   placeId: string;
   mainText: string;
   secondaryText: string;
-}
-
-async function fetchSuggestions(input: string): Promise<Suggestion[]> {
-  const res = await fetch("https://places.googleapis.com/v1/places:autocomplete", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Goog-Api-Key": API_KEY,
-    },
-    body: JSON.stringify({
-      input,
-      languageCode: "es",
-      includedRegionCodes: ["mx"],
-      locationBias: {
-        circle: { center: MTY_CENTER, radius: 60000.0 },
-      },
-    }),
-  });
-  if (!res.ok) return [];
-  const data = await res.json();
-  return (data.suggestions ?? []).map((s: any) => ({
-    placeId: s.placePrediction?.placeId ?? "",
-    mainText: s.placePrediction?.structuredFormat?.mainText?.text ?? s.placePrediction?.text?.text ?? "",
-    secondaryText: s.placePrediction?.structuredFormat?.secondaryText?.text ?? "",
-  })).filter((s: Suggestion) => s.placeId);
-}
-
-async function fetchPlaceDetails(placeId: string): Promise<AddressResult | null> {
-  const fields = "location,addressComponents,formattedAddress";
-  const res = await fetch(
-    `https://places.googleapis.com/v1/places/${placeId}?fields=${fields}&languageCode=es`,
-    { headers: { "X-Goog-Api-Key": API_KEY } }
-  );
-  if (!res.ok) return null;
-  const place = await res.json();
-  const coords = {
-    lat: place.location?.latitude ?? 0,
-    lng: place.location?.longitude ?? 0,
-  };
-  const municipio = detectMunicipio(place.addressComponents ?? []);
-  return { shortDisplay: place.formattedAddress ?? "", coords, municipio };
+  prediction: google.maps.places.AutocompletePrediction;
 }
 
 export const AddressAutocomplete = ({ value, onSelect, onClear, placeholder, className }: Props) => {
@@ -99,6 +75,8 @@ export const AddressAutocomplete = ({ value, onSelect, onClear, placeholder, cla
   const [selected, setSelected] = useState(!!value);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const svcRef = useRef<google.maps.places.AutocompleteService | null>(null);
+  const detailsRef = useRef<google.maps.places.PlacesService | null>(null);
 
   useEffect(() => {
     if (!value) { setQuery(""); setSelected(false); setSuggestions([]); setOpen(false); }
@@ -114,6 +92,14 @@ export const AddressAutocomplete = ({ value, onSelect, onClear, placeholder, cla
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  const ensureServices = async () => {
+    if (svcRef.current) return;
+    await loadGoogleMaps();
+    svcRef.current = new google.maps.places.AutocompleteService();
+    const div = document.createElement("div");
+    detailsRef.current = new google.maps.places.PlacesService(div);
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;
     setQuery(text);
@@ -125,25 +111,57 @@ export const AddressAutocomplete = ({ value, onSelect, onClear, placeholder, cla
 
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
-      const results = await fetchSuggestions(text);
-      setSuggestions(results);
-      setOpen(results.length > 0);
-      setLoading(false);
+      try {
+        await ensureServices();
+        svcRef.current!.getPlacePredictions(
+          {
+            input: text,
+            componentRestrictions: { country: "mx" },
+            locationBias: { center: MTY_CENTER, radius: 60000 } as google.maps.CircleLiteral,
+          },
+          (results, status) => {
+            if (status === "OK" && results) {
+              setSuggestions(results.map((p) => ({
+                placeId: p.place_id,
+                mainText: p.structured_formatting.main_text,
+                secondaryText: p.structured_formatting.secondary_text ?? "",
+                prediction: p,
+              })));
+              setOpen(true);
+            } else {
+              setSuggestions([]);
+              setOpen(false);
+            }
+            setLoading(false);
+          }
+        );
+      } catch {
+        setLoading(false);
+      }
     }, 350);
   };
 
-  const handleSelect = async (s: Suggestion) => {
-    setQuery(s.mainText + (s.secondaryText ? `, ${s.secondaryText}` : ""));
+  const handleSelect = (s: Suggestion) => {
+    const display = s.mainText + (s.secondaryText ? `, ${s.secondaryText}` : "");
+    setQuery(display);
     setSelected(true);
     setOpen(false);
     setSuggestions([]);
     setLoading(true);
-    const detail = await fetchPlaceDetails(s.placeId);
-    setLoading(false);
-    if (!detail) return;
-    const display = s.mainText + (s.secondaryText ? `, ${s.secondaryText}` : "");
-    setQuery(display);
-    onSelect({ ...detail, shortDisplay: display });
+
+    detailsRef.current!.getDetails(
+      { placeId: s.placeId, fields: ["geometry", "address_components"] },
+      (place, status) => {
+        setLoading(false);
+        if (status !== "OK" || !place?.geometry?.location) return;
+        const coords = {
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+        };
+        const municipio = detectMunicipio(place.address_components ?? []);
+        onSelect({ shortDisplay: display, coords, municipio });
+      }
+    );
   };
 
   const handleClear = () => {
