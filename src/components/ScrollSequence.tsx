@@ -38,8 +38,11 @@ const ScrollSequence = () => {
       const img = imagesRef.current[index];
       if (!img?.naturalWidth) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Cover-fit: fill canvas preserving aspect ratio
-      const scale = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
+      // Contain-fit: scale to fill canvas without cropping
+      const scale = Math.min(
+        canvas.width / img.naturalWidth,
+        canvas.height / img.naturalHeight
+      );
       const w = img.naturalWidth * scale;
       const h = img.naturalHeight * scale;
       const x = (canvas.width - w) / 2;
@@ -51,9 +54,9 @@ const ScrollSequence = () => {
 
     const onScroll = () => {
       const rect = container.getBoundingClientRect();
-      const totalScroll = container.offsetHeight - window.innerHeight;
-      const scrolled = -rect.top;
-      targetProgress = Math.max(0, Math.min(1, scrolled / totalScroll));
+      // Start animating as soon as the section enters from the bottom
+      const scrolledSince = window.innerHeight - rect.top;
+      targetProgress = Math.max(0, Math.min(1, scrolledSince / container.offsetHeight));
     };
 
     const tick = () => {
@@ -94,9 +97,15 @@ const ScrollSequence = () => {
   }, []);
 
   return (
-    <div ref={containerRef} style={{ height: "500vh" }} className="relative">
-      <div className="sticky top-0 h-screen w-full overflow-hidden bg-background">
+    <div ref={containerRef} style={{ height: "300vh" }} className="relative">
+      <div className="sticky top-0 h-[65vh] w-full overflow-hidden" style={{ background: "#faf8f5" }}>
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+        {/* fade top — blends into page background */}
+        <div className="absolute inset-x-0 top-0 h-32 pointer-events-none"
+          style={{ background: "linear-gradient(to bottom, #faf8f5, transparent)" }} />
+        {/* fade bottom */}
+        <div className="absolute inset-x-0 bottom-0 h-32 pointer-events-none"
+          style={{ background: "linear-gradient(to top, #faf8f5, transparent)" }} />
       </div>
     </div>
   );

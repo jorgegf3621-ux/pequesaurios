@@ -8,7 +8,6 @@ import bpzImg from "@/assets/baby-play-zone.jpg";
 import catalogInflableImg from "@/assets/catalog-inflable.jpg";
 import catalogMesitaImg from "@/assets/catalog-mesita.jpg";
 import paquetePlusImg from "@/assets/paquete-plus.jpg";
-import ScrollSequence from "@/components/ScrollSequence";
 
 type ServicioCard = {
   id: string;
@@ -203,9 +202,6 @@ const Index = () => {
           <div className="w-px h-10 bg-gradient-to-b from-primary/60 to-transparent" />
         </div>
       </section>
-
-      {/* ── Scroll sequence ───────────────────────────────── */}
-      <ScrollSequence />
 
       {/* ── Features strip ────────────────────────────────── */}
       <section className="container mx-auto px-4 -mt-8 relative z-10 mb-4">
