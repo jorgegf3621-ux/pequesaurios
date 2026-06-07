@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Loader } from "@googlemaps/js-api-loader";
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { MapPin, Loader2, X } from "lucide-react";
 
 export interface AddressResult {
@@ -45,26 +45,27 @@ function detectMunicipio(components: google.maps.GeocoderAddressComponent[]): st
   return null;
 }
 
-// Singleton loader — no carga dos veces
-const loader = new Loader({
-  apiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY as string,
-  libraries: ["places"],
-  language: "es",
-  region: "MX",
-});
-
+// Singleton — inicializa solo una vez
 let autocompleteService: google.maps.places.AutocompleteService | null = null;
 let placesService: google.maps.places.PlacesService | null = null;
-let mapsLoaded = false;
+let loadPromise: Promise<void> | null = null;
 
 async function ensureLoaded() {
-  if (mapsLoaded) return;
-  await loader.load();
-  autocompleteService = new google.maps.places.AutocompleteService();
-  // PlacesService requiere un elemento DOM
-  const div = document.createElement("div");
-  placesService = new google.maps.places.PlacesService(div);
-  mapsLoaded = true;
+  if (autocompleteService) return;
+  if (!loadPromise) {
+    loadPromise = (async () => {
+      setOptions({
+        apiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY as string,
+        language: "es",
+        region: "MX",
+      });
+      const places = await importLibrary("places") as typeof google.maps.places;
+      autocompleteService = new places.AutocompleteService();
+      const div = document.createElement("div");
+      placesService = new places.PlacesService(div);
+    })();
+  }
+  await loadPromise;
 }
 
 export const AddressAutocomplete = ({ value, onSelect, onClear, placeholder, className }: Props) => {
