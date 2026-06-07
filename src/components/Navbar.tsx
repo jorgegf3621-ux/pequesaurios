@@ -70,7 +70,7 @@ const Navbar = () => {
         <div className="hidden md:flex items-center">
           <Link
             to="/cotizador"
-            className="bg-primary text-white font-body font-semibold text-sm px-5 py-2 rounded-full hover:bg-primary/90 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+            className="bg-[hsl(335_50%_86%)] text-[hsl(335_40%_28%)] font-body font-semibold text-sm px-5 py-2 rounded-full hover:bg-[hsl(335_50%_81%)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
           >
             Cotizar
           </Link>
@@ -116,7 +116,7 @@ const Navbar = () => {
           })}
           <Link
             to="/cotizador"
-            className="mt-2 bg-primary text-white font-body font-semibold text-sm px-5 py-2.5 rounded-full text-center hover:bg-primary/90 transition-colors"
+            className="mt-2 bg-[hsl(335_50%_86%)] text-[hsl(335_40%_28%)] font-body font-semibold text-sm px-5 py-2.5 rounded-full text-center hover:bg-[hsl(335_50%_81%)] transition-colors"
           >
             Cotizar
           </Link>

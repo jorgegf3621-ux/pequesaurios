@@ -8,6 +8,7 @@ import bpzImg from "@/assets/baby-play-zone.jpg";
 import catalogInflableImg from "@/assets/catalog-inflable.jpg";
 import catalogMesitaImg from "@/assets/catalog-mesita.jpg";
 import paquetePlusImg from "@/assets/paquete-plus.jpg";
+import ScrollSequence from "@/components/ScrollSequence";
 
 type ServicioCard = {
   id: string;
@@ -202,6 +203,9 @@ const Index = () => {
           <div className="w-px h-10 bg-gradient-to-b from-primary/60 to-transparent" />
         </div>
       </section>
+
+      {/* ── Scroll sequence ───────────────────────────────── */}
+      <ScrollSequence />
 
       {/* ── Features strip ────────────────────────────────── */}
       <section className="container mx-auto px-4 -mt-8 relative z-10 mb-4">
@@ -407,7 +411,7 @@ const Index = () => {
               href="https://wa.me/528180540369"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 bg-primary text-white font-body font-semibold text-base px-10 py-4 rounded-full shadow-[0_8px_32px_-4px_hsl(330_60%_62%/0.45)] hover:shadow-[0_12px_40px_-4px_hsl(330_60%_62%/0.6)] hover:-translate-y-0.5 transition-all duration-300"
+              className="inline-flex items-center gap-2.5 bg-[hsl(142_35%_78%)] text-[hsl(142_35%_22%)] font-body font-semibold text-base px-10 py-4 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               Cotizar por WhatsApp
