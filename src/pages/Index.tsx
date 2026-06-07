@@ -22,7 +22,7 @@ type ServicioCard = {
 };
 
 const defaultServicios: ServicioCard[] = [
-  { id: "1", titulo: "Baby Play Zone", subtitulo: "Más Rentado", descripcion: "Inflable blanco con resbaladilla y alberca de pelotas. Seguro y divertido para bebés de 1 a 5 años.", desde: "Desde $1,000", img_url: catalogInflableImg, href: "/baby-play-zone", orden: 1, activa: true },
+  { id: "1", titulo: "Baby Play Zone", subtitulo: "Más Rentado", descripcion: "Inflable blanco con resbaladilla y alberca de pelotas. Seguro y divertido para niños de 1 a 5 años.", desde: "Desde $1,000", img_url: catalogInflableImg, href: "/baby-play-zone", orden: 1, activa: true },
   { id: "2", titulo: "Mobiliario Infantil", subtitulo: "Favorito Mamás", descripcion: "Mesita de madera blanca con 8 sillas infantiles arcoíris y conejito. Perfecta para snacks y actividades.", desde: "Desde $500", img_url: catalogMesitaImg, href: "/mobiliario-infantil", orden: 2, activa: true },
   { id: "3", titulo: "Caballetes & Color", subtitulo: "Creativo", descripcion: "Deja que los peques saquen toda su creatividad pintando en caballetes. ¡Entretenidos y felices toda la fiesta!", desde: "Desde $900", img_url: paquetePlusImg, href: "/actividad-creativa", orden: 3, activa: true },
   { id: "4", titulo: "Kit de Yesitos", subtitulo: "Recuerdo único", descripcion: "Los peques pintan su figura de yeso y se la llevan de recuerdo. Etiqueta personalizada según tu temática.", desde: "Desde $20 c/u", img_url: null, href: "/yesitos", orden: 4, activa: true },
@@ -54,7 +54,7 @@ const testimonials = [
 ];
 
 const features = [
-  { icon: Shield, label: "100% Seguro", desc: "Materiales certificados para bebés" },
+  { icon: Shield, label: "100% Seguro", desc: "Materiales certificados para niños" },
   { icon: Clock, label: "Entrega puntual", desc: "Instalamos antes de tu evento" },
   { icon: Sparkles, label: "Todo incluido", desc: "Setup y retiro sin costo extra" },
 ];
@@ -173,7 +173,7 @@ const Index = () => {
             </h1>
 
             <p className="animate-fade-in animation-delay-400 text-lg md:text-xl text-foreground/75 max-w-xl mb-10 font-body leading-relaxed">
-              Creamos el área de bebés perfecta para tu fiesta: segura, linda y llena de diversión.
+              Creamos el área perfecta para tu fiesta: segura, linda y llena de diversión.
             </p>
 
             <div className="animate-fade-in animation-delay-600 flex flex-col sm:flex-row gap-3">

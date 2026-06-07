@@ -8,7 +8,7 @@ const paquetes = [
   {
     id: "bpz-inflable",
     nombre: "Inflable Castillo",
-    subtitulo: "Ideal para bebés y toddlers de 1 a 5 años",
+    subtitulo: "Ideal para niños de 1 a 5 años",
     precio: 1000,
     popular: false,
     nota: "No incluye flete.",
@@ -133,9 +133,8 @@ const BabyPlayZone = () => {
             El inflable perfecto para los mas chiquitos
           </h2>
           <p className="text-muted-foreground mb-8">
-            Nuestro inflable blanco 3×3 es suave, seguro y disenado especialmente para bebes y
-            toddlers de 1 a 5 anos. Incluye resbaladilla y alberca de pelotas para horas de
-            entretenimiento.
+            Nuestro inflable blanco 3×3 es suave, seguro y diseñado especialmente para niños de
+            1 a 5 años. Incluye resbaladilla y alberca de pelotas para horas de entretenimiento.
           </p>
           <div className="grid sm:grid-cols-3 gap-4 text-center">
             {[

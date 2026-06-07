@@ -152,7 +152,7 @@ const MobiliarioInfantil = () => {
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   Figuras blancas en forma de conejito y arcoíris. Adorables
-                  para fiestas de bebés y temáticas tiernas.
+                  para fiestas con temáticas tiernas y coloridas.
                 </p>
               </div>
             </div>
