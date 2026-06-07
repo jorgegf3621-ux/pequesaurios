@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Check, Minus, Plus, TableProperties, MapPin, Loader2, Navigation } from "lucide-react";
+import { Check, Minus, Plus, TableProperties, MapPin, Loader2, Navigation, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import AddressAutocomplete, { type AddressResult } from "@/components/AddressAutocomplete";
 
 interface Item {
   id: string;
@@ -62,11 +63,12 @@ const IDS_ENTREGA_FISICA = ["bpz-inflable", "bpz-basico", "bpz-plus", "mesa-past
 const IDS_CON_MESITA = new Set(["mesa-pastel", "mesa-blanca", "bpz-basico", "bpz-plus"]);
 const MESA_EXTRA: Item = { id: "mesa-extra", name: "Mesa extra (segunda mesa)", price: 350, unit: "mesa", category: "Mesas" };
 
-// ─── Geocodificación y distancia real ────────────────────────────────────────
+// ─── Geocodificación base + distancia real ───────────────────────────────────
 
 type Coords = [number, number]; // [lon, lat]
 
-async function geocodeAddress(address: string): Promise<Coords | null> {
+// Solo para la dirección base del admin (carga única al inicio)
+async function geocodeBase(address: string): Promise<Coords | null> {
   try {
     const q = encodeURIComponent(address + ", Nuevo León, México");
     const res = await fetch(
@@ -87,7 +89,7 @@ async function getRoadDistanceKm(from: Coords, to: Coords): Promise<number | nul
     const res = await fetch(url);
     const data = await res.json();
     if (data.code !== "Ok" || !data.routes?.length) return null;
-    return data.routes[0].distance / 1000; // metros → km
+    return data.routes[0].distance / 1000;
   } catch {
     return null;
   }
@@ -103,8 +105,8 @@ const Cotizador = () => {
     return paquete ? { [paquete]: 1 } : {};
   });
   const [showMesaPrompt, setShowMesaPrompt] = useState(false);
-  const [municipio, setMunicipio] = useState("");
-  const [direccionEvento, setDireccionEvento] = useState("");
+  const [eventAddress, setEventAddress] = useState<AddressResult | null>(null);
+  const [addressInput, setAddressInput] = useState("");
 
   // Flete data from Supabase
   const [fleteConfig, setFleteConfig] = useState<FleteConfig | null>(null);
@@ -114,8 +116,6 @@ const Cotizador = () => {
   const [baseCoords, setBaseCoords] = useState<Coords | null>(null);
   const [distanciaReal, setDistanciaReal] = useState<number | null>(null);
   const [calculandoFlete, setCalculandoFlete] = useState(false);
-  const [errorGeo, setErrorGeo] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load flete config + municipios on mount
   useEffect(() => {
@@ -126,8 +126,7 @@ const Cotizador = () => {
       ]);
       if (cfg) {
         setFleteConfig(cfg);
-        // Geocodificar la dirección base del admin
-        const coords = await geocodeAddress(cfg.direccion_base || "San Nicolás de los Garza, NL");
+        const coords = await geocodeBase(cfg.direccion_base || "San Nicolás de los Garza, NL");
         if (coords) setBaseCoords(coords);
       }
       if (munis?.length) setMunicipiosFlete(munis);
@@ -136,29 +135,20 @@ const Cotizador = () => {
     load();
   }, []);
 
-  // Cuando el cliente escribe su dirección → calcular distancia real (debounced 1.5s)
+  // Cuando el cliente selecciona una dirección → calcular distancia real
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
     setDistanciaReal(null);
-    setErrorGeo(false);
-
-    if (!direccionEvento.trim() || !baseCoords || esSanNicolas) return;
-    if (direccionEvento.trim().length < 8) return; // esperar mínimo de texto
+    if (!eventAddress?.coords || !baseCoords) return;
+    if (eventAddress.municipio === "San Nicolás de los Garza") return;
 
     setCalculandoFlete(true);
-    debounceRef.current = setTimeout(async () => {
-      const query = `${direccionEvento}, ${municipio || "Nuevo León"}, México`;
-      const clientCoords = await geocodeAddress(query);
-      if (clientCoords && baseCoords) {
-        const km = await getRoadDistanceKm(baseCoords, clientCoords);
-        setDistanciaReal(km);
-        setErrorGeo(km === null);
-      } else {
-        setErrorGeo(true);
-      }
+    const from: Coords = [baseCoords[0], baseCoords[1]];
+    const to: Coords = [eventAddress.coords.lng, eventAddress.coords.lat];
+    getRoadDistanceKm(from, to).then((km) => {
+      setDistanciaReal(km);
       setCalculandoFlete(false);
-    }, 1500);
-  }, [direccionEvento, baseCoords, municipio]);
+    });
+  }, [eventAddress, baseCoords]);
 
   // Calcular flete con la fórmula del admin
   const calcularFlete = (km: number): number => {
@@ -169,9 +159,11 @@ const Cotizador = () => {
     return Math.ceil(costoGas * (1 + fleteConfig.margen_pct / 100));
   };
 
+  const municipio = eventAddress?.municipio ?? "";
   const municipioData = municipiosFlete.find((m) => m.nombre === municipio);
   const esSanNicolas = municipio === "San Nicolás de los Garza";
   const fueraDeSanNicolas = municipio !== "" && !esSanNicolas;
+  const fueraDeZona = eventAddress !== null && !eventAddress.municipio;
   const tienePintacaritas = !!selected["pintacaritas"];
   const tieneEntregaFisica = IDS_ENTREGA_FISICA.some((id) => selected[id]);
 
@@ -231,7 +223,7 @@ const Cotizador = () => {
     localStorage.setItem("cotizador_seleccion", resumen);
     localStorage.setItem("cotizador_ids", JSON.stringify(Object.keys(selectedFinal)));
     localStorage.setItem("cotizador_municipio", municipio);
-    localStorage.setItem("cotizador_direccion", direccionEvento);
+    localStorage.setItem("cotizador_direccion", eventAddress?.shortDisplay ?? "");
     localStorage.setItem("cotizador_flete", String(fleteAplicado));
     navigate("/reservaciones");
   };
@@ -316,70 +308,64 @@ const Cotizador = () => {
           <MapPin size={20} /> Ubicación del evento
         </h2>
         <div className="space-y-3">
-          {/* Municipio */}
+          {/* Buscador de dirección con Google Places */}
           <div className="p-4 rounded-xl border border-border bg-card">
-            <label className="block text-sm font-semibold mb-2">Municipio</label>
-            <select
-              value={municipio}
-              onChange={(e) => {
-                setMunicipio(e.target.value);
-                setDistanciaReal(null);
-                setErrorGeo(false);
+            <label className="block text-sm font-semibold mb-1">
+              Dirección del evento
+            </label>
+            <p className="text-xs text-muted-foreground mb-3">
+              Escribe tu calle y colonia — detectamos el municipio y calculamos el flete automáticamente.
+            </p>
+            <AddressAutocomplete
+              value={addressInput}
+              onSelect={(result) => {
+                setAddressInput(result.shortDisplay);
+                setEventAddress(result);
               }}
-              className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background"
-            >
-              <option value="">Selecciona tu municipio...</option>
-              {(municipiosFlete.length ? municipiosFlete : MUNICIPIOS_FALLBACK).map((m) => (
-                <option key={m.nombre} value={m.nombre}>{m.nombre}</option>
-              ))}
-            </select>
-          </div>
+              onClear={() => {
+                setAddressInput("");
+                setEventAddress(null);
+                setDistanciaReal(null);
+              }}
+              placeholder="Ej. Av. Constitución 450, Col. Centro"
+            />
 
-          {/* Dirección completa + cálculo real */}
-          {fueraDeSanNicolas && (
-            <div className="p-4 rounded-xl border border-border bg-card">
-              <label className="block text-sm font-semibold mb-1">
-                Dirección del evento{" "}
-                <span className="text-muted-foreground font-normal">(para calcular flete exacto)</span>
-              </label>
-              <p className="text-xs text-muted-foreground mb-2">
-                Escribe la calle y colonia — calculamos la distancia real con el mapa.
-              </p>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={direccionEvento}
-                  onChange={(e) => setDireccionEvento(e.target.value)}
-                  placeholder="Ej. Av. Constitución 450, Col. Centro"
-                  className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background pr-9"
-                />
-                {calculandoFlete && (
-                  <Loader2 size={15} className="absolute right-3 top-2.5 text-muted-foreground animate-spin" />
+            {/* Municipio detectado */}
+            {eventAddress && (
+              <div className="mt-3">
+                {fueraDeZona ? (
+                  <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-800">
+                    <AlertCircle size={13} className="mt-0.5 flex-shrink-0" />
+                    <span>
+                      Por el momento solo tenemos servicio en{" "}
+                      <strong>San Nicolás, Monterrey, San Pedro, Guadalupe y Escobedo</strong>.
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <MapPin size={12} className="text-primary" />
+                    Municipio detectado: <strong className="text-foreground">{municipio}</strong>
+                  </div>
                 )}
               </div>
+            )}
 
-              {/* Resultado del cálculo */}
-              {calculandoFlete && (
-                <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                  <Loader2 size={12} className="animate-spin" /> Calculando distancia real...
-                </p>
-              )}
-              {!calculandoFlete && usandoDistanciaReal && fleteCalculado !== null && (
-                <div className="mt-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-800 flex items-center gap-2">
-                  <Navigation size={13} />
-                  <span>
-                    <strong>{distanciaReal!.toFixed(1)} km</strong> de recorrido (ida) ·{" "}
-                    Flete calculado: <strong>${fleteCalculado.toLocaleString()} MXN</strong>
-                  </span>
-                </div>
-              )}
-              {!calculandoFlete && errorGeo && direccionEvento.trim().length >= 8 && (
-                <p className="text-xs text-amber-700 mt-2">
-                  No se pudo calcular la distancia exacta. Usando estimado por municipio.
-                </p>
-              )}
-            </div>
-          )}
+            {/* Resultado de distancia */}
+            {calculandoFlete && (
+              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                <Loader2 size={12} className="animate-spin" /> Calculando distancia...
+              </p>
+            )}
+            {!calculandoFlete && usandoDistanciaReal && fleteCalculado !== null && (
+              <div className="mt-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-800 flex items-center gap-2">
+                <Navigation size={13} />
+                <span>
+                  <strong>{distanciaReal!.toFixed(1)} km</strong> de recorrido ·{" "}
+                  Flete estimado: <strong>${fleteCalculado.toLocaleString()} MXN</strong>
+                </span>
+              </div>
+            )}
+          </div>
 
           {/* Banners informativos */}
           {esSanNicolas && tieneEntregaFisica && (

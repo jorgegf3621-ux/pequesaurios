@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Lock, LogOut, CalendarOff, Trash2, RefreshCw, FileText, MessageCircle, Mail, CheckCheck, Copy, Fuel, PlusCircle, ScrollText, ShoppingBag, CheckCircle2, History, Pencil, Image as ImageIcon, ImagePlus } from "lucide-react";
 import AdminProductos from "@/components/AdminProductos";
+import AddressAutocomplete from "@/components/AddressAutocomplete";
 import NotaPago from "@/components/NotaPago";
 import Contrato from "@/components/Contrato";
 import ReservacionManual, { type NotaData } from "@/components/ReservacionManual";
@@ -179,12 +180,14 @@ const FleteCalculator = () => {
         <p className="text-xs font-semibold text-muted-foreground uppercase mb-4">Parámetros del vehículo</p>
         <div className="mb-4">
           <Label className="text-xs">Dirección base (tu punto de salida)</Label>
-          <Input
-            value={direccionBase}
-            onChange={(e) => setDireccionBase(e.target.value)}
-            placeholder="Ej: Calle Roble 123, Col. Las Brisas, San Nicolás de los Garza, NL"
-            className="mt-1 text-sm"
-          />
+          <div className="mt-1">
+            <AddressAutocomplete
+              value={direccionBase}
+              onSelect={(result) => setDireccionBase(result.shortDisplay)}
+              onClear={() => setDireccionBase("")}
+              placeholder="Ej: Calle Roble 123, Col. Las Brisas, San Nicolás"
+            />
+          </div>
           <p className="text-xs text-muted-foreground mt-1">Usada para calcular distancia real con el mapa cuando el cliente ingresa su dirección.</p>
         </div>
         <div className="grid grid-cols-3 gap-4 mb-4">
