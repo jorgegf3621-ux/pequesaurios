@@ -17,6 +17,7 @@ import Admin from "./pages/Admin";
 import Accion from "./pages/Accion";
 import BabyPlayZone from "./pages/BabyPlayZone";
 import ActividadCreativa from "./pages/ActividadCreativa";
+import Yesitos from "./pages/Yesitos";
 import Pintacaritas from "./pages/Pintacaritas";
 import NotFound from "./pages/NotFound";
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/contacto" element={<Contacto />} />
             <Route path="/baby-play-zone" element={<BabyPlayZone />} />
             <Route path="/actividad-creativa" element={<ActividadCreativa />} />
+            <Route path="/yesitos" element={<Yesitos />} />
             <Route path="/pintacaritas" element={<Pintacaritas />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/accion" element={<Accion />} />

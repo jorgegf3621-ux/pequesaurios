@@ -22,10 +22,11 @@ type ServicioCard = {
 };
 
 const defaultServicios: ServicioCard[] = [
-  { id: "1", titulo: "Baby Play Zone", subtitulo: "Inflable Castillo", descripcion: "Inflable blanco con resbaladilla y alberca de pelotas. Seguro y divertido para bebés de 1 a 5 años.", desde: "Desde $1,000", img_url: catalogInflableImg, href: "/servicios", orden: 1, activa: true },
-  { id: "2", titulo: "Mobiliario Infantil", subtitulo: "Mesita & sillas", descripcion: "Mesita de madera blanca con 8 sillas infantiles arcoíris y conejito. Perfecta para snacks y actividades.", desde: "Desde $500", img_url: catalogMesitaImg, href: "/servicios", orden: 2, activa: true },
-  { id: "3", titulo: "Actividad Creativa", subtitulo: "Caballetes", descripcion: "Llevamos los caballetes a tu fiesta para que los peques pinten y se lleven su obra de arte como recuerdo.", desde: "Desde $900", img_url: paquetePlusImg, href: "/actividad-creativa", orden: 3, activa: true },
-  { id: "4", titulo: "Pintacaritas", subtitulo: "Arte en carita", descripcion: "Diseños en cara y mano, glitter tattoos y glitter para cabello. 1.5 horas de pura magia.", desde: "$800 · 1.5 hrs", img_url: null, href: "/pintacaritas", orden: 4, activa: true },
+  { id: "1", titulo: "Baby Play Zone", subtitulo: "Más Rentado", descripcion: "Inflable blanco con resbaladilla y alberca de pelotas. Seguro y divertido para bebés de 1 a 5 años.", desde: "Desde $1,000", img_url: catalogInflableImg, href: "/baby-play-zone", orden: 1, activa: true },
+  { id: "2", titulo: "Mobiliario Infantil", subtitulo: "Favorito Mamás", descripcion: "Mesita de madera blanca con 8 sillas infantiles arcoíris y conejito. Perfecta para snacks y actividades.", desde: "Desde $500", img_url: catalogMesitaImg, href: "/baby-play-zone", orden: 2, activa: true },
+  { id: "3", titulo: "Actividad Creativa", subtitulo: "Creativo", descripcion: "Llevamos los caballetes a tu fiesta para que los peques pinten y se lleven su obra de arte como recuerdo.", desde: "Desde $900", img_url: paquetePlusImg, href: "/actividad-creativa", orden: 3, activa: true },
+  { id: "4", titulo: "Kit de Yesitos", subtitulo: "Recuerdo único", descripcion: "Los peques pintan su figura de yeso y se la llevan de recuerdo. Etiqueta personalizada según tu temática.", desde: "Desde $20 c/u", img_url: null, href: "/yesitos", orden: 4, activa: true },
+  { id: "5", titulo: "Pintacaritas + Glitter", subtitulo: "1.5 hrs", descripcion: "Diseños en cara y mano, glitter tattoos y glitter para cabello. 1.5 horas de pura magia.", desde: "$800 · 1.5 hrs", img_url: null, href: "/pintacaritas", orden: 5, activa: true },
 ];
 
 const testimonials = [
@@ -250,47 +251,73 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {serviciosCards.map((s) => (
-              <Link
-                key={s.id}
-                to={s.href}
-                className="group rounded-3xl overflow-hidden border border-border bg-card shadow-[var(--shadow-card)] hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
-              >
-                {/* Image */}
-                <div className="relative w-full h-52 overflow-hidden flex-shrink-0">
-                  {s.img_url ? (
-                    <img
-                      src={s.img_url}
-                      alt={s.titulo}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-lavender/40 to-pink-100 flex items-center justify-center">
-                      <Sparkles size={48} className="text-primary/30" />
+        <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex gap-4 pb-4 snap-x snap-mandatory px-4 sm:px-8 w-max mx-auto">
+            {serviciosCards.map((s, i) => {
+              const backs = [
+                { bg: "#FBBDAA", text: "#5c2e18" },
+                { bg: "#A8DDD7", text: "#1a4540" },
+                { bg: "#C8B4E3", text: "#3d2060" },
+                { bg: "#FAE9A0", text: "#4a3800" },
+                { bg: "#F9C8D4", text: "#6b1e3d" },
+              ];
+              const bc = backs[i % backs.length];
+              return (
+                <div
+                  key={s.id}
+                  className="flex-none w-44 sm:w-52 snap-center aspect-[9/16] [perspective:1200px] group"
+                >
+                  <div className="relative w-full h-full [transform-style:preserve-3d] transition-transform duration-700 group-hover:[transform:rotateY(180deg)] rounded-3xl shadow-lg">
+                    {/* Front */}
+                    <div className="absolute inset-0 rounded-3xl overflow-hidden [backface-visibility:hidden]">
+                      {s.img_url ? (
+                        <img src={s.img_url} alt={s.titulo} className="w-full h-full object-cover" loading="lazy" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-lavender/40 to-pink-100 flex items-center justify-center">
+                          <Sparkles size={48} className="text-primary/30" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                      {s.subtitulo && (
+                        <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider bg-white/25 backdrop-blur-sm text-white px-2.5 py-1 rounded-full border border-white/30">
+                          {s.subtitulo}
+                        </span>
+                      )}
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <h3 className="font-display text-lg font-bold text-white leading-tight">{s.titulo}</h3>
+                        {s.desde && <p className="text-xs font-semibold text-white/80 mt-0.5">{s.desde}</p>}
+                      </div>
                     </div>
-                  )}
-                  {s.subtitulo && (
-                    <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider bg-white/85 backdrop-blur-sm text-foreground/70 px-2.5 py-1 rounded-full border border-white/60">
-                      {s.subtitulo}
-                    </span>
-                  )}
-                </div>
-                {/* Content */}
-                <div className="p-5 flex flex-col flex-1">
-                  <h3 className="font-display text-xl font-bold text-foreground mb-1">{s.titulo}</h3>
-                  <p className="text-sm text-foreground/55 leading-relaxed flex-1">{s.descripcion}</p>
-                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
-                    <span className="font-heading font-bold text-primary text-sm">{s.desde}</span>
-                    <span className="text-xs font-semibold text-foreground/40 group-hover:text-primary transition-colors">
-                      Ver más →
-                    </span>
+                    {/* Back */}
+                    <Link
+                      to={s.href}
+                      className="absolute inset-0 rounded-3xl overflow-hidden [backface-visibility:hidden] [transform:rotateY(180deg)] p-6 flex flex-col justify-between"
+                      style={{ backgroundColor: bc.bg }}
+                    >
+                      <div>
+                        <h3 className="font-display text-2xl font-bold mb-3 leading-tight" style={{ color: bc.text }}>
+                          {s.titulo}
+                        </h3>
+                        <p className="text-sm leading-relaxed" style={{ color: bc.text, opacity: 0.8 }}>
+                          {s.descripcion}
+                        </p>
+                      </div>
+                      <div>
+                        {s.desde && (
+                          <p className="font-heading font-bold text-base mb-3" style={{ color: bc.text }}>
+                            {s.desde}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between bg-black/85 text-white rounded-2xl px-4 py-3">
+                          <span className="font-body font-semibold text-sm">Cotizar este</span>
+                          <span className="text-sm">→</span>
+                        </div>
+                      </div>
+                    </Link>
                   </div>
                 </div>
-              </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

@@ -32,6 +32,10 @@ const items: Item[] = [
   { id: "cab-dino-baby",      name: "Caballetes · Paquete Dino Baby",                         price: 900,  unit: "1.5 hrs",     category: "Caballetes" },
   { id: "cab-dino-creativo",  name: "Caballetes · Paquete Dino Creativo (+ yesitos)",         price: 1300, unit: "1.5 hrs",     category: "Caballetes" },
   { id: "cab-dino-fun",       name: "Caballetes · Paquete Dino Fun (+ pintacaritas)",         price: 1700, unit: "1.5 hrs",     category: "Caballetes" },
+  // Yesitos
+  { id: "yesito-basico",      name: "Kit Yesitos Básico (1 yesito + 1 pintura)",              price: 20,   unit: "kit", min: 10, category: "Yesitos" },
+  { id: "yesito-intermedio",  name: "Kit Yesitos Intermedio (2 yesitos + 2 pinturas)",        price: 25,   unit: "kit", min: 10, category: "Yesitos" },
+  { id: "yesito-completo",    name: "Kit Yesitos Completo (3 yesitos + 3 pinturas)",          price: 30,   unit: "kit", min: 10, category: "Yesitos" },
   // Mesas
   { id: "mesa-pastel",        name: "Mesa Infantil Pastel (6 sillas)",                        price: 500,  unit: "mesa",        category: "Mesas" },
   { id: "mesa-blanca",        name: "Mesita Blanca (8 sillas madera)",                        price: 750,  unit: "mesa",        category: "Mesas" },
