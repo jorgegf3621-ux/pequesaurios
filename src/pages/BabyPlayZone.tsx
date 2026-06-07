@@ -8,13 +8,13 @@ const paquetes = [
     id: "inflable-solo",
     nombre: "Inflable Castillo",
     subtitulo: "Ideal para bebés y toddlers de 1 a 5 años",
-    precio: 800,
+    precio: 1000,
     popular: false,
-    nota: "No incluye flete. Agrega guirnalda de globos por $200 pesos.",
+    nota: "No incluye flete.",
     items: [
       "Inflable blanco 3×3 × 2.5 m de alto",
       "Resbaladilla incluida",
-      "Alberca de pelotas",
+      "Alberca de pelotas · ¡Elige el color!",
       "Renta por 5 horas",
     ],
     color: "border-sky-200",
@@ -24,7 +24,7 @@ const paquetes = [
     id: "paquete-basico",
     nombre: "Paquete Básico",
     subtitulo: "Inflable & mesita",
-    precio: 1200,
+    precio: 1400,
     popular: false,
     nota: "Flete incluido en San Nicolás.",
     items: [
@@ -41,7 +41,7 @@ const paquetes = [
     id: "paquete-plus",
     nombre: "Paquete Plus",
     subtitulo: "Inflable & mesita de arte",
-    precio: 1400,
+    precio: 1550,
     popular: true,
     nota: "Flete incluido en San Nicolás.",
     items: [
@@ -162,10 +162,10 @@ const BabyPlayZone = () => {
       <section className="container mx-auto px-4 py-12 max-w-2xl text-center">
         <h2 className="font-heading text-xl font-bold mb-4">Notas importantes</h2>
         <ul className="text-sm text-muted-foreground space-y-2">
-          <li>• Las fechas son limitadas por fin de semana — agenda con anticipacion.</li>
-          <li>• Flete incluido en San Nicolas en paquetes Basico y Plus.</li>
-          <li>• Para otras zonas de Monterrey, consultanos el costo de flete.</li>
-          <li>• Puedes agregar guirnalda de globos por $200 pesos adicionales.</li>
+          <li>• Las fechas son limitadas por fin de semana — agenda con anticipación.</li>
+          <li>• Flete incluido en San Nicolás en paquetes Básico y Plus.</li>
+          <li>• Para otras zonas de Monterrey, consúltanos el costo de flete.</li>
+          <li>• El inflable castillo (solo) no incluye flete.</li>
         </ul>
       </section>
 

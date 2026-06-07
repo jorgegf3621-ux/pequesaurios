@@ -25,18 +25,17 @@ type MunicipioFlete = { nombre: string; distancia_km: number };
 
 const items: Item[] = [
   // Baby Play Zone
-  { id: "bpz-inflable",       name: "Baby Play Zone · Inflable Castillo (solo)",              price: 800,  unit: "renta 5hrs",  category: "Baby Play Zone" },
-  { id: "bpz-basico",         name: "Baby Play Zone · Paquete Básico (inflable + mesita)",    price: 1200, unit: "renta 5hrs",  category: "Baby Play Zone" },
-  { id: "bpz-plus",           name: "Baby Play Zone · Paquete Plus (inflable + mesita arte)", price: 1400, unit: "renta 5hrs",  category: "Baby Play Zone" },
+  { id: "bpz-inflable",       name: "Baby Play Zone · Inflable Castillo (solo)",              price: 1000, unit: "renta 5hrs",  category: "Baby Play Zone" },
+  { id: "bpz-basico",         name: "Baby Play Zone · Paquete Básico (inflable + mesita)",    price: 1400, unit: "renta 5hrs",  category: "Baby Play Zone" },
+  { id: "bpz-plus",           name: "Baby Play Zone · Paquete Plus (inflable + mesita arte)", price: 1550, unit: "renta 5hrs",  category: "Baby Play Zone" },
+  // Caballetes
+  { id: "cab-dino-baby",      name: "Caballetes · Paquete Dino Baby",                         price: 900,  unit: "1.5 hrs",     category: "Caballetes" },
+  { id: "cab-dino-creativo",  name: "Caballetes · Paquete Dino Creativo (+ yesitos)",         price: 1300, unit: "1.5 hrs",     category: "Caballetes" },
+  { id: "cab-dino-fun",       name: "Caballetes · Paquete Dino Fun (+ pintacaritas)",         price: 1700, unit: "1.5 hrs",     category: "Caballetes" },
   // Mesas
   { id: "mesa-pastel",        name: "Mesa Infantil Pastel (6 sillas)",                        price: 500,  unit: "mesa",        category: "Mesas" },
   { id: "mesa-blanca",        name: "Mesita Blanca (8 sillas madera)",                        price: 750,  unit: "mesa",        category: "Mesas" },
-  // Yesitos
-  { id: "yesito-basico",      name: "Kit Yesitos Básico (1 yesito)",                          price: 20,   unit: "kit",  min: 10, category: "Yesitos" },
-  { id: "yesito-intermedio",  name: "Kit Yesitos Intermedio (2 yesitos)",                     price: 25,   unit: "kit",  min: 10, category: "Yesitos" },
-  { id: "yesito-completo",    name: "Kit Yesitos Completo (3 yesitos)",                       price: 30,   unit: "kit",  min: 10, category: "Yesitos" },
   // Extras
-  { id: "arte",               name: "Arte en Mesa",                                           price: 150,  unit: "complemento", category: "Extras" },
   { id: "globos",             name: "Guirnalda de Globos",                                    price: 200,  unit: "pieza",       category: "Extras" },
   // Servicios
   { id: "pintacaritas",       name: "Pintacaritas (1.5 hrs)",                                 price: 800,  unit: "servicio",    category: "Servicios" },
@@ -55,7 +54,7 @@ const MUNICIPIOS_FALLBACK: MunicipioFlete[] = [
   { nombre: "Otro municipio",           distancia_km: 0 },
 ];
 
-const IDS_ENTREGA_FISICA = ["bpz-inflable", "bpz-basico", "bpz-plus", "mesa-pastel", "mesa-blanca"];
+const IDS_ENTREGA_FISICA = ["bpz-inflable", "bpz-basico", "bpz-plus", "mesa-pastel", "mesa-blanca", "cab-dino-baby", "cab-dino-creativo", "cab-dino-fun"];
 const IDS_CON_MESITA = new Set(["mesa-pastel", "mesa-blanca", "bpz-basico", "bpz-plus"]);
 const MESA_EXTRA: Item = { id: "mesa-extra", name: "Mesa extra (segunda mesa)", price: 350, unit: "mesa", category: "Mesas" };
 
