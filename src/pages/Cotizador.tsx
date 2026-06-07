@@ -22,8 +22,6 @@ type FleteConfig = {
   direccion_base: string;
 };
 
-type MunicipioFlete = { nombre: string; distancia_km: number };
-
 const items: Item[] = [
   // Baby Play Zone
   { id: "bpz-inflable",       name: "Baby Play Zone · Inflable Castillo (solo)",              price: 1000, unit: "renta 5hrs",  category: "Baby Play Zone" },
@@ -46,18 +44,6 @@ const items: Item[] = [
   { id: "pintacaritas",       name: "Pintacaritas (1.5 hrs)",                                 price: 800,  unit: "servicio",    category: "Servicios" },
 ];
 
-const MUNICIPIOS_FALLBACK: MunicipioFlete[] = [
-  { nombre: "San Nicolás de los Garza", distancia_km: 0 },
-  { nombre: "Monterrey",                distancia_km: 12 },
-  { nombre: "Guadalupe",                distancia_km: 15 },
-  { nombre: "San Pedro Garza García",   distancia_km: 22 },
-  { nombre: "Escobedo",                 distancia_km: 18 },
-  { nombre: "Apodaca",                  distancia_km: 20 },
-  { nombre: "Santa Catarina",           distancia_km: 28 },
-  { nombre: "General Zuazua",           distancia_km: 35 },
-  { nombre: "García",                   distancia_km: 48 },
-  { nombre: "Otro municipio",           distancia_km: 0 },
-];
 
 const IDS_ENTREGA_FISICA = ["bpz-inflable", "bpz-basico", "bpz-plus", "mesa-pastel", "mesa-blanca", "cab-dino-baby", "cab-dino-creativo", "cab-dino-fun"];
 const IDS_CON_MESITA = new Set(["mesa-pastel", "mesa-blanca", "bpz-basico", "bpz-plus"]);
@@ -110,27 +96,21 @@ const Cotizador = () => {
 
   // Flete data from Supabase
   const [fleteConfig, setFleteConfig] = useState<FleteConfig | null>(null);
-  const [municipiosFlete, setMunicipiosFlete] = useState<MunicipioFlete[]>([]);
 
   // Real-distance state
   const [baseCoords, setBaseCoords] = useState<Coords | null>(null);
   const [distanciaReal, setDistanciaReal] = useState<number | null>(null);
   const [calculandoFlete, setCalculandoFlete] = useState(false);
 
-  // Load flete config + municipios on mount
+  // Load flete config on mount
   useEffect(() => {
     const load = async () => {
-      const [{ data: cfg }, { data: munis }] = await Promise.all([
-        (supabase as any).from("flete_config").select("*").eq("id", 1).single(),
-        (supabase as any).from("municipios_flete").select("nombre, distancia_km").order("sort_order"),
-      ]);
+      const { data: cfg } = await (supabase as any).from("flete_config").select("*").eq("id", 1).single();
       if (cfg) {
         setFleteConfig(cfg);
         const coords = await geocodeBase(cfg.direccion_base || "San Nicolás de los Garza, NL");
         if (coords) setBaseCoords(coords);
       }
-      if (munis?.length) setMunicipiosFlete(munis);
-      else setMunicipiosFlete(MUNICIPIOS_FALLBACK);
     };
     load();
   }, []);
@@ -160,21 +140,24 @@ const Cotizador = () => {
   };
 
   const municipio = eventAddress?.municipio ?? "";
-  const municipioData = municipiosFlete.find((m) => m.nombre === municipio);
+  const MUNICIPIOS_COBERTURA = new Set([
+    "San Nicolás de los Garza",
+    "Monterrey",
+    "Guadalupe",
+    "San Pedro Garza García",
+    "General Escobedo",
+    "Apodaca",
+  ]);
   const esSanNicolas = municipio === "San Nicolás de los Garza";
-  const fueraDeSanNicolas = municipio !== "" && !esSanNicolas;
-  const fueraDeZona = eventAddress !== null && !eventAddress.municipio;
+  const enZonaCobertura = municipio !== "" && MUNICIPIOS_COBERTURA.has(municipio);
+  const fueraDeSanNicolas = enZonaCobertura && !esSanNicolas;
+  const fueraDeZona = eventAddress !== null && !enZonaCobertura;
   const tienePintacaritas = !!selected["pintacaritas"];
   const tieneEntregaFisica = IDS_ENTREGA_FISICA.some((id) => selected[id]);
 
-  // Flete: prioriza distancia real → estimado por municipio → indeterminado
-  const fleteCalculado: number | null =
-    distanciaReal !== null ? calcularFlete(distanciaReal) :
-    municipioData && municipioData.distancia_km > 0 ? calcularFlete(municipioData.distancia_km) :
-    null;
-
+  // Flete: siempre distancia real por OSRM
+  const fleteCalculado: number | null = distanciaReal !== null ? calcularFlete(distanciaReal) : null;
   const fletePorCotizar = fueraDeSanNicolas && fleteCalculado === null && !calculandoFlete;
-  const usandoDistanciaReal = distanciaReal !== null;
 
   const toggle = (id: string, delta: number) => {
     setSelected((prev) => {
@@ -337,8 +320,8 @@ const Cotizador = () => {
                   <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-800">
                     <AlertCircle size={13} className="mt-0.5 flex-shrink-0" />
                     <span>
-                      Por el momento solo tenemos servicio en{" "}
-                      <strong>San Nicolás, Monterrey, San Pedro, Guadalupe y Escobedo</strong>.
+                      Por el momento no tenemos cobertura en esa zona. Servicio disponible en{" "}
+                      <strong>San Nicolás, Monterrey, San Pedro, Guadalupe, Escobedo y Apodaca</strong>.
                     </span>
                   </div>
                 ) : (
@@ -356,12 +339,12 @@ const Cotizador = () => {
                 <Loader2 size={12} className="animate-spin" /> Calculando distancia...
               </p>
             )}
-            {!calculandoFlete && usandoDistanciaReal && fleteCalculado !== null && (
+            {!calculandoFlete && fleteCalculado !== null && (
               <div className="mt-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-800 flex items-center gap-2">
                 <Navigation size={13} />
                 <span>
                   <strong>{distanciaReal!.toFixed(1)} km</strong> de recorrido ·{" "}
-                  Flete estimado: <strong>${fleteCalculado.toLocaleString()} MXN</strong>
+                  Flete: <strong>${fleteCalculado.toLocaleString()} MXN</strong>
                 </span>
               </div>
             )}
@@ -401,7 +384,7 @@ const Cotizador = () => {
               </p>
               {fleteAplicado > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  incl. ${fleteAplicado.toLocaleString()} flete{usandoDistanciaReal ? " (exacto)" : " (estimado)"}
+                  incl. ${fleteAplicado.toLocaleString()} flete
                 </p>
               )}
             </div>
@@ -425,7 +408,6 @@ const Cotizador = () => {
                 <li className="flex items-center gap-2 text-sm text-foreground/80">
                   <Navigation size={14} className="text-amber-500 flex-shrink-0" />
                   Flete{municipio ? ` (${municipio})` : ""} — ${fleteAplicado.toLocaleString()}
-                  {usandoDistanciaReal ? " ✓" : " ~"}
                 </li>
               )}
               {calculandoFlete && (

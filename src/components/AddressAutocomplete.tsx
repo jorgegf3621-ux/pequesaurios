@@ -28,6 +28,7 @@ const MUNICIPIOS_MAP: [string, string][] = [
   ["general escobedo", "General Escobedo"],
   ["escobedo", "General Escobedo"],
   ["guadalupe", "Guadalupe"],
+  ["apodaca", "Apodaca"],
 ];
 
 function detectMunicipio(components: { types: string[]; longText: string }[]): string | null {
