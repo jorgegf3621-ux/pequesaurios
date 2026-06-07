@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Star, Sparkles, Shield, Clock, ChevronRight } from "lucide-react";
@@ -9,65 +9,44 @@ import catalogInflableImg from "@/assets/catalog-inflable.jpg";
 import catalogMesitaImg from "@/assets/catalog-mesita.jpg";
 import paquetePlusImg from "@/assets/paquete-plus.jpg";
 
-const servicios = [
-  {
-    titulo: "Baby Play Zone",
-    subtitulo: "Inflable Castillo",
-    desc: "Inflable blanco con resbaladilla y alberca de pelotas. Seguro y divertido para bebés de 1 a 5 años.",
-    desde: "Desde $800",
-    img: catalogInflableImg,
-    href: "/servicios",
-    accent: "from-lavender/50 to-pink-50",
-    badge: "bg-lavender/30 text-purple-700",
-  },
-  {
-    titulo: "Mobiliario Infantil",
-    subtitulo: "Mesita & sillas",
-    desc: "Mesita de madera blanca con 8 sillas infantiles arcoíris y conejito. Perfecta para snacks y actividades.",
-    desde: "Desde $500",
-    img: catalogMesitaImg,
-    href: "/servicios",
-    accent: "from-peach/50 to-orange-50",
-    badge: "bg-peach/40 text-orange-700",
-  },
-  {
-    titulo: "Actividad Creativa",
-    subtitulo: "Kit de Yesitos",
-    desc: "Los peques pintan su propia figura de yeso y se la llevan de recuerdo. Bolsas personalizadas.",
-    desde: "Desde $20 c/u",
-    img: paquetePlusImg,
-    href: "/actividad-creativa",
-    accent: "from-yellow-100/70 to-amber-50",
-    badge: "bg-yellow-100 text-yellow-700",
-  },
-  {
-    titulo: "Pintacaritas",
-    subtitulo: "Arte en carita",
-    desc: "Diseños en cara y mano, glitter tattoos y glitter para cabello. 1.5 horas de pura magia.",
-    desde: "$800 · 1.5 hrs",
-    img: null,
-    href: "/pintacaritas",
-    accent: "from-purple-100/60 to-violet-50",
-    badge: "bg-purple-100 text-purple-700",
-  },
+type ServicioCard = {
+  id: string;
+  titulo: string;
+  subtitulo: string;
+  descripcion: string;
+  desde: string;
+  img_url: string | null;
+  href: string;
+  orden: number;
+  activa: boolean;
+};
+
+const defaultServicios: ServicioCard[] = [
+  { id: "1", titulo: "Baby Play Zone", subtitulo: "Inflable Castillo", descripcion: "Inflable blanco con resbaladilla y alberca de pelotas. Seguro y divertido para bebés de 1 a 5 años.", desde: "Desde $800", img_url: catalogInflableImg, href: "/servicios", orden: 1, activa: true },
+  { id: "2", titulo: "Mobiliario Infantil", subtitulo: "Mesita & sillas", descripcion: "Mesita de madera blanca con 8 sillas infantiles arcoíris y conejito. Perfecta para snacks y actividades.", desde: "Desde $500", img_url: catalogMesitaImg, href: "/servicios", orden: 2, activa: true },
+  { id: "3", titulo: "Actividad Creativa", subtitulo: "Kit de Yesitos", descripcion: "Los peques pintan su propia figura de yeso y se la llevan de recuerdo. Bolsas personalizadas.", desde: "Desde $20 c/u", img_url: paquetePlusImg, href: "/actividad-creativa", orden: 3, activa: true },
+  { id: "4", titulo: "Pintacaritas", subtitulo: "Arte en carita", descripcion: "Diseños en cara y mano, glitter tattoos y glitter para cabello. 1.5 horas de pura magia.", desde: "$800 · 1.5 hrs", img_url: null, href: "/pintacaritas", orden: 4, activa: true },
 ];
 
 const testimonials = [
   {
-    name: "Daniela Hernández",
-    text: "El inflable fue el centro de atención de la fiesta, los niños no querían salirse. Todo muy limpio y puntual. 100% recomendado.",
+    name: "Daniela H.",
+    role: "Mamá de Mateo · 3 años",
+    text: "El inflable fue el centro de atención. Los niños no querían salirse. Súper limpio y puntual.",
     rating: 5,
     initial: "D",
   },
   {
-    name: "Paola Martínez",
-    text: "Rentamos el paquete básico y quedó increíble. La mesita y las sillitas se veían hermosas, perfectas para los más pequeños.",
+    name: "Paola M.",
+    role: "Mamá de Sofía · 2 años",
+    text: "Rentamos el paquete básico y quedó increíble. La mesita y las sillitas se veían hermosas.",
     rating: 5,
     initial: "P",
   },
   {
-    name: "Karen Reyes",
-    text: "El paquete plus fue la mejor decisión. El área de arte mantuvo a los niños entretenidos toda la fiesta. ¡Definitivamente volvemos!",
+    name: "Karen R.",
+    role: "Mamá de Luna · 4 años",
+    text: "El paquete plus fue la mejor decisión. El área de arte mantuvo a los niños toda la fiesta.",
     rating: 5,
     initial: "K",
   },
@@ -81,42 +60,11 @@ const features = [
 
 type FotoGaleria = { id: string; url: string; alt: string; orden: number };
 
-/* ── 3D Tilt Card ──────────────────────────────────────── */
-const TiltCard = ({ children, className }: { children: React.ReactNode; className?: string }) => {
-  const ref = useRef<HTMLDivElement>(null);
-
-  const onMove = useCallback((e: React.MouseEvent) => {
-    const card = ref.current;
-    if (!card) return;
-    const { left, top, width, height } = card.getBoundingClientRect();
-    const x = (e.clientX - left) / width - 0.5;
-    const y = (e.clientY - top) / height - 0.5;
-    card.style.transform = `perspective(900px) rotateX(${-y * 10}deg) rotateY(${x * 10}deg) scale(1.025)`;
-    card.style.boxShadow = `${-x * 12}px ${y * 12}px 40px -8px hsl(270 40% 50% / 0.16), 0 4px 12px hsl(270 40% 50% / 0.08)`;
-  }, []);
-
-  const onLeave = useCallback(() => {
-    const card = ref.current;
-    if (!card) return;
-    card.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)";
-    card.style.boxShadow = "var(--shadow-card)";
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      onMouseMove={onMove}
-      onMouseLeave={onLeave}
-      className={`tilt-card ${className ?? ""}`}
-    >
-      {children}
-    </div>
-  );
-};
 
 /* ── Index Page ────────────────────────────────────────── */
 const Index = () => {
   const [galeria, setGaleria] = useState<FotoGaleria[]>([]);
+  const [serviciosCards, setServiciosCards] = useState<ServicioCard[]>(defaultServicios);
   const heroImgRef = useRef<HTMLImageElement>(null);
 
   /* Scroll Reveal */
@@ -156,6 +104,18 @@ const Index = () => {
       .order("orden")
       .then(({ data }: { data: FotoGaleria[] | null }) => {
         if (data && data.length > 0) setGaleria(data);
+      });
+  }, []);
+
+  /* Supabase servicios cards */
+  useEffect(() => {
+    (supabase as any)
+      .from("servicios_cards")
+      .select("*")
+      .eq("activa", true)
+      .order("orden")
+      .then(({ data }: { data: ServicioCard[] | null }) => {
+        if (data && data.length > 0) setServiciosCards(data);
       });
   }, []);
 
@@ -257,206 +217,193 @@ const Index = () => {
         </div>
       </section>
 
-      {/* ── Servicios — 3D Flip Cards ─────────────────────── */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="reveal text-center mb-14">
-          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">Lo que ofrecemos</p>
-          <h2 className="font-heading text-3xl md:text-4xl font-bold mb-3">Nuestros Servicios</h2>
-          <p className="text-muted-foreground max-w-sm mx-auto text-sm leading-relaxed">
-            Todo lo que necesitas para hacer tu fiesta inolvidable
-          </p>
+      {/* ── Servicios — Header + Story Cards ────────────────── */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="reveal flex flex-col md:flex-row md:items-end gap-8 mb-14">
+            <div className="md:w-1/2">
+              <p className="font-script text-3xl text-primary mb-3">nuestros servicios</p>
+              <h2 className="font-display text-5xl md:text-6xl font-bold leading-[1.05] text-foreground">
+                Todo lo que necesitas,{" "}
+                <em className="italic font-normal">en un solo lugar.</em>
+              </h2>
+            </div>
+            <div className="md:w-1/2 md:pl-8 md:pb-2">
+              <p className="text-foreground/55 text-lg leading-relaxed max-w-md">
+                Pasa el cursor sobre cada tarjeta para ver detalles. Combina servicios para armar tu paquete perfecto — te lo cotizamos sin compromiso.
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-6">
-          {servicios.map((s, i) => (
-            <div
-              key={s.titulo}
-              className={`reveal reveal-delay-${(i % 2) + 1} group h-72 [perspective:1200px]`}
+        <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-4 sm:px-8">
+          {serviciosCards.map((s) => (
+            <Link
+              key={s.id}
+              to={s.href}
+              className="flex-none w-44 sm:w-52 snap-center rounded-3xl overflow-hidden relative group aspect-[9/16] shadow-lg hover:shadow-2xl transition-shadow duration-300 block"
             >
-              <div className="relative w-full h-full [transform-style:preserve-3d] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:[transform:rotateY(180deg)]">
-
-                {/* Front */}
-                <Link
-                  to={s.href}
-                  className="absolute inset-0 [backface-visibility:hidden] rounded-2xl overflow-hidden block"
-                  tabIndex={-1}
-                >
-                  {s.img ? (
-                    <img src={s.img} alt={s.titulo} className="w-full h-full object-cover scale-100 group-hover:scale-105 transition-transform duration-700" loading="lazy" />
-                  ) : (
-                    <div className={`w-full h-full bg-gradient-to-br ${s.accent} flex items-center justify-center`}>
-                      <Sparkles size={64} className="text-primary/30" />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-5">
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${s.badge} mb-2 inline-block`}>
-                      {s.subtitulo}
-                    </span>
-                    <h3 className="font-heading text-2xl font-bold text-white">{s.titulo}</h3>
-                    <p className="text-sm font-semibold text-white/85 mt-0.5">{s.desde}</p>
-                  </div>
-                  <div className="absolute top-3 right-3 hidden sm:flex items-center gap-1 bg-white/15 backdrop-blur-sm text-white text-[10px] px-2.5 py-1 rounded-full border border-white/20">
-                    Voltear
-                  </div>
-                </Link>
-
-                {/* Back */}
-                <div className={`absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-2xl p-7 flex flex-col bg-gradient-to-br ${s.accent} border border-white/60 shadow-xl`}>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${s.badge} mb-3 self-start`}>
+              {s.img_url ? (
+                <img src={s.img_url} alt={s.titulo} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-lavender/40 to-pink-100 flex items-center justify-center">
+                  <Sparkles size={48} className="text-primary/30" />
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                {s.subtitulo && (
+                  <span className="text-[9px] font-bold uppercase tracking-wider bg-white/20 backdrop-blur-sm text-white px-2 py-0.5 rounded-full mb-1.5 inline-block border border-white/20">
                     {s.subtitulo}
                   </span>
-                  <h3 className="font-heading text-2xl font-bold mb-3 text-foreground">{s.titulo}</h3>
-                  <p className="text-sm text-foreground/70 flex-1 leading-relaxed">{s.desc}</p>
-                  <div className="flex items-center justify-between mt-5">
-                    <span className="font-heading font-bold text-primary text-xl">{s.desde}</span>
-                    <Link
-                      to={s.href}
-                      onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center gap-1.5 bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-primary/90 hover:shadow-lg transition-all"
-                    >
-                      Ver más <ChevronRight size={14} />
-                    </Link>
-                  </div>
-                </div>
-
+                )}
+                <h3 className="font-display text-lg font-bold text-white leading-tight">{s.titulo}</h3>
+                {s.desde && <p className="text-xs font-semibold text-white/80 mt-0.5">{s.desde}</p>}
               </div>
-            </div>
+            </Link>
           ))}
         </div>
+      </section>
 
-        <div className="reveal text-center mt-10">
-          <Button variant="outline" size="lg" asChild className="rounded-full border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-all">
-            <Link to="/servicios">Ver todos los servicios</Link>
-          </Button>
+      {/* ── Tres Pasos ───────────────────────────────────────── */}
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="reveal text-center mb-16">
+            <p className="font-script text-3xl text-primary mb-3">así de fácil</p>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground">Tres pasos. Cero estrés.</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {[
+              { num: "01", title: "Cotiza", desc: "Mándanos un WhatsApp con tu fecha y lo que imaginas. Respondemos en menos de 1 hora.", bg: "#F4A07A", text: "#4a2010", muted: "#c07848" },
+              { num: "02", title: "Reserva", desc: "Apartas tu fecha con 30%. Coordinamos detalles y te confirmamos por mail.", bg: "#6ECFC3", text: "#0f3a35", muted: "#3aada0" },
+              { num: "03", title: "Disfruta", desc: "Llegamos antes, montamos contigo, y al final levantamos todo. Tú solo disfrutas.", bg: "#F5D76E", text: "#4a3a00", muted: "#c9a830" },
+            ].map((step, i) => (
+              <div
+                key={step.num}
+                className={`reveal reveal-delay-${i + 1} rounded-3xl p-8 md:p-10 relative overflow-hidden`}
+                style={{ backgroundColor: step.bg }}
+              >
+                <p className="font-display text-[7rem] font-bold leading-none absolute -top-4 -right-2 select-none pointer-events-none" style={{ color: step.muted, opacity: 0.35 }}>
+                  {step.num}
+                </p>
+                <div className="relative">
+                  <p className="font-display text-6xl font-bold mb-6" style={{ color: step.muted, opacity: 0.5 }}>{step.num}</p>
+                  <h3 className="font-display text-2xl font-bold mb-3" style={{ color: step.text }}>{step.title}</h3>
+                  <p className="leading-relaxed text-sm" style={{ color: step.text, opacity: 0.75 }}>{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ── Testimonials — 3D Tilt ─────────────────────────── */}
-      <section className="py-20 relative overflow-hidden">
-        {/* BG decoration */}
-        <div className="absolute inset-0 bg-gradient-to-b from-muted/30 to-transparent pointer-events-none" />
-        <div className="absolute top-8 left-1/4 w-72 h-72 rounded-full bg-lavender/15 blur-3xl pointer-events-none" />
+      {/* ── Gallery ──────────────────────────────────────────── */}
+      <section id="galeria" className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="reveal flex items-end justify-between mb-12">
+            <div>
+              <p className="font-script text-3xl text-primary mb-2">nuestros eventos</p>
+              <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground">Momentos reales.</h2>
+            </div>
+            <a
+              href="https://www.instagram.com/pequesaurios/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:block text-sm font-body font-semibold text-foreground hover:text-primary transition-colors underline underline-offset-4"
+            >
+              Ver más en Instagram →
+            </a>
+          </div>
 
+          {galeria.length > 0 ? (
+            <div className="columns-2 md:columns-3 gap-3 space-y-3">
+              {galeria.map((foto, i) => (
+                <div key={foto.id} className={`reveal reveal-delay-${(i % 4) + 1} break-inside-avoid rounded-2xl overflow-hidden`}>
+                  <img src={foto.url} alt={foto.alt || "Foto Pequesaurios"} className="w-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="reveal grid grid-cols-3 gap-3">
+              {[
+                { src: bpzImg, alt: "Baby Play Zone completo", className: "col-span-2 row-span-2 h-[360px]" },
+                { src: catalogInflableImg, alt: "Inflable castillo", className: "h-[175px]" },
+                { src: catalogMesitaImg, alt: "Mesita y sillas", className: "h-[175px]" },
+                { src: paquetePlusImg, alt: "Paquete plus", className: "col-span-3 h-[200px]" },
+              ].map((img, i) => (
+                <div key={i} className={`reveal reveal-delay-${i + 1} rounded-2xl overflow-hidden ${img.className}`}>
+                  <img src={img.src} alt={img.alt} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="sm:hidden reveal text-center mt-8">
+            <a href="https://www.instagram.com/pequesaurios/" target="_blank" rel="noopener noreferrer"
+              className="text-sm font-body font-semibold text-foreground hover:text-primary transition-colors underline underline-offset-4">
+              Ver más en Instagram →
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Testimonials — Dark ───────────────────────────────── */}
+      <section id="resenas" className="py-24 bg-[#14143a] relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(270_40%_20%/0.6)_0%,_transparent_70%)] pointer-events-none" />
         <div className="container mx-auto px-4 relative">
           <div className="reveal text-center mb-14">
-            <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">Reseñas reales</p>
-            <h2 className="font-heading text-3xl font-bold">Lo que dicen nuestros clientes</h2>
+            <p className="font-script text-3xl text-[#F4A07A] mb-3">lo que dicen</p>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-white leading-tight">
+              Mamás que ya vivieron{" "}
+              <em className="italic font-normal text-[#F5D76E]">la magia.</em>
+            </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-5">
             {testimonials.map((t, i) => (
-              <TiltCard
-                key={t.name}
-                className={`reveal reveal-delay-${i + 1} bg-white rounded-2xl p-6 border border-border/60 shadow-[var(--shadow-card)] cursor-default`}
-              >
-                {/* Stars */}
-                <div className="flex gap-1 mb-4">
+              <div key={t.name} className={`reveal reveal-delay-${i + 1} bg-[#1e1e4a] rounded-2xl p-7 border border-white/8`}>
+                <div className="flex gap-1 mb-5">
                   {Array.from({ length: t.rating }).map((_, j) => (
-                    <Star key={j} size={14} className="fill-accent text-accent" />
+                    <Star key={j} size={16} className="fill-[#F5D76E] text-[#F5D76E]" />
                   ))}
                 </div>
-                <p className="text-sm text-foreground/75 mb-5 leading-relaxed italic">
-                  "{t.text}"
-                </p>
-                <div className="flex items-center gap-3 pt-3 border-t border-border/40">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/60 to-lavender/60 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                <p className="text-white/80 text-sm leading-relaxed mb-6">"{t.text}"</p>
+                <div className="flex items-center gap-3 pt-4 border-t border-white/10">
+                  <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                     {t.initial}
                   </div>
-                  <p className="font-heading font-bold text-sm text-foreground">{t.name}</p>
+                  <div>
+                    <p className="font-body font-bold text-sm text-white">{t.name}</p>
+                    <p className="text-xs text-white/45">{t.role}</p>
+                  </div>
                 </div>
-              </TiltCard>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Gallery ────────────────────────────────────────── */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="reveal text-center mb-14">
-          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">Galería</p>
-          <h2 className="font-heading text-3xl md:text-4xl font-bold mb-3">Nuestros eventos</h2>
-          <p className="text-muted-foreground text-sm">Momentos reales, fiestas inolvidables</p>
-        </div>
-
-        {galeria.length > 0 ? (
-          <div className="columns-2 md:columns-3 gap-3 space-y-3">
-            {galeria.map((foto, i) => (
-              <div
-                key={foto.id}
-                className={`reveal reveal-delay-${(i % 4) + 1} break-inside-avoid rounded-2xl overflow-hidden`}
-              >
-                <img
-                  src={foto.url}
-                  alt={foto.alt || "Foto Pequesaurios"}
-                  className="w-full object-cover hover:scale-105 transition-transform duration-700"
-                  loading="lazy"
-                />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="reveal grid grid-cols-3 gap-3">
-            {[
-              { src: bpzImg, alt: "Baby Play Zone completo", className: "col-span-2 row-span-2 h-[360px]" },
-              { src: catalogInflableImg, alt: "Inflable castillo", className: "h-[175px]" },
-              { src: catalogMesitaImg, alt: "Mesita y sillas", className: "h-[175px]" },
-              { src: paquetePlusImg, alt: "Paquete plus", className: "col-span-3 h-[200px] mt-0" },
-            ].map((img, i) => (
-              <div key={i} className={`reveal reveal-delay-${i + 1} rounded-2xl overflow-hidden ${img.className}`}>
-                <img
-                  src={img.src}
-                  alt={img.alt}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                  loading="lazy"
-                />
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* ── CTA ────────────────────────────────────────────── */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="reveal reveal-scale relative overflow-hidden rounded-3xl">
-          {/* BG gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-lavender/40 via-primary/10 to-peach/30" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(330_60%_90%/0.5)_0%,_transparent_65%)]" />
-
-          {/* Decorative floating rings */}
-          <div className="absolute -right-12 -top-12 w-56 h-56 rounded-full border border-primary/15 animate-spin-slow pointer-events-none" />
-          <div className="absolute -right-6 -top-6 w-36 h-36 rounded-full border border-primary/10 animate-spin-slow pointer-events-none" style={{ animationDirection: "reverse", animationDuration: "15s" }} />
-
-          <div className="relative px-8 py-16 md:py-20 text-center">
-            <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-3">
-              Fechas limitadas por fin de semana
-            </p>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4 [text-wrap:balance]">
-              Asegura tu fecha antes de que se ocupe
+      {/* ── CTA ──────────────────────────────────────────────── */}
+      <section className="py-28 text-center bg-background">
+        <div className="container mx-auto px-4">
+          <div className="reveal">
+            <p className="font-script text-3xl text-primary mb-5">¿lista, mamá?</p>
+            <h2 className="font-display text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+              Asegura tu fecha antes<br className="hidden sm:block" />
+              {" "}de que <em className="italic font-normal">se ocupe.</em>
             </h2>
-            <p className="text-muted-foreground mb-10 max-w-md mx-auto text-sm leading-relaxed">
-              Escríbenos por WhatsApp y te respondemos en menos de 1 hora.
+            <p className="text-foreground/50 mb-10 max-w-sm mx-auto leading-relaxed">
+              Quedan pocos sábados disponibles este mes. Te respondemos en menos de 1 hora por WhatsApp.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button
-                variant="hero"
-                size="lg"
-                asChild
-                className="rounded-full px-8 shadow-[0_8px_32px_-4px_hsl(330_60%_62%/0.40)] hover:shadow-[0_12px_40px_-4px_hsl(330_60%_62%/0.55)] hover:-translate-y-0.5 transition-all duration-300"
-              >
-                <Link to="/cotizador">Cotizador Interactivo</Link>
-              </Button>
-              <Button
-                variant="whatsapp"
-                size="lg"
-                asChild
-                className="rounded-full px-8 hover:-translate-y-0.5 transition-all duration-300"
-              >
-                <a href="https://wa.me/528180540369" target="_blank" rel="noopener noreferrer">
-                  WhatsApp · 8180540369
-                </a>
-              </Button>
-            </div>
+            <a
+              href="https://wa.me/528180540369"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2.5 bg-primary text-white font-body font-semibold text-base px-10 py-4 rounded-full shadow-[0_8px_32px_-4px_hsl(330_60%_62%/0.45)] hover:shadow-[0_12px_40px_-4px_hsl(330_60%_62%/0.6)] hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Cotizar por WhatsApp
+            </a>
           </div>
         </div>
       </section>

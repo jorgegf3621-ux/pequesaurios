@@ -16,6 +16,8 @@ export default {
       fontFamily: {
         heading: ['Fredoka', 'sans-serif'],
         body: ['Quicksand', 'sans-serif'],
+        display: ['"Playfair Display"', 'Georgia', 'serif'],
+        script: ['"Dancing Script"', 'cursive'],
       },
       colors: {
         border: "hsl(var(--border))",

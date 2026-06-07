@@ -6,8 +6,8 @@ import logo from "@/assets/logo.png";
 const navLinks = [
   { to: "/", label: "Inicio" },
   { to: "/servicios", label: "Servicios" },
-  { to: "/cotizador", label: "Cotizador" },
-  { to: "/reservaciones", label: "Reservaciones" },
+  { href: "/#galeria", label: "Galería" },
+  { href: "/#resenas", label: "Reseñas" },
   { to: "/contacto", label: "Contacto" },
 ];
 
@@ -26,43 +26,54 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`sticky top-0 z-50 transition-all duration-500 ${
+      className={`sticky top-0 z-50 transition-all duration-500 border-t-[3px] border-t-[#2c1810] ${
         scrolled
-          ? "bg-white/80 backdrop-blur-xl border-b border-border/60 shadow-[0_2px_20px_-4px_hsl(270_40%_50%/0.10)]"
-          : "bg-card/70 backdrop-blur-md border-b border-transparent"
+          ? "bg-white/90 backdrop-blur-xl border-b border-border/60 shadow-sm"
+          : "bg-white/80 backdrop-blur-md border-b border-transparent"
       }`}
     >
       <div className={`container mx-auto flex items-center justify-between px-4 transition-all duration-500 ${scrolled ? "h-14" : "h-16"}`}>
+        {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group">
           <img
             src={logo}
             alt="Pequesaurios"
             className={`rounded-full object-cover transition-all duration-500 ${scrolled ? "h-9 w-9" : "h-11 w-11"}`}
           />
-          <span className="font-heading text-xl font-bold text-gradient-brand hidden sm:block">
+          <span className="font-heading text-xl font-bold text-foreground hidden sm:block">
             Pequesaurios
           </span>
         </Link>
 
-        {/* Desktop */}
-        <div className="hidden md:flex items-center gap-1">
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-0.5">
           {navLinks.map((link) => {
-            const active = location.pathname === link.to;
-            return (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`relative font-body font-semibold text-sm px-3 py-2 rounded-lg transition-colors duration-200 ${
-                  active ? "text-primary" : "text-foreground/65 hover:text-foreground hover:bg-muted/60"
-                }`}
-              >
+            const isRoute = "to" in link;
+            const active = isRoute && location.pathname === link.to;
+            const commonClass = `relative font-body font-semibold text-sm px-3.5 py-2 rounded-lg transition-colors duration-200 ${
+              active ? "text-foreground" : "text-foreground/60 hover:text-foreground hover:bg-muted/50"
+            }`;
+            return isRoute ? (
+              <Link key={link.label} to={link.to!} className={commonClass}>
                 {link.label}
                 {active && (
                   <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-primary transition-all duration-300" />
                 )}
               </Link>
+            ) : (
+              <a key={link.label} href={link.href} className={commonClass}>{link.label}</a>
             );
           })}
+        </div>
+
+        {/* Cotizar CTA */}
+        <div className="hidden md:flex items-center">
+          <Link
+            to="/cotizador"
+            className="bg-primary text-white font-body font-semibold text-sm px-5 py-2 rounded-full hover:bg-primary/90 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+          >
+            Cotizar
+          </Link>
         </div>
 
         {/* Mobile toggle */}
@@ -83,29 +94,32 @@ const Navbar = () => {
       {/* Mobile menu */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          open ? "max-h-72 opacity-100" : "max-h-0 opacity-0"
+          open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
         }`}
         style={{ borderTop: open ? "1px solid hsl(var(--border))" : "none" }}
       >
-        <div className="bg-white/90 backdrop-blur-xl px-4 py-3 flex flex-col gap-0.5">
+        <div className="bg-white/95 backdrop-blur-xl px-4 py-3 flex flex-col gap-0.5">
           {navLinks.map((link, i) => {
-            const active = location.pathname === link.to;
-            return (
-              <Link
-                key={link.to}
-                to={link.to}
-                style={{ transitionDelay: open ? `${i * 40}ms` : "0ms" }}
-                className={`flex items-center gap-2 py-2.5 px-3 rounded-xl font-body font-semibold text-sm transition-all duration-300 ${
-                  active
-                    ? "text-primary bg-primary/8"
-                    : "text-foreground/70 hover:text-foreground hover:bg-muted/60"
-                } ${open ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"}`}
-              >
+            const isRoute = "to" in link;
+            const active = isRoute && location.pathname === link.to;
+            const commonClass = `flex items-center gap-2 py-2.5 px-3 rounded-xl font-body font-semibold text-sm transition-all duration-300 ${
+              active ? "text-primary bg-primary/8" : "text-foreground/70 hover:text-foreground hover:bg-muted/60"
+            } ${open ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"}`;
+            return isRoute ? (
+              <Link key={link.label} to={link.to!} style={{ transitionDelay: open ? `${i * 40}ms` : "0ms" }} className={commonClass}>
                 {active && <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />}
                 {link.label}
               </Link>
+            ) : (
+              <a key={link.label} href={link.href} style={{ transitionDelay: open ? `${i * 40}ms` : "0ms" }} className={commonClass}>{link.label}</a>
             );
           })}
+          <Link
+            to="/cotizador"
+            className="mt-2 bg-primary text-white font-body font-semibold text-sm px-5 py-2.5 rounded-full text-center hover:bg-primary/90 transition-colors"
+          >
+            Cotizar
+          </Link>
         </div>
       </div>
     </nav>

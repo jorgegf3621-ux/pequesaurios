@@ -56,6 +56,8 @@ type Reservation = {
   created_at: string;
 };
 
+type ContactMessage = { id: string; name: string; email: string; phone: string | null; message: string; created_at: string; read: boolean };
+
 const statusColors: Record<string, string> = {
   pendiente: "bg-yellow-100 text-yellow-800 border-yellow-300",
   confirmada: "bg-green-100 text-green-800 border-green-300",
@@ -293,6 +295,179 @@ const FleteCalculator = () => {
   );
 };
 
+// ─── Servicios Admin ─────────────────────────────────────────────────────────
+type ServicioCard = { id: string; titulo: string; subtitulo: string; descripcion: string; desde: string; img_url: string | null; href: string; orden: number; activa: boolean };
+const emptyServicio = () => ({ titulo: "", subtitulo: "", descripcion: "", desde: "", img_url: null as string | null, href: "/servicios" });
+
+const ServiciosAdmin = () => {
+  const [cards, setCards] = useState<ServicioCard[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [editing, setEditing] = useState<ServicioCard | null>(null);
+  const [form, setForm] = useState(emptyServicio());
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const loadCards = async () => {
+    const { data } = await (supabase as any).from("servicios_cards").select("*").order("orden");
+    if (data) setCards(data);
+    setLoading(false);
+  };
+
+  useEffect(() => { loadCards(); }, []);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const ext = file.name.split(".").pop();
+    const { data, error } = await supabase.storage.from("galeria").upload(`servicios/${Date.now()}.${ext}`, file);
+    if (error) { toast.error("Error al subir imagen"); setUploading(false); return; }
+    const { data: { publicUrl } } = supabase.storage.from("galeria").getPublicUrl(data.path);
+    setForm((f) => ({ ...f, img_url: publicUrl }));
+    setUploading(false);
+    toast.success("Imagen subida");
+  };
+
+  const save = async () => {
+    if (!form.titulo.trim()) { toast.error("El título es requerido"); return; }
+    if (editing) {
+      await (supabase as any).from("servicios_cards").update({ titulo: form.titulo, subtitulo: form.subtitulo, descripcion: form.descripcion, desde: form.desde, img_url: form.img_url, href: form.href }).eq("id", editing.id);
+      toast.success("Servicio actualizado");
+    } else {
+      const maxOrden = cards.length > 0 ? Math.max(...cards.map((c) => c.orden)) + 1 : 1;
+      await (supabase as any).from("servicios_cards").insert({ ...form, orden: maxOrden, activa: true });
+      toast.success("Servicio agregado");
+    }
+    setEditing(null); setIsAdding(false); setForm(emptyServicio());
+    await loadCards();
+  };
+
+  const deleteCard = async (card: ServicioCard) => {
+    await (supabase as any).from("servicios_cards").delete().eq("id", card.id);
+    if (card.img_url?.includes("/storage/v1/object/public/galeria/")) {
+      const path = card.img_url.split("/storage/v1/object/public/galeria/")[1];
+      await supabase.storage.from("galeria").remove([path]);
+    }
+    setCards((prev) => prev.filter((c) => c.id !== card.id));
+    toast.success("Servicio eliminado");
+  };
+
+  const toggleActive = async (card: ServicioCard) => {
+    await (supabase as any).from("servicios_cards").update({ activa: !card.activa }).eq("id", card.id);
+    setCards((prev) => prev.map((c) => (c.id === card.id ? { ...c, activa: !c.activa } : c)));
+  };
+
+  const startEdit = (card: ServicioCard) => {
+    setEditing(card); setIsAdding(true);
+    setForm({ titulo: card.titulo, subtitulo: card.subtitulo, descripcion: card.descripcion, desde: card.desde, img_url: card.img_url, href: card.href });
+  };
+
+  if (loading) return <div className="text-center py-8 text-muted-foreground">Cargando...</div>;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="bg-primary/10 rounded-full p-2"><ShoppingBag size={20} className="text-primary" /></div>
+          <div>
+            <h2 className="font-heading font-bold text-lg">Tarjetas de Servicios</h2>
+            <p className="text-xs text-muted-foreground">Aparecen como historias en "Nuestros Servicios" en el inicio</p>
+          </div>
+        </div>
+        {!isAdding && (
+          <Button variant="hero" size="sm" onClick={() => setIsAdding(true)}><PlusCircle size={15} /> Agregar</Button>
+        )}
+      </div>
+
+      {isAdding && (
+        <div className="bg-white rounded-2xl border border-border p-5 shadow-sm space-y-4">
+          <p className="text-xs font-semibold text-muted-foreground uppercase">{editing ? "Editar servicio" : "Nuevo servicio"}</p>
+          <div className="flex gap-4 items-start">
+            <div className="w-20 flex-none rounded-xl overflow-hidden bg-muted border border-border" style={{ aspectRatio: "9/16" }}>
+              {form.img_url ? (
+                <img src={form.img_url} alt="preview" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center"><ImageIcon size={16} className="text-muted-foreground" /></div>
+              )}
+            </div>
+            <div className="flex-1 space-y-2">
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+              <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                <ImagePlus size={13} /> {uploading ? "Subiendo..." : "Subir imagen (9:16 ideal)"}
+              </Button>
+              <Input value={form.img_url ?? ""} onChange={(e) => setForm((f) => ({ ...f, img_url: e.target.value || null }))} placeholder="o pegar URL" className="text-xs" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label className="text-xs">Título *</Label><Input value={form.titulo} onChange={(e) => setForm((f) => ({ ...f, titulo: e.target.value }))} placeholder="Baby Play Zone" className="mt-1 text-sm" /></div>
+            <div><Label className="text-xs">Subtítulo / Badge</Label><Input value={form.subtitulo} onChange={(e) => setForm((f) => ({ ...f, subtitulo: e.target.value }))} placeholder="Inflable Castillo" className="mt-1 text-sm" /></div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label className="text-xs">Precio / Desde</Label><Input value={form.desde} onChange={(e) => setForm((f) => ({ ...f, desde: e.target.value }))} placeholder="Desde $800" className="mt-1 text-sm" /></div>
+            <div><Label className="text-xs">Enlace</Label><Input value={form.href} onChange={(e) => setForm((f) => ({ ...f, href: e.target.value }))} placeholder="/servicios" className="mt-1 text-sm" /></div>
+          </div>
+          <div>
+            <Label className="text-xs">Descripción</Label>
+            <textarea value={form.descripcion} onChange={(e) => setForm((f) => ({ ...f, descripcion: e.target.value }))} placeholder="Describe el servicio..." className="mt-1 w-full text-sm border border-input rounded-md px-3 py-2 resize-none h-20 focus:outline-none focus:ring-2 focus:ring-ring" />
+          </div>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" size="sm" onClick={() => { setIsAdding(false); setEditing(null); setForm(emptyServicio()); }}>Cancelar</Button>
+            <Button variant="hero" size="sm" onClick={save}>{editing ? "Guardar cambios" : "Agregar servicio"}</Button>
+          </div>
+        </div>
+      )}
+
+      {cards.length === 0 ? (
+        <div className="text-center py-10 text-muted-foreground border-2 border-dashed border-border rounded-2xl">
+          <ShoppingBag size={36} className="mx-auto mb-2 opacity-25" />
+          <p className="text-sm">No hay tarjetas todavía</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+          {cards.map((card) => (
+            <div key={card.id} className={`relative group rounded-2xl overflow-hidden border-2 ${card.activa ? "border-border" : "border-red-200 opacity-60"}`} style={{ aspectRatio: "9/16" }}>
+              {card.img_url ? (
+                <img src={card.img_url} alt={card.titulo} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-lavender/40 to-pink-100 flex items-center justify-center">
+                  <ImageIcon size={20} className="text-primary/30" />
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                {card.subtitulo && <p className="text-[8px] text-white/60 uppercase tracking-wide truncate">{card.subtitulo}</p>}
+                <p className="text-xs font-bold text-white leading-tight truncate">{card.titulo}</p>
+                {card.desde && <p className="text-[9px] text-white/70">{card.desde}</p>}
+              </div>
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex flex-col items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100">
+                <Button size="sm" className="h-6 text-[10px] px-2 bg-white text-black hover:bg-gray-100 border-0" onClick={() => startEdit(card)}><Pencil size={10} /> Editar</Button>
+                <Button size="sm" className="h-6 text-[10px] px-2 bg-white text-black hover:bg-gray-100 border-0" onClick={() => toggleActive(card)}>{card.activa ? "Ocultar" : "Mostrar"}</Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button size="sm" variant="destructive" className="h-6 px-2 text-[10px]"><Trash2 size={10} /></Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Eliminar "{card.titulo}"?</AlertDialogTitle>
+                      <AlertDialogDescription>Esta acción no se puede deshacer.</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => deleteCard(card)}>Eliminar</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+              {!card.activa && <div className="absolute top-1 left-1 bg-red-500 text-white text-[8px] px-1 py-0.5 rounded">Oculta</div>}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ─── Galería ─────────────────────────────────────────────────────────────────
 type GaleriaItem = { id: string; url: string; alt: string; orden: number; activa: boolean };
 
@@ -502,7 +677,7 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
 const Admin = () => {
   const [authenticated, setAuthenticated] = useState(() => localStorage.getItem("admin_auth") === "true");
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [contacts, setContacts] = useState<Record<string, unknown>[]>([]);
+  const [contacts, setContacts] = useState<ContactMessage[]>([]);
   const [quotes, setQuotes] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
   const [blockedDate, setBlockedDate] = useState<Date | undefined>();
@@ -645,7 +820,7 @@ const Admin = () => {
 
   const handleReservacionCreada = (notaData: NotaData) => {
     fetchReservations();
-    setNotaReservation(notaData.reservation);
+    setNotaReservation(notaData.reservation as Reservation);
     setNotaPrefill({
       address: notaData.address,
       hora: notaData.hora,
@@ -665,7 +840,7 @@ const Admin = () => {
       total: notaData.total,
       anticipo: notaData.anticipo,
     });
-    setContratoReservation(notaData.reservation);
+    setContratoReservation(notaData.reservation as Reservation);
   };
 
   const addBlockedDate = async () => {
@@ -1210,9 +1385,12 @@ const Admin = () => {
           <FleteCalculator />
         </TabsContent>
 
-        {/* ── Tab: Galería ── */}
+        {/* ── Tab: Galería & Servicios ── */}
         <TabsContent value="galeria">
           <GaleriaAdmin />
+          <div className="border-t border-border mt-10 pt-10">
+            <ServiciosAdmin />
+          </div>
         </TabsContent>
 
         {/* ── Tab 7: Historial ── */}
