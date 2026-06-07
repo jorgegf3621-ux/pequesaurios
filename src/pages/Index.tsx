@@ -23,8 +23,8 @@ type ServicioCard = {
 
 const defaultServicios: ServicioCard[] = [
   { id: "1", titulo: "Baby Play Zone", subtitulo: "Más Rentado", descripcion: "Inflable blanco con resbaladilla y alberca de pelotas. Seguro y divertido para bebés de 1 a 5 años.", desde: "Desde $1,000", img_url: catalogInflableImg, href: "/baby-play-zone", orden: 1, activa: true },
-  { id: "2", titulo: "Mobiliario Infantil", subtitulo: "Favorito Mamás", descripcion: "Mesita de madera blanca con 8 sillas infantiles arcoíris y conejito. Perfecta para snacks y actividades.", desde: "Desde $500", img_url: catalogMesitaImg, href: "/baby-play-zone", orden: 2, activa: true },
-  { id: "3", titulo: "Actividad Creativa", subtitulo: "Creativo", descripcion: "Llevamos los caballetes a tu fiesta para que los peques pinten y se lleven su obra de arte como recuerdo.", desde: "Desde $900", img_url: paquetePlusImg, href: "/actividad-creativa", orden: 3, activa: true },
+  { id: "2", titulo: "Mobiliario Infantil", subtitulo: "Favorito Mamás", descripcion: "Mesita de madera blanca con 8 sillas infantiles arcoíris y conejito. Perfecta para snacks y actividades.", desde: "Desde $500", img_url: catalogMesitaImg, href: "/mobiliario-infantil", orden: 2, activa: true },
+  { id: "3", titulo: "Caballetes & Color", subtitulo: "Creativo", descripcion: "Deja que los peques saquen toda su creatividad pintando en caballetes. ¡Entretenidos y felices toda la fiesta!", desde: "Desde $900", img_url: paquetePlusImg, href: "/actividad-creativa", orden: 3, activa: true },
   { id: "4", titulo: "Kit de Yesitos", subtitulo: "Recuerdo único", descripcion: "Los peques pintan su figura de yeso y se la llevan de recuerdo. Etiqueta personalizada según tu temática.", desde: "Desde $20 c/u", img_url: null, href: "/yesitos", orden: 4, activa: true },
   { id: "5", titulo: "Pintacaritas + Glitter", subtitulo: "1.5 hrs", descripcion: "Diseños en cara y mano, glitter tattoos y glitter para cabello. 1.5 horas de pura magia.", desde: "$800 · 1.5 hrs", img_url: null, href: "/pintacaritas", orden: 5, activa: true },
 ];

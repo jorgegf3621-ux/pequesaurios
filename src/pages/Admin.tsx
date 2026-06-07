@@ -332,11 +332,13 @@ const ServiciosAdmin = () => {
   const save = async () => {
     if (!form.titulo.trim()) { toast.error("El título es requerido"); return; }
     if (editing) {
-      await (supabase as any).from("servicios_cards").update({ titulo: form.titulo, subtitulo: form.subtitulo, descripcion: form.descripcion, desde: form.desde, img_url: form.img_url, href: form.href }).eq("id", editing.id);
+      const { error } = await (supabase as any).from("servicios_cards").update({ titulo: form.titulo, subtitulo: form.subtitulo, descripcion: form.descripcion, desde: form.desde, img_url: form.img_url, href: form.href }).eq("id", editing.id);
+      if (error) { toast.error("Error al guardar: " + error.message); return; }
       toast.success("Servicio actualizado");
     } else {
       const maxOrden = cards.length > 0 ? Math.max(...cards.map((c) => c.orden)) + 1 : 1;
-      await (supabase as any).from("servicios_cards").insert({ ...form, orden: maxOrden, activa: true });
+      const { error } = await (supabase as any).from("servicios_cards").insert({ ...form, orden: maxOrden, activa: true });
+      if (error) { toast.error("Error al agregar: " + error.message); return; }
       toast.success("Servicio agregado");
     }
     setEditing(null); setIsAdding(false); setForm(emptyServicio());

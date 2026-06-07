@@ -80,7 +80,7 @@ const ActividadCreativa = () => {
             @pequesaurios
           </p>
           <h1 className="font-heading text-5xl md:text-6xl font-bold mb-4">
-            Actividad Creativa
+            Caballetes & Color
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
             Llevamos los caballetes a tu fiesta para que los peques pinten, creen y se lleven
@@ -176,7 +176,7 @@ const ActividadCreativa = () => {
       {/* CTA */}
       <section className="bg-gradient-to-r from-yellow-100 to-pink-100 py-14 px-4 text-center">
         <h2 className="font-heading text-2xl font-bold mb-3">
-          Agenda tu Actividad Creativa
+          Agenda tu Caballetes & Color
         </h2>
         <p className="text-muted-foreground mb-6">
           Fechas limitadas por fin de semana
