@@ -5,9 +5,9 @@ import logo from "@/assets/logo.png";
 
 const navLinks = [
   { to: "/", label: "Inicio" },
-  { href: "/#servicios", label: "Servicios" },
-  { href: "/#galeria", label: "Galería" },
-  { href: "/#resenas", label: "Reseñas" },
+  { to: "/#servicios", label: "Servicios" },
+  { to: "/#galeria", label: "Galería" },
+  { to: "/#resenas", label: "Reseñas" },
   { to: "/contacto", label: "Contacto" },
 ];
 
@@ -48,20 +48,17 @@ const Navbar = () => {
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-0.5">
           {navLinks.map((link) => {
-            const isRoute = "to" in link;
-            const active = isRoute && location.pathname === link.to;
+            const active = location.pathname === link.to && !link.to.includes("#");
             const commonClass = `relative font-body font-semibold text-sm px-3.5 py-2 rounded-lg transition-colors duration-200 ${
               active ? "text-foreground" : "text-foreground/60 hover:text-foreground hover:bg-muted/50"
             }`;
-            return isRoute ? (
-              <Link key={link.label} to={link.to!} className={commonClass}>
+            return (
+              <Link key={link.label} to={link.to} className={commonClass}>
                 {link.label}
                 {active && (
                   <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-primary transition-all duration-300" />
                 )}
               </Link>
-            ) : (
-              <a key={link.label} href={link.href} className={commonClass}>{link.label}</a>
             );
           })}
         </div>
@@ -100,18 +97,15 @@ const Navbar = () => {
       >
         <div className="bg-white/95 backdrop-blur-xl px-4 py-3 flex flex-col gap-0.5">
           {navLinks.map((link, i) => {
-            const isRoute = "to" in link;
-            const active = isRoute && location.pathname === link.to;
+            const active = location.pathname === link.to && !link.to.includes("#");
             const commonClass = `flex items-center gap-2 py-2.5 px-3 rounded-xl font-body font-semibold text-sm transition-all duration-300 ${
               active ? "text-primary bg-primary/8" : "text-foreground/70 hover:text-foreground hover:bg-muted/60"
             } ${open ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"}`;
-            return isRoute ? (
-              <Link key={link.label} to={link.to!} style={{ transitionDelay: open ? `${i * 40}ms` : "0ms" }} className={commonClass}>
+            return (
+              <Link key={link.label} to={link.to} style={{ transitionDelay: open ? `${i * 40}ms` : "0ms" }} className={commonClass}>
                 {active && <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />}
                 {link.label}
               </Link>
-            ) : (
-              <a key={link.label} href={link.href} style={{ transitionDelay: open ? `${i * 40}ms` : "0ms" }} className={commonClass}>{link.label}</a>
             );
           })}
           <Link
