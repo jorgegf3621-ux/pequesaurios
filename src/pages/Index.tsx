@@ -68,7 +68,7 @@ const Index = () => {
   const [serviciosCards, setServiciosCards] = useState<ServicioCard[]>(defaultServicios);
   const heroImgRef = useRef<HTMLImageElement>(null);
 
-  /* Scroll Reveal */
+  /* Scroll Reveal — re-runs when async data (galeria, serviciosCards) adds new elements */
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) =>
@@ -84,7 +84,7 @@ const Index = () => {
       observer.observe(el)
     );
     return () => observer.disconnect();
-  }, []);
+  }, [galeria, serviciosCards]);
 
   /* Hero parallax */
   useEffect(() => {
