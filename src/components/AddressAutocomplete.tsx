@@ -64,7 +64,7 @@ async function fetchSuggestions(input: string): Promise<Suggestion[]> {
         languageCode: "es",
         includedRegionCodes: ["mx"],
         locationBias: {
-          circle: { center: MTY_CENTER, radius: 60000.0 },
+          circle: { center: MTY_CENTER, radius: 50000.0 },
         },
       }),
     });
