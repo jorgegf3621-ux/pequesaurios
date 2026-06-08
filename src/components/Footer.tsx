@@ -48,7 +48,7 @@ const Footer = () => (
             @pequesaurioss
           </a>
           <a
-            href="https://www.facebook.com/share/1Cmd1FwKxW/?mibextid=wwXIfr"
+            href="https://www.facebook.com/share/1DvDRmqAGB/?mibextid=wwXIfr"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2.5 text-sm text-muted-foreground hover:text-primary transition-colors group"
