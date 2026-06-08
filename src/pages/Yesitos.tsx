@@ -60,7 +60,7 @@ const personajes = [
   "Bluey", "Sonic", "Mario Bros", "Spiderman", "Dinosaurios", "Videojuegos",
   "Capibara", "Plim Plim", "Carros", "Huevitos de Pascua", "Hello Kitty",
   "Kuromi", "Unicornio", "Mickey", "Minnie", "Helados", "Donas",
-  "Ositos", "Astronauta",
+  "Ositos", "Astronauta", "y muchos más...",
 ];
 
 const entrega = [
@@ -142,7 +142,7 @@ const Yesitos = () => (
         <p className="font-semibold text-foreground mb-2">Notas importantes:</p>
         <p>• Pedido mínimo de <strong>10 piezas</strong>.</p>
         <p>• Más de <strong>20 piezas</strong>: $1 menos por bolsita.</p>
-        <p>• Pedir con <strong>mínimo 7 días de anticipación</strong>.</p>
+        <p>• Pedir con <strong>mínimo 10 días de anticipación</strong>.</p>
         <p>• La etiqueta personalizada se diseña según la temática de tu fiesta.</p>
       </div>
     </section>
@@ -184,7 +184,7 @@ const Yesitos = () => (
     <section className="bg-gradient-to-r from-yellow-100 to-pink-100 py-14 px-4 text-center">
       <h2 className="font-heading text-2xl font-bold mb-3">¿Lista para pedir tus Yesitos?</h2>
       <p className="text-muted-foreground mb-6 text-sm">
-        Recuerda pedirlos con al menos 7 días de anticipación
+        Recuerda pedirlos con al menos 10 días de anticipación
       </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <Button variant="whatsapp" size="lg" asChild>
