@@ -997,8 +997,10 @@ const Admin = () => {
     const nombre = r.customer_name.split(" ")[0];
     const paquete = packageLabels[r.package] ?? r.package;
 
+    const notasLinea = r.notes ? `\n*Detalle:* ${r.notes}` : "";
+
     const mensaje = tipo === "confirmada"
-      ? `¡Hola ${nombre}! Queremos confirmarte que tu reservación con *Pequesaurios* está *confirmada*.\n\n*Fecha:* ${fecha}\n*Paquete:* ${paquete}\n\nSi tienes alguna duda o cambio, escríbenos aquí mismo. ¡Nos vemos pronto!`
+      ? `¡Hola ${nombre}! Queremos confirmarte que recibimos tu reservación con *Pequesaurios* 🎉\n\n*Fecha:* ${fecha}\n*Servicios:* ${paquete}${notasLinea}\n\nPara agendar tu espacio y confirmar la reservación es necesario realizar el anticipo del *50%* a la siguiente cuenta:\n\n👤 *Nombre:* Elena Estefania Saldivar Martinez\n🏦 *Banco:* BBVA\n💳 *Tarjeta:* 4152 3141 0801 077\n📝 *Concepto:* ${r.customer_name}\n\nPor favor envíanos foto del comprobante de transferencia para confirmar tu lugar. 📸\n\nSi tienes alguna duda o cambio, escríbenos aquí mismo. ¡Nos vemos pronto! 🎈`
       : `Hola ${nombre}, te informamos que tu reservación del *${fecha}* con *Pequesaurios* ha sido *cancelada*.\n\nSi deseas reagendar o tienes alguna pregunta, con gusto te ayudamos. 😊`;
 
     const phone = r.customer_phone.replace(/\D/g, "");
