@@ -69,16 +69,28 @@ async function geocodeBase(address: string): Promise<Coords | null> {
   }
 }
 
-async function getRoadDistanceKm(from: Coords, to: Coords): Promise<number | null> {
+function haversineKm(from: Coords, to: Coords): number {
+  const [lon1, lat1] = from;
+  const [lon2, lat2] = to;
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 1.35;
+}
+
+async function getRoadDistanceKm(from: Coords, to: Coords): Promise<number> {
   try {
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 4000);
     const url = `https://router.project-osrm.org/route/v1/driving/${from[0]},${from[1]};${to[0]},${to[1]}?overview=false`;
-    const res = await fetch(url);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(tid);
     const data = await res.json();
-    if (data.code !== "Ok" || !data.routes?.length) return null;
-    return data.routes[0].distance / 1000;
-  } catch {
-    return null;
-  }
+    if (data.code === "Ok" && data.routes?.length) return data.routes[0].distance / 1000;
+  } catch {}
+  return haversineKm(from, to);
 }
 
 // ─── Cotizador ────────────────────────────────────────────────────────────────
@@ -102,6 +114,9 @@ const Cotizador = () => {
   const [distanciaReal, setDistanciaReal] = useState<number | null>(null);
   const [calculandoFlete, setCalculandoFlete] = useState(false);
 
+  // Fallback si Nominatim falla: centro de San Nicolás de los Garza
+  const DEFAULT_BASE: Coords = [-100.3000, 25.7333];
+
   // Load flete config on mount
   useEffect(() => {
     const load = async () => {
@@ -109,7 +124,9 @@ const Cotizador = () => {
       if (cfg) {
         setFleteConfig(cfg);
         const coords = await geocodeBase(cfg.direccion_base || "San Nicolás de los Garza, NL");
-        if (coords) setBaseCoords(coords);
+        setBaseCoords(coords ?? DEFAULT_BASE);
+      } else {
+        setBaseCoords(DEFAULT_BASE);
       }
     };
     load();
