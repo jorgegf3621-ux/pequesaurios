@@ -32,7 +32,7 @@ const SERVICIOS_DEF: ServicioDef[] = [
   // Mesas
   { id: "mesa-pastel",       name: "Mesita Infantil Pastel (6 sillas)",           defaultPrice: 500,  unit: "mesa",        category: "Mesas" },
   { id: "mesa-blanca",       name: "Mesita Blanca (8 sillas madera)",             defaultPrice: 750,  unit: "mesa",        category: "Mesas" },
-  { id: "mesa-extra",        name: "Mesa extra (segunda mesa)",                   defaultPrice: 350,  unit: "mesa",        category: "Mesas",       max: 1 },
+  { id: "mesa-extra",        name: "Mesa extra (segunda mesa)",                   defaultPrice: 450,  unit: "mesa",        category: "Mesas",       max: 1 },
   // Yesitos
   { id: "yesito-basico",     name: "Kit Yesitos Básico (1 yesito)",               defaultPrice: 20,   unit: "kit",         category: "Yesitos",     min: 10 },
   { id: "yesito-intermedio", name: "Kit Yesitos Intermedio (2 yesitos)",          defaultPrice: 25,   unit: "kit",         category: "Yesitos",     min: 10 },

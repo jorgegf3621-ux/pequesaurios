@@ -47,7 +47,7 @@ const items: Item[] = [
 
 const IDS_ENTREGA_FISICA = ["bpz-inflable", "bpz-basico", "bpz-plus", "mesa-pastel", "mesa-blanca", "cab-dino-baby", "cab-dino-creativo", "cab-dino-fun"];
 const IDS_CON_MESITA = new Set(["mesa-pastel", "mesa-blanca", "bpz-basico", "bpz-plus"]);
-const MESA_EXTRA: Item = { id: "mesa-extra", name: "Mesa extra (segunda mesa)", price: 350, unit: "mesa", category: "Mesas" };
+const MESA_EXTRA: Item = { id: "mesa-extra", name: "Mesa extra (segunda mesa)", price: 450, unit: "mesa", category: "Mesas" };
 
 // ─── Geocodificación base + distancia real ───────────────────────────────────
 
@@ -460,13 +460,13 @@ const Cotizador = () => {
             <DialogTitle className="text-center">¿Agregar una segunda mesa?</DialogTitle>
             <DialogDescription className="text-center">
               Puedes incluir una segunda mesa adicional por solo{" "}
-              <span className="font-bold text-primary">$350 MXN</span> más.
+              <span className="font-bold text-primary">$450 MXN</span> más.
               El máximo es 2 mesas en total.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-2 mt-2">
             <Button variant="hero" onClick={agregarMesaExtra} className="w-full">
-              Sí, agregar segunda mesa ($350)
+              Sí, agregar segunda mesa ($450)
             </Button>
             <Button variant="outline" onClick={handleConfirmarSinMesa} className="w-full">
               No, continuar sin ella

@@ -396,7 +396,7 @@ const NotaPago = ({ reservation, open, onClose, prefill }: Props) => {
       "inflable": 1300,
       "mesa-pastel": 500,
       "mesa-blanca": 750,
-      "mesa-extra": 350,
+      "mesa-extra": 450,
       "yesito-basico": 20,
       "yesito-intermedio": 25,
       "yesito-completo": 30,
