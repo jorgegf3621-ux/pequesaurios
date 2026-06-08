@@ -52,6 +52,28 @@ const Reservaciones = () => {
     }
   }, []);
 
+  const readAndClearCotizadorData = () => {
+    try {
+      const quantities = localStorage.getItem("cotizador_quantities");
+      const prices = localStorage.getItem("cotizador_item_prices");
+      const flete = localStorage.getItem("cotizador_flete");
+      const direccion = localStorage.getItem("cotizador_direccion");
+      const municipio = localStorage.getItem("cotizador_municipio");
+      ["cotizador_quantities", "cotizador_item_prices", "cotizador_flete",
+       "cotizador_direccion", "cotizador_municipio"].forEach((k) => localStorage.removeItem(k));
+      if (!quantities) return null;
+      return {
+        servicios: JSON.parse(quantities) as Record<string, number>,
+        precios: prices ? JSON.parse(prices) as Record<string, number> : {},
+        flete: flete ? Number(flete) : 0,
+        direccion: direccion ?? "",
+        municipio: municipio ?? "",
+      };
+    } catch {
+      return null;
+    }
+  };
+
   const fetchBookedDates = async () => {
     const { data } = await supabase
       .from("reservations")
@@ -96,6 +118,8 @@ const Reservaciones = () => {
       .map((v) => packages.find((p) => p.value === v)?.label ?? v)
       .join(", ");
 
+    const cotizadorData = readAndClearCotizadorData();
+
     const { data: inserted, error } = await supabase
       .from("reservations")
       .insert({
@@ -105,6 +129,7 @@ const Reservaciones = () => {
         event_date: format(date, "yyyy-MM-dd"),
         package: packageLabel,
         notes: notes || null,
+        ...(cotizadorData ? { cotizador_data: cotizadorData } : {}),
       })
       .select("id")
       .single();

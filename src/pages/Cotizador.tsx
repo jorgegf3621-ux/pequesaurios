@@ -203,8 +203,11 @@ const Cotizador = () => {
       })
       .filter(Boolean)
       .join(", ");
+    const itemPrices = Object.fromEntries(allItems.map((i) => [i.id, i.price]));
     localStorage.setItem("cotizador_seleccion", resumen);
     localStorage.setItem("cotizador_ids", JSON.stringify(Object.keys(selectedFinal)));
+    localStorage.setItem("cotizador_quantities", JSON.stringify(selectedFinal));
+    localStorage.setItem("cotizador_item_prices", JSON.stringify(itemPrices));
     localStorage.setItem("cotizador_municipio", municipio);
     localStorage.setItem("cotizador_direccion", eventAddress?.shortDisplay ?? "");
     localStorage.setItem("cotizador_flete", String(fleteAplicado));

@@ -26,6 +26,9 @@ const ID_MAP: Record<string, { oldId: string; name: string }> = {
   "bpz-inflable":      { oldId: "bpz-inflable",      name: "BPZ · Inflable Castillo (solo)" },
   "bpz-basico":        { oldId: "bpz-basico",        name: "BPZ · Paquete Básico (inflable + mesita)" },
   "bpz-plus":          { oldId: "bpz-plus",          name: "BPZ · Paquete Plus (inflable + mesita arte)" },
+  "cab-dino-baby":     { oldId: "cab-dino-baby",     name: "Caballetes · Paquete Dino Baby" },
+  "cab-dino-creativo": { oldId: "cab-dino-creativo", name: "Caballetes · Paquete Dino Creativo" },
+  "cab-dino-fun":      { oldId: "cab-dino-fun",      name: "Caballetes · Paquete Dino Fun" },
   "inflable":          { oldId: "inflable",          name: "Inflable Castillo Blanco 3×3 m" },
   "mesa-pastel":       { oldId: "mesa-pastel",       name: "Mesita Infantil Pastel (6 sillas)" },
   "mesa-blanca":       { oldId: "mesa-blanca",       name: "Mesita Blanca (8 sillas madera)" },
@@ -89,9 +92,12 @@ const NotaTemplate = ({
 }) => {
   // Precios por defecto para cada servicio
   const defaultPrices: Record<string, number> = {
-    "bpz-inflable": 800,
-    "bpz-basico": 1200,
-    "bpz-plus": 1400,
+    "bpz-inflable": 1000,
+    "bpz-basico": 1400,
+    "bpz-plus": 1550,
+    "cab-dino-baby": 900,
+    "cab-dino-creativo": 1300,
+    "cab-dino-fun": 1700,
     "inflable": 1300,
     "mesa-pastel": 500,
     "mesa-blanca": 750,
@@ -381,9 +387,12 @@ const NotaPago = ({ reservation, open, onClose, prefill }: Props) => {
 
   const getServicePrice = (id: string) => {
     const defaultPrices: Record<string, number> = {
-      "bpz-inflable": 800,
-      "bpz-basico": 1200,
-      "bpz-plus": 1400,
+      "bpz-inflable": 1000,
+      "bpz-basico": 1400,
+      "bpz-plus": 1550,
+      "cab-dino-baby": 900,
+      "cab-dino-creativo": 1300,
+      "cab-dino-fun": 1700,
       "inflable": 1300,
       "mesa-pastel": 500,
       "mesa-blanca": 750,
@@ -592,11 +601,33 @@ const NotaPago = ({ reservation, open, onClose, prefill }: Props) => {
                 const fecha = `${day}/${month}/${year}`;
                 const serviciosTexto = Object.entries(servicios)
                   .filter(([, qty]) => qty > 0)
-                  .map(([id, qty]) => `• ${qty}x ${id.replace(/-/g, " ")} — $${(getServicePrice(id) * qty).toLocaleString()}`)
+                  .map(([id, qty]) => {
+                    const nombre_ = ID_MAP[id]?.name || id;
+                    return `• ${qty > 1 ? `${qty}x ` : ""}${nombre_} — $${(getServicePrice(id) * qty).toLocaleString()}`;
+                  })
                   .join("\n");
                 const phone = reservation.customer_phone.replace(/\D/g, "");
                 const phoneWithCode = phone.startsWith("52") ? phone : `52${phone}`;
-                const msg = `¡Hola ${nombre}! 🎉 Tu reservación con *Pequesaurios* ya quedó *confirmada y agendada*.\n\n*Fecha:* ${fecha}\n*Dirección:* ${address || "Por confirmar"}\n*Hora:* ${hora || "Por confirmar"}\n\n*Servicios:*\n${serviciosTexto}${flete > 0 ? `\n• Flete — $${flete.toLocaleString()}` : ""}\n\n*Total:* $${total.toLocaleString()} MXN\n*Anticipo (50%):* $${anticipo.toLocaleString()} MXN\n\nTe compartimos tu nota de pago adjunta. 📄 Cualquier duda, escríbenos aquí mismo. ¡Nos vemos pronto! 🎈`;
+                const pendienteWA = total - anticipo;
+                const msg = [
+                  `¡Hola ${nombre}! 🎉`,
+                  `Tu reservación con *Pequesaurios* ya quedó *confirmada y agendada* ✅`,
+                  ``,
+                  `📅 *Fecha:* ${fecha}`,
+                  hora ? `🕐 *Hora:* ${hora}` : null,
+                  address ? `📍 *Dirección:* ${address}` : null,
+                  ``,
+                  `*Servicios contratados:*`,
+                  serviciosTexto,
+                  flete > 0 ? `• Flete — $${flete.toLocaleString()}` : null,
+                  ``,
+                  `💰 *Total:* $${total.toLocaleString()} MXN`,
+                  `💳 *Anticipo (50%):* $${anticipo.toLocaleString()} MXN`,
+                  `⏳ *Pendiente el día del evento:* $${pendienteWA.toLocaleString()} MXN`,
+                  ``,
+                  `Te compartimos tu nota de pago adjunta 📄`,
+                  `Cualquier duda, escríbenos aquí mismo. ¡Nos vemos pronto! 🎈`,
+                ].filter((l) => l !== null).join("\n");
                 window.open(`https://wa.me/${phoneWithCode}?text=${encodeURIComponent(msg)}`, "_blank");
               }}
             >

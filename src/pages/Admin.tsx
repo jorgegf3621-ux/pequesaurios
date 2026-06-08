@@ -45,6 +45,14 @@ import { isSameDay } from "date-fns";
 
 const ADMIN_PASSWORD = "Chapis3621$";
 
+type CotizadorData = {
+  servicios: Record<string, number>;
+  precios: Record<string, number>;
+  flete: number;
+  direccion: string;
+  municipio: string;
+};
+
 type Reservation = {
   id: string;
   customer_name: string;
@@ -55,6 +63,7 @@ type Reservation = {
   notes: string | null;
   status: string;
   created_at: string;
+  cotizador_data?: CotizadorData | null;
 };
 
 type ContactMessage = { id: string; name: string; email: string; phone: string | null; message: string; created_at: string; read: boolean };
@@ -1273,8 +1282,15 @@ const Admin = () => {
                           className="text-primary hover:text-primary/80"
                           title="Crear nota de pago"
                           onClick={() => {
+                            const cd = r.cotizador_data;
                             setNotaPrefill({
-                              skipToPreview: true,
+                              ...(cd ? {
+                                servicios: cd.servicios,
+                                precios: cd.precios,
+                                flete: cd.flete,
+                                address: cd.direccion,
+                                skipToPreview: true,
+                              } : { skipToPreview: false }),
                             });
                             setNotaReservation(r);
                           }}
@@ -1686,7 +1702,19 @@ const Admin = () => {
                             size="icon"
                             className="text-primary hover:text-primary/80"
                             title="Crear nota de pago"
-                            onClick={() => { setNotaPrefill({ skipToPreview: true }); setNotaReservation(r); }}
+                            onClick={() => {
+                              const cd = r.cotizador_data;
+                              setNotaPrefill({
+                                ...(cd ? {
+                                  servicios: cd.servicios,
+                                  precios: cd.precios,
+                                  flete: cd.flete,
+                                  address: cd.direccion,
+                                  skipToPreview: true,
+                                } : { skipToPreview: false }),
+                              });
+                              setNotaReservation(r);
+                            }}
                           >
                             <FileText size={16} />
                           </Button>
