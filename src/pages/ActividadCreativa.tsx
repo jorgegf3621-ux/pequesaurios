@@ -169,7 +169,6 @@ const ActividadCreativa = () => {
           <li>• Servicio de 1.5 horas con personal de apoyo incluido.</li>
           <li>• Ningún paquete incluye flete — se cotiza según tu ubicación.</li>
           <li>• Fechas limitadas por fin de semana — agenda con anticipación.</li>
-          <li>• Para agregar más caballetes o sillas, consúltanos.</li>
         </ul>
       </section>
 
