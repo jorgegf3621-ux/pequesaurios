@@ -1,4 +1,4 @@
-import { Instagram, Phone, MapPin, Clock } from "lucide-react";
+import { Instagram, Phone, MapPin, Clock, Facebook } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
@@ -46,6 +46,17 @@ const Footer = () => (
               <Instagram size={14} className="text-primary" />
             </span>
             @pequesaurioss
+          </a>
+          <a
+            href="https://www.facebook.com/share/1Cmd1FwKxW/?mibextid=wwXIfr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2.5 text-sm text-muted-foreground hover:text-primary transition-colors group"
+          >
+            <span className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors flex-shrink-0">
+              <Facebook size={14} className="text-primary" />
+            </span>
+            Pequesaurios
           </a>
           <p className="flex items-center gap-2.5 text-sm text-muted-foreground">
             <span className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
