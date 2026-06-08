@@ -140,7 +140,7 @@ const Yesitos = () => (
       <div className="mt-8 bg-muted/50 rounded-xl border border-border p-6 text-sm text-muted-foreground space-y-2">
         <p className="font-semibold text-foreground mb-2">Notas importantes:</p>
         <p>• Pedido mínimo de <strong>10 piezas</strong>.</p>
-        <p>• Más de <strong>20 piezas</strong>: $1 menos por bolsita.</p>
+        <p>• Más de <strong>25 piezas</strong>: $1 menos por bolsita.</p>
         <p>• Pedir con <strong>mínimo 10 días de anticipación</strong>.</p>
         <p>• La etiqueta personalizada se diseña según la temática de tu fiesta.</p>
       </div>
