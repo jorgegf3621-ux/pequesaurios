@@ -35,7 +35,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Lock, LogOut, CalendarOff, Trash2, RefreshCw, FileText, MessageCircle, Mail, CheckCheck, Copy, Fuel, PlusCircle, ScrollText, ShoppingBag, CheckCircle2, History, Pencil, Image as ImageIcon, ImagePlus } from "lucide-react";
+import { Lock, LogOut, CalendarOff, Trash2, RefreshCw, FileText, MessageCircle, Mail, CheckCheck, Copy, Fuel, PlusCircle, ScrollText, ShoppingBag, CheckCircle2, History, Pencil, Image as ImageIcon, ImagePlus, LayoutTemplate } from "lucide-react";
 import AdminProductos from "@/components/AdminProductos";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
 import NotaPago from "@/components/NotaPago";
@@ -629,6 +629,154 @@ const GaleriaAdmin = () => {
   );
 };
 
+// ─── Mobiliario Infantil Admin ────────────────────────────────────────────────
+type MobCfg = {
+  badge: string; titulo: string; descripcion: string; precio: number;
+  features: string[]; img_hero: string | null;
+  silla1_titulo: string; silla1_desc: string; silla1_img: string | null;
+  silla2_titulo: string; silla2_desc: string; silla2_img: string | null;
+};
+
+const MOB_DEFAULT: MobCfg = {
+  badge: "Favorito Mamás", titulo: "Mesita de Madera Blanca",
+  descripcion: "Mesa de madera color blanco acompañada de 8 sillas infantiles a juego. Ideal para snacks, pastel, actividades creativas y más.",
+  precio: 500,
+  features: ["1 mesita de madera color blanco", "8 sillas infantiles incluidas", "Disponibles hasta 2 mesas", "Entrega y recolección incluidas"],
+  img_hero: null,
+  silla1_titulo: "Sillas Pasteles", silla1_desc: "Sillas de colores suaves: rosa, lila, menta y amarillo. Perfectas para cualquier temática.", silla1_img: null,
+  silla2_titulo: "Sillas Conejito & Arcoíris", silla2_desc: "Figuras blancas en forma de conejito y arcoíris. Adorables para fiestas con temáticas tiernas y coloridas.", silla2_img: null,
+};
+
+const MobiliarioAdmin = () => {
+  const [cfg, setCfg] = useState<MobCfg>(MOB_DEFAULT);
+  const [featText, setFeatText] = useState(MOB_DEFAULT.features.join("\n"));
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState<string | null>(null);
+  const heroRef = useRef<HTMLInputElement>(null);
+  const s1Ref = useRef<HTMLInputElement>(null);
+  const s2Ref = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await (supabase as any).from("mobiliario_config").select("*").eq("id", 1).single();
+      if (data) {
+        const features = Array.isArray(data.features) ? data.features : MOB_DEFAULT.features;
+        setCfg({ ...MOB_DEFAULT, ...data, features });
+        setFeatText(features.join("\n"));
+      }
+      setLoading(false);
+    })();
+  }, []);
+
+  const uploadImg = async (file: File, field: keyof MobCfg) => {
+    setUploading(field);
+    const ext = file.name.split(".").pop();
+    const { data, error } = await supabase.storage.from("galeria").upload(`mobiliario/${Date.now()}.${ext}`, file);
+    if (error) { toast.error("Error al subir imagen"); setUploading(null); return; }
+    const { data: { publicUrl } } = supabase.storage.from("galeria").getPublicUrl(data.path);
+    setCfg((c) => ({ ...c, [field]: publicUrl }));
+    setUploading(null);
+    toast.success("Imagen subida");
+  };
+
+  const save = async () => {
+    setSaving(true);
+    const features = featText.split("\n").map((l) => l.trim()).filter(Boolean);
+    const { error } = await (supabase as any).from("mobiliario_config").upsert({ ...cfg, features, id: 1 });
+    if (error) toast.error("Error: " + error.message);
+    else toast.success("¡Contenido actualizado!");
+    setSaving(false);
+  };
+
+  const ImgField = ({ field, label, inputRef, src }: { field: keyof MobCfg; label: string; inputRef: React.RefObject<HTMLInputElement>; src: string | null }) => (
+    <div>
+      <Label className="text-xs">{label}</Label>
+      <div className="mt-1 flex gap-2 items-start">
+        <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted border border-border flex items-center justify-center flex-shrink-0">
+          {src ? <img src={src} alt={label} className="w-full h-full object-cover" /> : <ImageIcon size={16} className="text-muted-foreground" />}
+        </div>
+        <div className="flex-1 space-y-1">
+          <input ref={inputRef} type="file" accept="image/*" className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImg(f, field); }} />
+          <Button variant="outline" size="sm" className="w-full text-xs"
+            onClick={() => inputRef.current?.click()} disabled={uploading === field}>
+            <ImagePlus size={13} /> {uploading === field ? "Subiendo..." : "Subir foto"}
+          </Button>
+          <Input value={src ?? ""} onChange={(e) => setCfg((c) => ({ ...c, [field]: e.target.value || null }))}
+            placeholder="o pegar URL" className="text-xs" />
+        </div>
+      </div>
+    </div>
+  );
+
+  if (loading) return <div className="text-center py-8 text-muted-foreground">Cargando...</div>;
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-5">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="bg-primary/10 rounded-full p-2"><LayoutTemplate size={22} className="text-primary" /></div>
+        <div>
+          <h2 className="font-heading font-bold text-lg">Página Mobiliario Infantil</h2>
+          <p className="text-xs text-muted-foreground">Edita el contenido y fotos de /mobiliario-infantil</p>
+        </div>
+      </div>
+
+      {/* Info principal */}
+      <div className="bg-white rounded-2xl border border-border p-5 shadow-sm space-y-4">
+        <p className="text-xs font-semibold text-muted-foreground uppercase">Información principal</p>
+        <div className="grid grid-cols-2 gap-3">
+          <div><Label className="text-xs">Badge / Etiqueta</Label><Input value={cfg.badge} onChange={(e) => setCfg((c) => ({ ...c, badge: e.target.value }))} className="mt-1 text-sm" /></div>
+          <div><Label className="text-xs">Precio por mesa ($)</Label><Input type="number" value={cfg.precio} onChange={(e) => setCfg((c) => ({ ...c, precio: parseInt(e.target.value) || 0 }))} className="mt-1 text-sm" /></div>
+        </div>
+        <div><Label className="text-xs">Título</Label><Input value={cfg.titulo} onChange={(e) => setCfg((c) => ({ ...c, titulo: e.target.value }))} className="mt-1 text-sm" /></div>
+        <div>
+          <Label className="text-xs">Descripción</Label>
+          <textarea value={cfg.descripcion} onChange={(e) => setCfg((c) => ({ ...c, descripcion: e.target.value }))}
+            className="mt-1 w-full text-sm border border-input rounded-md px-3 py-2 resize-none h-20 focus:outline-none focus:ring-2 focus:ring-ring" />
+        </div>
+        <div>
+          <Label className="text-xs">Características (una por línea)</Label>
+          <textarea value={featText} onChange={(e) => setFeatText(e.target.value)}
+            className="mt-1 w-full text-sm border border-input rounded-md px-3 py-2 resize-none h-28 focus:outline-none focus:ring-2 focus:ring-ring" />
+        </div>
+        <ImgField field="img_hero" label="Foto principal del producto" inputRef={heroRef} src={cfg.img_hero} />
+      </div>
+
+      {/* Estilos de sillas */}
+      <div className="bg-white rounded-2xl border border-border p-5 shadow-sm space-y-4">
+        <p className="text-xs font-semibold text-muted-foreground uppercase">Estilos de sillas</p>
+        <div className="grid sm:grid-cols-2 gap-5">
+          <div className="space-y-2">
+            <p className="text-xs font-bold text-primary">Opción A</p>
+            <div><Label className="text-xs">Título</Label><Input value={cfg.silla1_titulo} onChange={(e) => setCfg((c) => ({ ...c, silla1_titulo: e.target.value }))} className="mt-1 text-sm" /></div>
+            <div>
+              <Label className="text-xs">Descripción</Label>
+              <textarea value={cfg.silla1_desc} onChange={(e) => setCfg((c) => ({ ...c, silla1_desc: e.target.value }))}
+                className="mt-1 w-full text-sm border border-input rounded-md px-3 py-2 resize-none h-16 focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            <ImgField field="silla1_img" label="Foto Opción A" inputRef={s1Ref} src={cfg.silla1_img} />
+          </div>
+          <div className="space-y-2">
+            <p className="text-xs font-bold text-purple-600">Opción B</p>
+            <div><Label className="text-xs">Título</Label><Input value={cfg.silla2_titulo} onChange={(e) => setCfg((c) => ({ ...c, silla2_titulo: e.target.value }))} className="mt-1 text-sm" /></div>
+            <div>
+              <Label className="text-xs">Descripción</Label>
+              <textarea value={cfg.silla2_desc} onChange={(e) => setCfg((c) => ({ ...c, silla2_desc: e.target.value }))}
+                className="mt-1 w-full text-sm border border-input rounded-md px-3 py-2 resize-none h-16 focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            <ImgField field="silla2_img" label="Foto Opción B" inputRef={s2Ref} src={cfg.silla2_img} />
+          </div>
+        </div>
+      </div>
+
+      <Button variant="hero" className="w-full" onClick={save} disabled={saving}>
+        {saving ? "Guardando..." : "Guardar todos los cambios"}
+      </Button>
+    </div>
+  );
+};
+
 // ─── Login ───────────────────────────────────────────────────────────────────
 const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   const [password, setPassword] = useState("");
@@ -959,6 +1107,7 @@ const Admin = () => {
           <TabsTrigger value="productos">Productos</TabsTrigger>
           <TabsTrigger value="flete">Flete</TabsTrigger>
           <TabsTrigger value="galeria">Galería</TabsTrigger>
+          <TabsTrigger value="mobiliario">Mobiliario</TabsTrigger>
           <TabsTrigger value="historial" className="relative">
             Historial
             {completedReservations.length > 0 && (
@@ -1396,6 +1545,11 @@ const Admin = () => {
           <div className="border-t border-border mt-10 pt-10">
             <ServiciosAdmin />
           </div>
+        </TabsContent>
+
+        {/* ── Tab: Mobiliario ── */}
+        <TabsContent value="mobiliario">
+          <MobiliarioAdmin />
         </TabsContent>
 
         {/* ── Tab 7: Historial ── */}
