@@ -629,6 +629,69 @@ const GaleriaAdmin = () => {
   );
 };
 
+// ─── Link Generador de Reseña ─────────────────────────────────────────────────
+const LinkResena = () => {
+  const [nombre, setNombre] = useState("");
+  const [copiado, setCopiado] = useState(false);
+  const BASE = "https://pequesaurios.pages.dev/gracias";
+  const link = nombre.trim() ? `${BASE}?nombre=${encodeURIComponent(nombre.trim())}` : BASE;
+
+  const copiar = () => {
+    navigator.clipboard.writeText(link);
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 2500);
+  };
+
+  const wa = `https://wa.me/?text=${encodeURIComponent(
+    `¡Hola ${nombre.trim() || ""}! 🌟 Fue un placer ser parte de la fiesta de tu pequeño. Te compartimos un link para que nos cuentes cómo te fue:\n\n${link}\n\n¡Solo toma un minuto y nos ayuda muchísimo! 💕\n— Equipo Pequesaurios`
+  )}`;
+
+  return (
+    <div className="max-w-lg mx-auto space-y-5">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="bg-primary/10 rounded-full p-2"><MessageCircle size={22} className="text-primary" /></div>
+        <div>
+          <h2 className="font-heading font-bold text-lg">Generar link de reseña</h2>
+          <p className="text-xs text-muted-foreground">Personaliza el link con el nombre del cliente y envíalo por WhatsApp</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-border p-5 shadow-sm space-y-4">
+        <div>
+          <Label className="text-xs">Nombre del cliente</Label>
+          <Input
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            placeholder="Ej: Ana, María, Sofía..."
+            className="mt-1"
+            autoFocus
+          />
+        </div>
+
+        {/* Preview del link */}
+        <div className="bg-muted/50 rounded-xl px-3 py-2 text-xs text-muted-foreground break-all font-mono border border-border">
+          {link}
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Button variant="outline" className="w-full" onClick={copiar}>
+            <Copy size={15} /> {copiado ? "¡Copiado!" : "Copiar link"}
+          </Button>
+          <Button variant="whatsapp" className="w-full" asChild>
+            <a href={wa} target="_blank" rel="noopener noreferrer">
+              <MessageCircle size={15} /> Enviar por WhatsApp
+            </a>
+          </Button>
+        </div>
+
+        <p className="text-xs text-muted-foreground text-center">
+          El cliente verá la página personalizada con su nombre y podrá dejar su reseña.
+        </p>
+      </div>
+    </div>
+  );
+};
+
 // ─── Mobiliario Infantil Admin ────────────────────────────────────────────────
 type MobCfg = {
   badge: string; titulo: string; descripcion: string; precio: number;
@@ -1108,6 +1171,7 @@ const Admin = () => {
           <TabsTrigger value="flete">Flete</TabsTrigger>
           <TabsTrigger value="galeria">Galería</TabsTrigger>
           <TabsTrigger value="mobiliario">Mobiliario</TabsTrigger>
+          <TabsTrigger value="resenas">Reseñas</TabsTrigger>
           <TabsTrigger value="historial" className="relative">
             Historial
             {completedReservations.length > 0 && (
@@ -1550,6 +1614,11 @@ const Admin = () => {
         {/* ── Tab: Mobiliario ── */}
         <TabsContent value="mobiliario">
           <MobiliarioAdmin />
+        </TabsContent>
+
+        {/* ── Tab: Reseñas ── */}
+        <TabsContent value="resenas">
+          <LinkResena />
         </TabsContent>
 
         {/* ── Tab 7: Historial ── */}

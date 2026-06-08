@@ -63,9 +63,13 @@ type FotoGaleria = { id: string; url: string; alt: string; orden: number };
 
 
 /* ── Index Page ────────────────────────────────────────── */
+type DbResena = { id: string; nombre: string; rating: number; texto: string; created_at: string };
+
 const Index = () => {
   const [galeria, setGaleria] = useState<FotoGaleria[]>([]);
   const [serviciosCards, setServiciosCards] = useState<ServicioCard[]>(defaultServicios);
+  const [dbResenas, setDbResenas] = useState<DbResena[]>([]);
+  const [showAllResenas, setShowAllResenas] = useState(false);
   const heroImgRef = useRef<HTMLImageElement>(null);
 
   /* Scroll Reveal — re-runs when async data (galeria, serviciosCards) adds new elements */
@@ -112,6 +116,18 @@ const Index = () => {
       .order("orden")
       .then(({ data }: { data: FotoGaleria[] | null }) => {
         if (data && data.length > 0) setGaleria(data);
+      });
+  }, []);
+
+  /* Supabase reseñas */
+  useEffect(() => {
+    (supabase as any)
+      .from("resenas")
+      .select("id, nombre, rating, texto, created_at")
+      .eq("visible", true)
+      .order("created_at", { ascending: false })
+      .then(({ data }: { data: DbResena[] | null }) => {
+        if (data && data.length > 0) setDbResenas(data);
       });
   }, []);
 
@@ -416,27 +432,48 @@ const Index = () => {
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-5">
-            {testimonials.map((t, i) => (
-              <div key={t.name} className={`reveal reveal-delay-${i + 1} bg-[#1e1e4a] rounded-2xl p-7 border border-white/8`}>
-                <div className="flex gap-1 mb-5">
-                  {Array.from({ length: t.rating }).map((_, j) => (
-                    <Star key={j} size={16} className="fill-[#F5D76E] text-[#F5D76E]" />
+          {(() => {
+            const LIMIT = 3;
+            const source = dbResenas.length > 0
+              ? dbResenas.map((r) => ({ key: r.id, name: r.nombre, text: r.texto, rating: r.rating, initial: r.nombre[0]?.toUpperCase() ?? "?", role: "Cliente verificado" }))
+              : testimonials.map((t) => ({ key: t.name, name: t.name, text: t.text, rating: t.rating, initial: t.initial, role: t.role }));
+            const visible = showAllResenas ? source : source.slice(0, LIMIT);
+            return (
+              <>
+                <div className="grid md:grid-cols-3 gap-5">
+                  {visible.map((t, i) => (
+                    <div key={t.key} className={`reveal reveal-delay-${(i % 3) + 1} bg-[#1e1e4a] rounded-2xl p-7 border border-white/8`}>
+                      <div className="flex gap-1 mb-5">
+                        {Array.from({ length: t.rating }).map((_, j) => (
+                          <Star key={j} size={16} className="fill-[#F5D76E] text-[#F5D76E]" />
+                        ))}
+                      </div>
+                      <p className="text-white/80 text-sm leading-relaxed mb-6">"{t.text}"</p>
+                      <div className="flex items-center gap-3 pt-4 border-t border-white/10">
+                        <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                          {t.initial}
+                        </div>
+                        <div>
+                          <p className="font-body font-bold text-sm text-white">{t.name}</p>
+                          <p className="text-xs text-white/45">{t.role}</p>
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
-                <p className="text-white/80 text-sm leading-relaxed mb-6">"{t.text}"</p>
-                <div className="flex items-center gap-3 pt-4 border-t border-white/10">
-                  <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                    {t.initial}
+                {source.length > LIMIT && (
+                  <div className="text-center mt-8">
+                    <button
+                      onClick={() => setShowAllResenas((v) => !v)}
+                      className="text-sm font-semibold text-white/60 hover:text-white border border-white/20 hover:border-white/40 px-6 py-2.5 rounded-full transition-all duration-200"
+                    >
+                      {showAllResenas ? "Ver menos" : `Ver más reseñas (${source.length - LIMIT} más)`}
+                    </button>
                   </div>
-                  <div>
-                    <p className="font-body font-bold text-sm text-white">{t.name}</p>
-                    <p className="text-xs text-white/45">{t.role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </section>
 

@@ -20,6 +20,7 @@ import ActividadCreativa from "./pages/ActividadCreativa";
 import Yesitos from "./pages/Yesitos";
 import MobiliarioInfantil from "./pages/MobiliarioInfantil";
 import Pintacaritas from "./pages/Pintacaritas";
+import Gracias from "./pages/Gracias";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,27 +32,36 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
-        <Navbar />
-        <main className="min-h-screen">
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/servicios" element={<Servicios />} />
-            <Route path="/catalogo" element={<Catalogo />} />
-            <Route path="/cotizador" element={<Cotizador />} />
-            <Route path="/reservaciones" element={<Reservaciones />} />
-            <Route path="/contacto" element={<Contacto />} />
-            <Route path="/baby-play-zone" element={<BabyPlayZone />} />
-            <Route path="/actividad-creativa" element={<ActividadCreativa />} />
-            <Route path="/yesitos" element={<Yesitos />} />
-            <Route path="/mobiliario-infantil" element={<MobiliarioInfantil />} />
-            <Route path="/pintacaritas" element={<Pintacaritas />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/accion" element={<Accion />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
-        <Footer />
-        <WhatsAppButton />
+        <Routes>
+          {/* Página sin navbar/footer */}
+          <Route path="/gracias" element={<Gracias />} />
+          {/* Resto con layout completo */}
+          <Route path="/*" element={
+            <>
+              <Navbar />
+              <main className="min-h-screen">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/servicios" element={<Servicios />} />
+                  <Route path="/catalogo" element={<Catalogo />} />
+                  <Route path="/cotizador" element={<Cotizador />} />
+                  <Route path="/reservaciones" element={<Reservaciones />} />
+                  <Route path="/contacto" element={<Contacto />} />
+                  <Route path="/baby-play-zone" element={<BabyPlayZone />} />
+                  <Route path="/actividad-creativa" element={<ActividadCreativa />} />
+                  <Route path="/yesitos" element={<Yesitos />} />
+                  <Route path="/mobiliario-infantil" element={<MobiliarioInfantil />} />
+                  <Route path="/pintacaritas" element={<Pintacaritas />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="/accion" element={<Accion />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
+              <Footer />
+              <WhatsAppButton />
+            </>
+          } />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
