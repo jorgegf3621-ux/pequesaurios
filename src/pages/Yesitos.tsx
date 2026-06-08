@@ -65,8 +65,7 @@ const personajes = [
 
 const entrega = [
   "Soriana Fresnos",
-  "Soriana Sendero",
-  "Escobedo",
+  "Soriana Sendero Escobedo",
   "HEB Sendero",
   "HEB Concordia",
   "HEB Diego Díaz",
