@@ -16,7 +16,7 @@ const Footer = () => (
             <img src={logo} alt="Pequesaurios" className="h-14 w-14 rounded-2xl object-cover shadow-md" />
             <div>
               <p className="font-heading text-xl font-bold text-gradient-brand leading-tight">Pequesaurios</p>
-              <p className="text-xs text-muted-foreground">Baby Play Zone · Monterrey</p>
+              <p className="text-xs text-muted-foreground">Renta de mobiliario para fiestas · Monterrey</p>
             </div>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed max-w-[220px]">
