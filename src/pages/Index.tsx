@@ -332,7 +332,7 @@ const Index = () => {
           <div className="grid md:grid-cols-3 gap-5">
             {[
               { num: "01", title: "Cotiza", desc: "Mándanos un WhatsApp con tu fecha y lo que imaginas. Respondemos en menos de 1 hora.", bg: "#FBBDAA", text: "#5c2e18", muted: "#D4906E" },
-              { num: "02", title: "Reserva", desc: "Apartas tu fecha con 30%. Coordinamos detalles y te confirmamos por mail.", bg: "#A8DDD7", text: "#1a4540", muted: "#56b5af" },
+              { num: "02", title: "Reserva", desc: "Apartas tu fecha con 50%. Coordinamos detalles y te confirmamos por WhatsApp.", bg: "#A8DDD7", text: "#1a4540", muted: "#56b5af" },
               { num: "03", title: "Disfruta", desc: "Llegamos antes, montamos contigo, y al final levantamos todo. Tú solo disfrutas.", bg: "#FAE9A0", text: "#4a3800", muted: "#C9AD30" },
             ].map((step, i) => (
               <div
