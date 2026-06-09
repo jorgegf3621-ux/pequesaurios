@@ -151,7 +151,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="[overflow-x:clip]">
 
       {/* ── Hero ──────────────────────────────────────────── */}
       <section className="relative min-h-[88vh] flex items-center overflow-hidden">
@@ -274,8 +274,8 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex gap-4 pb-4 snap-x snap-mandatory px-4 sm:px-8 w-max mx-auto">
+        <div className="overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [touch-action:pan-x]">
+          <div className="flex gap-4 pb-4 px-4 sm:px-8 w-max mx-auto">
             {serviciosCards.map((s, i) => {
               const backs = [
                 { bg: "#FBBDAA", text: "#5c2e18" },
