@@ -57,6 +57,7 @@ const testimonials = [
 const features = [
   { icon: Shield, label: "100% Seguro", desc: "Materiales certificados para niños" },
   { icon: Clock, label: "Entrega puntual", desc: "Instalamos antes de tu evento" },
+  { icon: Sparkles, label: "Sin compromiso", desc: "Cotiza gratis, sin obligación de reservar" },
 ];
 
 type FotoGaleria = { id: string; url: string; alt: string; orden: number };
@@ -187,6 +188,12 @@ const Index = () => {
               Un espacio especial para los{" "}
               <em className="not-italic text-gradient-brand">más pequeños</em>
             </h1>
+
+            {/* Social proof */}
+            <div className="animate-fade-in animation-delay-300 inline-flex items-center gap-2 mb-6">
+              <span className="text-[#F5C842] text-sm tracking-tight">★★★★★</span>
+              <span className="text-sm font-body text-foreground/65">+200 fiestas montadas en Monterrey</span>
+            </div>
 
             <p className="animate-fade-in animation-delay-400 text-lg md:text-xl text-foreground/75 max-w-xl mb-10 font-body leading-relaxed">
               Creamos el área perfecta para tu fiesta: segura, linda y llena de diversión.
