@@ -244,6 +244,7 @@
   .huellitas    { background-size: 40px 20px; height: 18px; bottom: 12px; }
 }
 
+/* animación 1: movimiento horizontal del dino completo */
 @media (prefers-reduced-motion: no-preference) {
   .dino-walker { animation: dino-walk 25s linear infinite; }
 }
@@ -251,6 +252,29 @@
 @media (prefers-reduced-motion: reduce) {
   .dino-walker  { transform: translateX(10vw); animation: none; }
   .huellitas    { display: none; }
+}
+
+/* animación 2: caminar — patas delanteras y traseras alternadas */
+@keyframes leg-swing-a {
+  from { transform: rotate(-18deg); }
+  to   { transform: rotate(18deg); }
+}
+@keyframes leg-swing-b {
+  from { transform: rotate(18deg); }
+  to   { transform: rotate(-18deg); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .leg-f1, .leg-b2 {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: leg-swing-a 0.4s ease-in-out infinite alternate;
+  }
+  .leg-f2, .leg-b1 {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: leg-swing-b 0.4s ease-in-out infinite alternate;
+  }
 }
 
 /* ── Dino Esquinas (manada en secciones) ───────────────── */
