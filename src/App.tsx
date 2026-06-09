@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { DinoWalker } from "@/components/DinoDecor";
+import { DinoFX } from "@/components/DinoFX";
 import ScrollToTop from "@/components/ScrollToTop";
 import Index from "./pages/Index";
 import Servicios from "./pages/Servicios";
@@ -62,6 +63,7 @@ const App = () => (
               </main>
               <Footer />
               <DinoWalker />
+              <DinoFX />
               <WhatsAppButton />
             </>
           } />
