@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -10,12 +12,17 @@ import { supabase } from "@/integrations/supabase/client";
 const Contacto = () => {
   const { toast } = useToast();
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
+  const [privacidad, setPrivacidad] = useState(false);
   const [sending, setSending] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
       toast({ title: "Campos requeridos", description: "Por favor llena nombre, email y mensaje.", variant: "destructive" });
+      return;
+    }
+    if (!privacidad) {
+      toast({ title: "Aviso de Privacidad", description: "Debes aceptar el Aviso de Privacidad para continuar.", variant: "destructive" });
       return;
     }
     setSending(true);
@@ -62,7 +69,24 @@ const Contacto = () => {
             <Label htmlFor="message">Mensaje *</Label>
             <Textarea id="message" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="Cuéntanos sobre tu evento..." rows={5} maxLength={1000} />
           </div>
-          <Button type="submit" variant="hero" size="lg" className="w-full" disabled={sending}>
+          {/* Aviso de privacidad */}
+          <div className="flex items-start gap-3 rounded-xl border border-border px-4 py-3 bg-muted/30">
+            <Checkbox
+              id="privacidad-con"
+              checked={privacidad}
+              onCheckedChange={(v) => setPrivacidad(Boolean(v))}
+              className="mt-0.5"
+            />
+            <label htmlFor="privacidad-con" className="text-sm text-muted-foreground cursor-pointer leading-relaxed">
+              He leído y acepto el{" "}
+              <Link to="/aviso-privacidad" target="_blank" className="text-primary underline underline-offset-2 hover:text-primary/80">
+                Aviso de Privacidad
+              </Link>
+              {" "}y autorizo el uso de mis datos para responder a mi mensaje.
+            </label>
+          </div>
+
+          <Button type="submit" variant="hero" size="lg" className="w-full" disabled={sending || !privacidad}>
             <Send size={18} /> Enviar Mensaje
           </Button>
         </form>

@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { format, isSameDay, isBefore, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { PartyPopper, Phone, User, Mail, MessageSquare, Check, TableProperties } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -38,6 +40,7 @@ const Reservaciones = () => {
   const [email, setEmail] = useState("");
   const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
+  const [privacidad, setPrivacidad] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showMesaPrompt, setShowMesaPrompt] = useState(false);
 
@@ -109,6 +112,10 @@ const Reservaciones = () => {
 
     if (!date || !name || !phone || selectedPackages.length === 0) {
       toast.error("Por favor completa todos los campos obligatorios");
+      return;
+    }
+    if (!privacidad) {
+      toast.error("Debes aceptar el Aviso de Privacidad para continuar");
       return;
     }
 
@@ -272,12 +279,29 @@ const Reservaciones = () => {
           />
         </div>
 
+        {/* Aviso de privacidad */}
+        <div className="flex items-start gap-3 rounded-xl border border-border px-4 py-3 bg-muted/30">
+          <Checkbox
+            id="privacidad-res"
+            checked={privacidad}
+            onCheckedChange={(v) => setPrivacidad(Boolean(v))}
+            className="mt-0.5"
+          />
+          <label htmlFor="privacidad-res" className="text-sm text-muted-foreground cursor-pointer leading-relaxed">
+            He leído y acepto el{" "}
+            <Link to="/aviso-privacidad" target="_blank" className="text-primary underline underline-offset-2 hover:text-primary/80">
+              Aviso de Privacidad
+            </Link>
+            {" "}y autorizo el uso de mis datos para gestionar mi reservación.
+          </label>
+        </div>
+
         <Button
           type="submit"
           variant="hero"
           size="lg"
           className="w-full"
-          disabled={loading || !date}
+          disabled={loading || !date || !privacidad}
         >
           {loading ? "Enviando..." : "Enviar Reservacion"}
         </Button>
