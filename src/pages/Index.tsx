@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { DinoEsquina } from "@/components/DinoDecor";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Star, Sparkles, Shield, Clock, ChevronRight } from "lucide-react";
@@ -339,7 +340,7 @@ const Index = () => {
       </section>
 
       {/* ── Tres Pasos ───────────────────────────────────────── */}
-      <section className="py-20 bg-background">
+      <section className="py-20 bg-background relative">
         <div className="container mx-auto px-4">
           <div className="reveal text-center mb-16">
             <p className="font-script text-3xl text-primary mb-3">así de fácil</p>
@@ -368,6 +369,8 @@ const Index = () => {
             ))}
           </div>
         </div>
+        <DinoEsquina src="/dino-rosa-quieto.svg"        position="bottom-left" />
+        <DinoEsquina src="/dino-lavanda-quieto-izq.svg" position="bottom-right" />
       </section>
 
       {/* ── Gallery ──────────────────────────────────────────── */}
@@ -478,7 +481,9 @@ const Index = () => {
       </section>
 
       {/* ── CTA ──────────────────────────────────────────────── */}
-      <section className="py-28 text-center bg-background">
+      <section className="py-28 text-center bg-background relative">
+        <DinoEsquina src="/dino-lavanda-quieto.svg"    position="bottom-left"  size={88} />
+        <DinoEsquina src="/dino-rosa-quieto-izq.svg"   position="bottom-right" size={88} />
         <div className="container mx-auto px-4">
           <div className="reveal">
             <p className="font-script text-3xl text-primary mb-5">¿lista, mamá?</p>

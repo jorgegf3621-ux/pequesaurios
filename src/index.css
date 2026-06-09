@@ -207,3 +207,67 @@
   will-change: transform;
   transform-style: preserve-3d;
 }
+
+/* ── Dino Walker (caminante fijo) ──────────────────────── */
+@keyframes dino-walk {
+  from { transform: translateX(-120px); }
+  to   { transform: translateX(calc(100vw + 120px)); }
+}
+
+.huellitas {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 16px;
+  height: 24px;
+  z-index: 38;
+  pointer-events: none;
+  opacity: 0.65;
+  background-repeat: repeat-x;
+  background-size: 54px 26px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 28'%3E%3Cg fill='%23d9c6ac'%3E%3Cellipse cx='12' cy='20' rx='6.5' ry='5.5'/%3E%3Cellipse cx='6' cy='9' rx='2.4' ry='3.8'/%3E%3Cellipse cx='12' cy='6' rx='2.4' ry='4'/%3E%3Cellipse cx='18' cy='9' rx='2.4' ry='3.8'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.dino-walker {
+  position: fixed;
+  bottom: 44px;
+  left: 0;
+  pointer-events: none;
+  z-index: 40;
+  width: 72px;
+  height: auto;
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .dino-walker  { width: 44px; bottom: 32px; }
+  .huellitas    { background-size: 40px 20px; height: 18px; bottom: 12px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dino-walker { animation: dino-walk 25s linear infinite; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dino-walker  { transform: translateX(10vw); animation: none; }
+  .huellitas    { display: none; }
+}
+
+/* ── Dino Esquinas (manada en secciones) ───────────────── */
+.dino-esquina {
+  position: absolute;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.5s ease,
+              transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dino-esquina.bottom-left  { bottom: -4px; left: -4px;  transform: translate(-28px, 28px); }
+.dino-esquina.bottom-right { bottom: -4px; right: -4px; transform: translate(28px, 28px); }
+
+.dino-esquina.peeked { opacity: 1; transform: translate(0, 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dino-esquina { opacity: 1; transform: translate(0, 0) !important; transition: none; }
+}

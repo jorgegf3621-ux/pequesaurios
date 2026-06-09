@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import { DinoWalker } from "@/components/DinoDecor";
 import ScrollToTop from "@/components/ScrollToTop";
 import Index from "./pages/Index";
 import Servicios from "./pages/Servicios";
@@ -58,6 +59,7 @@ const App = () => (
                 </Routes>
               </main>
               <Footer />
+              <DinoWalker />
               <WhatsAppButton />
             </>
           } />
