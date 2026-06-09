@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { format, parseISO } from "date-fns";
@@ -37,27 +37,72 @@ type Props = {
   prefill?: ContratoPrefill;
 };
 
-// Valores de reposición para penalizaciones por daños
-const SERVICIOS_OPCIONES = [
+type Componente = { nombre: string; cantidad: number; valorUnitario: number };
+type ServicioOpcion = { id: string; label: string; componentes: Componente[] };
+
+const calcTotal = (comp: Componente[]) =>
+  comp.reduce((s, c) => s + c.cantidad * c.valorUnitario, 0);
+
+const INFLABLE_COMP: Componente[] = [
+  { nombre: "Inflable castillo 3×3 m",       cantidad: 1, valorUnitario: 6000 },
+  { nombre: "Motor del inflable",             cantidad: 1, valorUnitario: 1000 },
+  { nombre: "Alberca de pelotas (conjunto)",  cantidad: 1, valorUnitario: 1300 },
+  { nombre: "Letrero del inflable",           cantidad: 1, valorUnitario:  300 },
+];
+const MESA_MADERA_COMP: Componente[] = [
+  { nombre: "Mesa de madera blanca",  cantidad: 1, valorUnitario: 4500 },
+  { nombre: "Silla de madera",        cantidad: 8, valorUnitario:  500 },
+];
+const MESA_PLASTICO_COMP: Componente[] = [
+  { nombre: "Mesa de madera blanca",  cantidad: 1, valorUnitario: 4500 },
+  { nombre: "Silla de plástico",      cantidad: 6, valorUnitario:  300 },
+];
+
+const SERVICIOS_OPCIONES: ServicioOpcion[] = [
   // Baby Play Zone
-  { id: "bpz-inflable",      label: "BPZ · Inflable Castillo (solo)",                valor: 6000 },
-  { id: "bpz-basico",        label: "BPZ · Paquete Básico (inflable + mesita)",      valor: 6000 },
-  { id: "bpz-plus",          label: "BPZ · Paquete Plus (inflable + mesita arte)",   valor: 6000 },
-  // Inflables
-  { id: "inflable",          label: "Inflable Castillo Blanco 3×3 m",                valor: 6000 },
+  { id: "bpz-inflable", label: "BPZ · Inflable Castillo (solo)",
+    componentes: [...INFLABLE_COMP] },
+  { id: "bpz-basico",   label: "BPZ · Paquete Básico (inflable + mesita)",
+    componentes: [...INFLABLE_COMP, ...MESA_MADERA_COMP] },
+  { id: "bpz-plus",     label: "BPZ · Paquete Plus (inflable + mesita arte)",
+    componentes: [...INFLABLE_COMP, ...MESA_MADERA_COMP] },
+  // Inflable suelto
+  { id: "inflable", label: "Inflable Castillo Blanco 3×3 m",
+    componentes: [...INFLABLE_COMP] },
   // Mesas
-  { id: "mesa-pastel",       label: "Mesita Infantil Pastel (6 sillas plástico)",    valor: 6300 },
-  { id: "mesa-blanca",       label: "Mesita Blanca (8 sillas madera)",               valor: 8500 },
-  { id: "mesa-extra",        label: "Mesa extra (segunda mesa)",                     valor: 5000 },
+  { id: "mesa-pastel",         label: "Mesita Infantil Pastel (6 sillas plástico)",
+    componentes: [...MESA_PLASTICO_COMP] },
+  { id: "mesa-blanca",         label: "Mesita Blanca (8 sillas madera)",
+    componentes: [...MESA_MADERA_COMP] },
+  { id: "mesa-extra-plastico", label: "Mesa extra (6 sillas plástico)",
+    componentes: [...MESA_PLASTICO_COMP] },
+  { id: "mesa-extra-madera",   label: "Mesa extra (8 sillas madera)",
+    componentes: [...MESA_MADERA_COMP] },
+  // Caballetes
+  { id: "cab-dino-baby",      label: "Caballetes · Paquete Dino Baby",
+    componentes: [{ nombre: "Silla de plástico (sillitas)", cantidad: 6, valorUnitario: 300 }] },
+  { id: "cab-dino-creativo",  label: "Caballetes · Paquete Dino Creativo (+ yesitos)",
+    componentes: [
+      { nombre: "Silla de plástico (sillitas)", cantidad: 6, valorUnitario: 300 },
+      ...MESA_PLASTICO_COMP,
+    ] },
+  { id: "cab-dino-fun",       label: "Caballetes · Paquete Dino Fun (+ pintacaritas)",
+    componentes: [{ nombre: "Silla de plástico (sillitas)", cantidad: 6, valorUnitario: 300 }] },
   // Yesitos
-  { id: "yesito-basico",     label: "Kit Yesitos Básico (1 yesito)",                 valor: 150  },
-  { id: "yesito-intermedio", label: "Kit Yesitos Intermedio (2 yesitos)",            valor: 200  },
-  { id: "yesito-completo",   label: "Kit Yesitos Completo (3 yesitos)",              valor: 250  },
+  { id: "yesito-basico",     label: "Kit Yesitos Básico (1 yesito)",
+    componentes: [{ nombre: "Kit Yesitos Básico",     cantidad: 1, valorUnitario: 150 }] },
+  { id: "yesito-intermedio", label: "Kit Yesitos Intermedio (2 yesitos)",
+    componentes: [{ nombre: "Kit Yesitos Intermedio", cantidad: 1, valorUnitario: 200 }] },
+  { id: "yesito-completo",   label: "Kit Yesitos Completo (3 yesitos)",
+    componentes: [{ nombre: "Kit Yesitos Completo",   cantidad: 1, valorUnitario: 250 }] },
   // Extras
-  { id: "arte",              label: "Arte en Mesa",                                  valor: 300  },
-  { id: "globos",            label: "Guirnalda de Globos",                           valor: 400  },
+  { id: "arte",        label: "Arte en Mesa",
+    componentes: [{ nombre: "Arte en Mesa",        cantidad: 1, valorUnitario: 300 }] },
+  { id: "globos",      label: "Guirnalda de Globos",
+    componentes: [{ nombre: "Guirnalda de Globos", cantidad: 1, valorUnitario: 400 }] },
   // Servicios
-  { id: "pintacaritas",      label: "Pintacaritas (1.5 hrs)",                        valor: 800  },
+  { id: "pintacaritas", label: "Pintacaritas (1.5 hrs)",
+    componentes: [{ nombre: "Pintacaritas (servicio)", cantidad: 1, valorUnitario: 800 }] },
 ];
 
 // ── Plantilla visual ──────────────────────────────────────────────────────────
@@ -122,22 +167,48 @@ const ContratoTemplate = ({
 
       {/* Artículos */}
       <div style={{ marginBottom: 16 }}>
-        <div style={{ fontWeight: 700, color: pink, fontSize: 10, textTransform: "uppercase", marginBottom: 8, letterSpacing: 0.5 }}>Artículos rentados</div>
+        <div style={{ fontWeight: 700, color: pink, fontSize: 10, textTransform: "uppercase", marginBottom: 8, letterSpacing: 0.5 }}>Artículos rentados — desglose de reposición</div>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: pink }}>
               <th style={{ color: "#fff", padding: "7px 10px", textAlign: "left", fontWeight: 600 }}>Artículo</th>
-              <th style={{ color: "#fff", padding: "7px 10px", textAlign: "right", fontWeight: 600 }}>Valor de reposición</th>
+              <th style={{ color: "#fff", padding: "7px 10px", textAlign: "center", fontWeight: 600, width: 40 }}>Cant.</th>
+              <th style={{ color: "#fff", padding: "7px 10px", textAlign: "right", fontWeight: 600, width: 90 }}>Val. unitario</th>
+              <th style={{ color: "#fff", padding: "7px 10px", textAlign: "right", fontWeight: 600, width: 90 }}>Subtotal</th>
             </tr>
           </thead>
           <tbody>
             {serviciosSeleccionados.map((id) => {
               const s = SERVICIOS_OPCIONES.find((o) => o.id === id);
+              if (!s) return null;
+              const total = calcTotal(s.componentes);
               return (
-                <tr key={id}>
-                  <td style={cell}>{s?.label ?? id}</td>
-                  <td style={{ ...cell, textAlign: "right", color: "#666" }}>${(s?.valor ?? 0).toLocaleString()} MXN</td>
-                </tr>
+                <React.Fragment key={id}>
+                  {/* Encabezado del paquete */}
+                  <tr style={{ background: "#fce0ee" }}>
+                    <td colSpan={4} style={{ padding: "5px 10px", fontWeight: 700, color: "#c0397a", fontSize: 10 }}>
+                      {s.label}
+                    </td>
+                  </tr>
+                  {/* Componentes individuales */}
+                  {s.componentes.map((c, ci) => (
+                    <tr key={ci} style={{ background: ci % 2 === 0 ? "#fff" : "#fdf2f7" }}>
+                      <td style={{ ...cell, paddingLeft: 18 }}>{c.nombre}</td>
+                      <td style={{ ...cell, textAlign: "center", color: "#666" }}>×{c.cantidad}</td>
+                      <td style={{ ...cell, textAlign: "right", color: "#666" }}>${c.valorUnitario.toLocaleString()}</td>
+                      <td style={{ ...cell, textAlign: "right" }}>${(c.cantidad * c.valorUnitario).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                  {/* Total del paquete */}
+                  <tr style={{ background: "#fff5f9", borderTop: "1.5px solid #f4c0d8" }}>
+                    <td colSpan={3} style={{ padding: "5px 10px", textAlign: "right", fontSize: 10, color: "#c0397a", fontWeight: 700 }}>
+                      Valor total de reposición del paquete:
+                    </td>
+                    <td style={{ padding: "5px 10px", textAlign: "right", fontWeight: 800, color: "#c0397a" }}>
+                      ${total.toLocaleString()} MXN
+                    </td>
+                  </tr>
+                </React.Fragment>
               );
             })}
           </tbody>
@@ -331,7 +402,7 @@ const Contrato = ({ reservation, open, onClose, prefill }: Props) => {
                     <Checkbox checked={serviciosSeleccionados.includes(s.id)} onCheckedChange={() => toggleServicio(s.id)} />
                     <div className="flex-1">
                       <span className="text-sm">{s.label}</span>
-                      <span className="text-xs text-muted-foreground ml-2">(val. reposición: ${s.valor.toLocaleString()})</span>
+                      <span className="text-xs text-muted-foreground ml-2">(val. reposición: ${calcTotal(s.componentes).toLocaleString()})</span>
                     </div>
                   </div>
                 ))}
