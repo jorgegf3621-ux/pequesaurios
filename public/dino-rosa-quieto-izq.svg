@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 165" role="img" aria-label="Dino Pequesaurios" overflow="visible">
+  <g transform="translate(230,0) scale(-1,1)">
+  <ellipse cx="112" cy="156" rx="74" ry="9" fill="#503c5a" fill-opacity="0.13"></ellipse>
+  <g class="dino-legs-back">
+    <g><rect x="58" y="108" width="20" height="44" rx="10" fill="#C393A0"></rect><ellipse cx="68" cy="150" rx="13" ry="8" fill="#C393A0"></ellipse></g>
+    <g><rect x="120" y="108" width="20" height="44" rx="10" fill="#C393A0"></rect><ellipse cx="130" cy="150" rx="13" ry="8" fill="#C393A0"></ellipse></g>
+  </g>
+  <path d="M58 76 C28 70 6 92 3 110 C1 119 9 121 15 113 C27 98 46 100 64 112 C70 96 72 84 58 76 Z" fill="#F4B8C8"></path>
+  <ellipse cx="96" cy="96" rx="64" ry="44" fill="#F4B8C8"></ellipse>
+  <ellipse cx="92" cy="112" rx="46" ry="26" fill="#FBD9E2"></ellipse>
+  <path d="M52 60 q8 -16 17 -2 z" fill="#A8DDD7"></path>
+  <path d="M74 50 q9 -18 18 -1 z" fill="#A8DDD7"></path>
+  <path d="M98 48 q9 -18 18 -2 z" fill="#A8DDD7"></path>
+  <path d="M124 54 q8 -16 16 0 z" fill="#A8DDD7"></path>
+  <path d="M126 84 C140 50 150 30 176 30 C196 30 200 56 184 64 C168 56 156 70 152 96 Z" fill="#F4B8C8"></path>
+  <g>
+    <ellipse cx="184" cy="34" rx="26" ry="22" fill="#F4B8C8"></ellipse>
+    <path d="M200 26 q22 0 24 12 q-4 10 -24 6 z" fill="#F4B8C8"></path>
+    <circle cx="216" cy="33" r="1.8" fill="#9b5e6e"></circle>
+    <circle cx="188" cy="30" r="7.5" fill="#fff"></circle>
+    <circle cx="190" cy="31" r="4" fill="#3a2e44"></circle>
+    <circle cx="188.5" cy="29" r="1.5" fill="#fff"></circle>
+    <ellipse cx="176" cy="42" rx="6.5" ry="4.5" fill="#A8DDD7" fill-opacity="0.65"></ellipse>
+    <path d="M198 44 q8 5 15 1" fill="none" stroke="#5b4660" stroke-width="2.2" stroke-linecap="round"></path>
+    <path d="M170 16 q6 -14 13 -1 z" fill="#A8DDD7"></path>
+  </g>
+  <g class="dino-legs-front">
+    <g><rect x="66" y="110" width="22" height="46" rx="11" fill="#F4B8C8"></rect><ellipse cx="77" cy="154" rx="14" ry="8.5" fill="#D7A2B0"></ellipse></g>
+    <g><rect x="128" y="110" width="22" height="46" rx="11" fill="#F4B8C8"></rect><ellipse cx="139" cy="154" rx="14" ry="8.5" fill="#D7A2B0"></ellipse></g>
+  </g>
+</g>
+</svg>
