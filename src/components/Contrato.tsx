@@ -46,8 +46,8 @@ const SERVICIOS_OPCIONES = [
   // Inflables
   { id: "inflable",          label: "Inflable Castillo Blanco 3×3 m",                valor: 6000 },
   // Mesas
-  { id: "mesa-pastel",       label: "Mesita Infantil Pastel (6 sillas plástico)",    valor: 5000 },
-  { id: "mesa-blanca",       label: "Mesita Blanca (8 sillas madera)",               valor: 5000 },
+  { id: "mesa-pastel",       label: "Mesita Infantil Pastel (6 sillas plástico)",    valor: 6300 },
+  { id: "mesa-blanca",       label: "Mesita Blanca (8 sillas madera)",               valor: 8500 },
   { id: "mesa-extra",        label: "Mesa extra (segunda mesa)",                     valor: 5000 },
   // Yesitos
   { id: "yesito-basico",     label: "Kit Yesitos Básico (1 yesito)",                 valor: 150  },
@@ -199,8 +199,12 @@ const ContratoTemplate = ({
               { s: "Daño mayor que inutiliza el artículo (daño total)", c: "100% del valor de reposición del artículo" },
               { s: "Artículo extraviado o robado", c: "100% del valor de reposición del artículo" },
               { s: "Inflable con suciedad excesiva que requiere lavado especial", c: "$300 – $500 MXN adicionales" },
+              { s: "Mesa sola (sin sillas) — pérdida o daño total", c: "$4,500 MXN" },
               { s: "Silla de plástico rota por mal uso", c: "$300 MXN por pieza" },
               { s: "Silla de madera rota por mal uso", c: "$500 MXN por pieza" },
+              { s: "Letrero del inflable — pérdida o daño total", c: "$300 MXN" },
+              { s: "Pelotas — pérdida o destrucción total del conjunto", c: "$1,300 MXN" },
+              { s: "Motor del inflable — daño o pérdida", c: "$1,000 MXN" },
               { s: "Retención del equipo más allá del horario acordado sin aviso", c: "$200 MXN por hora adicional" },
             ].map((r, i) => (
               <tr key={i} style={{ background: i % 2 === 0 ? "#fff" : "#fdf2f7" }}>
