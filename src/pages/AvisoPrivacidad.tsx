@@ -1,7 +1,7 @@
 import React from "react";
 
-const RAZON_SOCIAL = "[RAZÓN SOCIAL PENDIENTE DE REGISTRO]";
-const DOMICILIO   = "[DOMICILIO FISCAL PENDIENTE DE REGISTRO], Monterrey, Nuevo León";
+const RAZON_SOCIAL = "Jorge Gomez Fuentes";
+const DOMICILIO   = "Calle Puerto Mazatlán 4233, Colonia Las Brisas 4to Sector, Monterrey, Nuevo León, C.P. 64790, México";
 const EMAIL_ARCO  = "pequesauriosmx@gmail.com";
 
 const Section = ({ num, title, children }: { num: string; title: string; children: React.ReactNode }) => (
@@ -37,12 +37,6 @@ export default function AvisoPrivacidad() {
           física a quien pertenecen, así como el tratamiento y la finalidad para los cuales fueron o
           son obtenidos.
         </p>
-
-        <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 mb-8 text-sm text-amber-800">
-          <strong>Nota:</strong> Pequesaurios se encuentra en proceso de constitución legal formal.
-          Los datos de razón social y domicilio fiscal serán actualizados en este aviso una vez
-          concluido dicho proceso.
-        </div>
 
         <Section num="1" title="Datos de Clientes">
           <p>
