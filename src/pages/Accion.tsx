@@ -95,14 +95,14 @@ const Accion = () => {
       let mensaje = "";
       if (estado === "confirmada") {
         mensaje =
-          `¡Hola ${nombre}! Queremos confirmarte que tu reservación con *Pequesaurios* está *confirmada*.\n\n` +
-          `📅 *Fecha:* ${fechaLegible}\n` +
-          `🎪 *Paquete:* ${paquete}\n\n` +
-          `Si tienes alguna duda o cambio, escríbenos aquí mismo. ¡Nos vemos pronto!`;
+          `\u{2705} ¡Hola ${nombre}! Queremos confirmarte que tu reservación con *Pequesaurios* está *confirmada*.\n\n` +
+          `\u{1F4C5} *Fecha:* ${fechaLegible}\n` +
+          `\u{1F381} *Paquete:* ${paquete}\n\n` +
+          `Si tienes alguna duda o cambio, escríbenos aquí mismo. \u{1F38A}`;
       } else {
         mensaje =
           `Hola ${nombre}, te informamos que tu reservación del *${fechaLegible}* con *Pequesaurios* ha sido *cancelada*.\n\n` +
-          `Si deseas reagendar o tienes alguna pregunta, con gusto te ayudamos. 😊`;
+          `Si deseas reagendar o tienes alguna pregunta, con gusto te ayudamos.`;
       }
 
       const phone = reservation.customer_phone.replace(/\D/g, "");
