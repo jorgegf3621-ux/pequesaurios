@@ -23,6 +23,7 @@ import MobiliarioInfantil from "./pages/MobiliarioInfantil";
 import Pintacaritas from "./pages/Pintacaritas";
 import Gracias from "./pages/Gracias";
 import NotFound from "./pages/NotFound";
+import AvisoPrivacidad from "./pages/AvisoPrivacidad";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
                   <Route path="/pintacaritas" element={<Pintacaritas />} />
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/accion" element={<Accion />} />
+                  <Route path="/aviso-privacidad" element={<AvisoPrivacidad />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>

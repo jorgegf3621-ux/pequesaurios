@@ -91,10 +91,14 @@ const Footer = () => (
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-border/60 py-5">
+      <div className="border-t border-border/60 py-5 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
         <p className="text-center text-xs text-muted-foreground">
           © {new Date().getFullYear()} Pequesaurios · Todos los derechos reservados
         </p>
+        <span className="hidden sm:block text-muted-foreground/40 text-xs">·</span>
+        <Link to="/aviso-privacidad" className="text-xs text-muted-foreground hover:text-primary transition-colors">
+          Aviso de Privacidad
+        </Link>
       </div>
     </div>
   </footer>
