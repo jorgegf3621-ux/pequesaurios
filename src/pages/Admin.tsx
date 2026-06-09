@@ -1009,7 +1009,7 @@ const Admin = () => {
     const notasLinea = r.notes ? `\n*Detalle:* ${r.notes}` : "";
 
     const mensaje = tipo === "confirmada"
-      ? `\u{1F389} ¡Hola ${nombre}! Queremos confirmarte que recibimos tu reservación con *Pequesaurios*\n\n\u{1F4C5} *Fecha:* ${fecha}\n\u{1F6CD} *Servicios:* ${paquete}${notasLinea}\n\nPara agendar tu espacio y confirmar la reservación es necesario realizar el anticipo del *50%* a la siguiente cuenta:\n\n\u{1F4B3} *Nombre:* Elena Estefania Saldivar Martinez\n\u{1F3E6} *Banco:* BBVA\n\u{1F4B4} *Tarjeta:* 4152 3141 0801 077\n\u{1F4DD} *Concepto:* ${r.customer_name}\n\nPor favor envíanos foto del comprobante de transferencia para confirmar tu lugar.\n\nSi tienes alguna duda o cambio, escríbenos aquí mismo. \u{1F38A}`
+      ? `¡Hola ${nombre}! Queremos confirmarte que recibimos tu reservación con *Pequesaurios*\n\n*Fecha:* ${fecha}\n*Servicios:* ${paquete}${notasLinea}\n\nPara agendar tu espacio y confirmar la reservación es necesario realizar el anticipo del *50%* a la siguiente cuenta:\n\n*Nombre:* Elena Estefania Saldivar Martinez\n*Banco:* BBVA\n*Tarjeta:* 4152 3141 0801 077\n*Concepto:* ${r.customer_name}\n\nPor favor envianos foto del comprobante de transferencia para confirmar tu lugar.\n\nSi tienes alguna duda o cambio, escribenos aqui mismo. Nos vemos pronto!`
       : `Hola ${nombre}, te informamos que tu reservación del *${fecha}* con *Pequesaurios* ha sido *cancelada*.\n\nSi deseas reagendar o tienes alguna pregunta, con gusto te ayudamos.`;
 
     const phone = r.customer_phone.replace(/\D/g, "");
@@ -1494,7 +1494,7 @@ const Admin = () => {
                             if (!c.read) markContactRead(c.id);
                             const phone = c.phone.replace(/\D/g, "");
                             const phoneWithCode = phone.startsWith("52") ? phone : `52${phone}`;
-                            const msg = encodeURIComponent(`\u{1F44B} ¡Hola ${c.name.split(" ")[0]}! Gracias por contactar a *Pequesaurios*. `);
+                            const msg = encodeURIComponent(`¡Hola ${c.name.split(" ")[0]}! Gracias por contactar a *Pequesaurios*. `);
                             window.open(`https://wa.me/${phoneWithCode}?text=${msg}`, "_blank");
                           }}
                         >

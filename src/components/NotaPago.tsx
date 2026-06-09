@@ -610,23 +610,23 @@ const NotaPago = ({ reservation, open, onClose, prefill }: Props) => {
                 const phoneWithCode = phone.startsWith("52") ? phone : `52${phone}`;
                 const pendienteWA = total - anticipo;
                 const msg = [
-                  `\u{1F389} ¡Hola ${nombre}!`,
-                  `Tu reservación con *Pequesaurios* ya quedó *confirmada y agendada* \u{2705}`,
+                  `¡Hola ${nombre}!`,
+                  `Tu reservación con *Pequesaurios* ya quedó *confirmada y agendada*`,
                   ``,
-                  `\u{1F4C5} *Fecha:* ${fecha}`,
-                  hora ? `\u{1F550} *Hora:* ${hora}` : null,
-                  address ? `\u{1F4CD} *Dirección:* ${address}` : null,
+                  `*Fecha:* ${fecha}`,
+                  hora ? `*Hora:* ${hora}` : null,
+                  address ? `*Dirección:* ${address}` : null,
                   ``,
                   `*Servicios contratados:*`,
                   serviciosTexto,
-                  flete > 0 ? `- Flete — $${flete.toLocaleString()}` : null,
+                  flete > 0 ? `- Flete: $${flete.toLocaleString()}` : null,
                   ``,
-                  `\u{1F4B0} *Total:* $${total.toLocaleString()} MXN`,
-                  `\u{1F4B3} *Anticipo (50%):* $${anticipo.toLocaleString()} MXN`,
-                  `\u{23F3} *Pendiente el día del evento:* $${pendienteWA.toLocaleString()} MXN`,
+                  `*Total:* $${total.toLocaleString()} MXN`,
+                  `*Anticipo (50%):* $${anticipo.toLocaleString()} MXN`,
+                  `*Pendiente el dia del evento:* $${pendienteWA.toLocaleString()} MXN`,
                   ``,
-                  `Te compartimos tu nota de pago adjunta \u{1F4C4}`,
-                  `Cualquier duda, escríbenos aquí mismo. \u{1F388}`,
+                  `Te compartimos tu nota de pago adjunta.`,
+                  `Cualquier duda, escribenos aqui mismo. Nos vemos pronto!`,
                 ].filter((l) => l !== null).join("\n");
                 window.open(`https://wa.me/${phoneWithCode}?text=${encodeURIComponent(msg)}`, "_blank");
               }}

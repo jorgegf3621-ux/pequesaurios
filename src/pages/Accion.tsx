@@ -95,10 +95,10 @@ const Accion = () => {
       let mensaje = "";
       if (estado === "confirmada") {
         mensaje =
-          `\u{2705} ¡Hola ${nombre}! Queremos confirmarte que tu reservación con *Pequesaurios* está *confirmada*.\n\n` +
-          `\u{1F4C5} *Fecha:* ${fechaLegible}\n` +
-          `\u{1F381} *Paquete:* ${paquete}\n\n` +
-          `Si tienes alguna duda o cambio, escríbenos aquí mismo. \u{1F38A}`;
+          `¡Hola ${nombre}! Queremos confirmarte que tu reservación con *Pequesaurios* está *confirmada*.\n\n` +
+          `*Fecha:* ${fechaLegible}\n` +
+          `*Paquete:* ${paquete}\n\n` +
+          `Si tienes alguna duda o cambio, escribenos aqui mismo. Nos vemos pronto!`;
       } else {
         mensaje =
           `Hola ${nombre}, te informamos que tu reservación del *${fechaLegible}* con *Pequesaurios* ha sido *cancelada*.\n\n` +
