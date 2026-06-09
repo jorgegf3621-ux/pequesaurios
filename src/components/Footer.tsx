@@ -73,7 +73,7 @@ const Footer = () => (
             <span className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
               <Clock size={14} className="text-primary" />
             </span>
-            Lun – Vie: 9:00 – 18:00
+            Lun – Vie: 9:00 – 18:00 (solo cotizaciones)
           </p>
           <p className="text-sm text-muted-foreground pl-9">Sáb y Dom: Eventos</p>
           <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 pl-9">

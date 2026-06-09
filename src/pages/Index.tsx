@@ -57,7 +57,6 @@ const testimonials = [
 const features = [
   { icon: Shield, label: "100% Seguro", desc: "Materiales certificados para niños" },
   { icon: Clock, label: "Entrega puntual", desc: "Instalamos antes de tu evento" },
-  { icon: Sparkles, label: "Todo incluido", desc: "Setup y retiro sin costo extra" },
 ];
 
 type FotoGaleria = { id: string; url: string; alt: string; orden: number };
