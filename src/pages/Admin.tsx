@@ -647,13 +647,7 @@ const LinkResena = () => {
   const [copiado, setCopiado] = useState(false);
 
   const BASE = "https://pequesaurios.pages.dev/gracias";
-  const params = new URLSearchParams();
-  if (nombre.trim()) params.set("nombre", nombre.trim());
-  if (tipo)          params.set("tipo",   tipo);
-  if (nino.trim())   params.set("nino",   nino.trim());
-  if (edad.trim())   params.set("edad",   edad.trim());
-  const qs = params.toString();
-  const link = qs ? `${BASE}?${qs}` : BASE;
+  const link = nombre.trim() ? `${BASE}?nombre=${encodeURIComponent(nombre.trim())}` : BASE;
 
   const copiar = () => {
     navigator.clipboard.writeText(link);

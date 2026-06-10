@@ -8,22 +8,9 @@ import logo from "@/assets/logo.png";
 const FACEBOOK_URL = "https://www.facebook.com/share/1DvDRmqAGB/?mibextid=wwXIfr";
 const LABELS = ["", "Podría mejorar", "Regular", "Bien", "Muy bien", "¡Excelente!"];
 
-type Tipo = "cumpleanos" | "bautizo" | "sin-motivo" | "";
-
-function getSubtitulo(tipo: Tipo, nino: string) {
-  const n = nino.trim();
-  if (tipo === "cumpleanos") return n ? `Fue un placer celebrar el cumpleaños de ${n}.` : "Fue un placer celebrar este cumpleaños tan especial.";
-  if (tipo === "bautizo")    return n ? `Fue un placer ser parte del bautizo de ${n}.`   : "Fue un placer ser parte de este bautizo tan especial.";
-  if (tipo === "sin-motivo") return n ? `Fue un placer compartir este momento especial con ${n}.` : "Fue un placer ser parte de tu evento especial.";
-  return n ? `Fue un placer ser parte del evento de ${n}.` : "Fue un placer ser parte de tu evento especial.";
-}
-
 const Gracias = () => {
   const [searchParams] = useSearchParams();
   const nombre = searchParams.get("nombre") || "amiga";
-  const tipo   = (searchParams.get("tipo") || "") as Tipo;
-  const nino   = searchParams.get("nino") || "";
-  const edad   = searchParams.get("edad") || "";
 
   const [rating, setRating]         = useState(0);
   const [hover, setHover]           = useState(0);
@@ -33,9 +20,7 @@ const Gracias = () => {
 
   const isHighRating = rating >= 4;
 
-  const nombreFirma = nino.trim()
-    ? `${nombre}${edad.trim() ? `, mamá de ${nino.trim()} (${edad.trim()} años)` : `, mamá de ${nino.trim()}`}`
-    : nombre;
+  const nombreFirma = nombre;
 
   const handleSubmit = async () => {
     if (!rating) return;
@@ -77,7 +62,7 @@ const Gracias = () => {
             ¡Gracias, {nombre}!
           </h1>
           <p className="text-muted-foreground leading-relaxed">
-            {getSubtitulo(tipo, nino)}
+            Fue un placer ser parte de tu evento especial.
           </p>
         </div>
 
