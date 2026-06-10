@@ -27,7 +27,7 @@ const paquetes = [
     subtitulo: "Inflable & mesita",
     precio: 1400,
     popular: false,
-    nota: "Flete incluido en San Nicolás.",
+    nota: "",
     items: [
       "Inflable blanco 3×3 × 2.5 m con resbaladilla y alberca de pelotas",
       "Mesita de madera color blanco",
@@ -44,7 +44,7 @@ const paquetes = [
     subtitulo: "Inflable & mesita de arte",
     precio: 1550,
     popular: true,
-    nota: "Flete incluido en San Nicolás.",
+    nota: "",
     items: [
       "Inflable blanco 3×3 × 2.5 m con resbaladilla y alberca de pelotas",
       "Mesita de madera color blanco",
@@ -156,7 +156,6 @@ const BabyPlayZone = () => {
         <h2 className="font-heading text-xl font-bold mb-4">Notas importantes</h2>
         <ul className="text-sm text-muted-foreground space-y-2">
           <li>• Las fechas son limitadas por fin de semana — agenda con anticipación.</li>
-          <li>• Flete incluido en San Nicolás en paquetes Básico y Plus.</li>
           <li>• Para otras zonas de Monterrey, consúltanos el costo de flete.</li>
           <li>• El inflable castillo (solo) no incluye flete.</li>
         </ul>
