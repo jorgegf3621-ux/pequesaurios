@@ -36,8 +36,10 @@ const App = () => (
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
-          {/* Página sin navbar/footer */}
+          {/* Páginas sin navbar/footer */}
           <Route path="/gracias" element={<Gracias />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/accion" element={<Accion />} />
           {/* Resto con layout completo */}
           <Route path="/*" element={
             <>
@@ -55,8 +57,6 @@ const App = () => (
                   <Route path="/yesitos" element={<Yesitos />} />
                   <Route path="/mobiliario-infantil" element={<MobiliarioInfantil />} />
                   <Route path="/pintacaritas" element={<Pintacaritas />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="/accion" element={<Accion />} />
                   <Route path="/aviso-privacidad" element={<AvisoPrivacidad />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
