@@ -6,25 +6,35 @@ import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
 
 const FACEBOOK_URL = "https://www.facebook.com/share/1DvDRmqAGB/?mibextid=wwXIfr";
-
 const LABELS = ["", "Podría mejorar", "Regular", "Bien", "Muy bien", "¡Excelente!"];
+
+type Tipo = "cumpleanos" | "bautizo" | "sin-motivo" | "";
+
+function getSubtitulo(tipo: Tipo, nino: string) {
+  const n = nino.trim();
+  if (tipo === "cumpleanos") return n ? `Fue un placer celebrar el cumpleaños de ${n}.` : "Fue un placer celebrar este cumpleaños tan especial.";
+  if (tipo === "bautizo")    return n ? `Fue un placer ser parte del bautizo de ${n}.`   : "Fue un placer ser parte de este bautizo tan especial.";
+  if (tipo === "sin-motivo") return n ? `Fue un placer compartir este momento especial con ${n}.` : "Fue un placer ser parte de tu evento especial.";
+  return n ? `Fue un placer ser parte del evento de ${n}.` : "Fue un placer ser parte de tu evento especial.";
+}
 
 const Gracias = () => {
   const [searchParams] = useSearchParams();
   const nombre = searchParams.get("nombre") || "amiga";
-  const nino = searchParams.get("nino") || "";
-  const edad = searchParams.get("edad") || "";
+  const tipo   = (searchParams.get("tipo") || "") as Tipo;
+  const nino   = searchParams.get("nino") || "";
+  const edad   = searchParams.get("edad") || "";
 
-  const [rating, setRating] = useState(0);
-  const [hover, setHover] = useState(0);
-  const [texto, setTexto] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [rating, setRating]         = useState(0);
+  const [hover, setHover]           = useState(0);
+  const [texto, setTexto]           = useState("");
+  const [submitted, setSubmitted]   = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const isHighRating = rating >= 4;
 
   const nombreFirma = nino.trim()
-    ? `${nombre}${edad.trim() ? `, mamá de ${nino} (${edad} años)` : `, mamá de ${nino}`}`
+    ? `${nombre}${edad.trim() ? `, mamá de ${nino.trim()} (${edad.trim()} años)` : `, mamá de ${nino.trim()}`}`
     : nombre;
 
   const handleSubmit = async () => {
@@ -47,7 +57,7 @@ const Gracias = () => {
           <div className="text-7xl mb-5">💕</div>
           <h1 className="font-heading text-3xl font-bold mb-3">¡Muchas gracias!</h1>
           <p className="text-muted-foreground leading-relaxed">
-            Tu opinión significa mucho para nosotras. ¡Esperamos verte pronto en otra fiesta especial!
+            Tu opinión significa mucho para nosotras. ¡Esperamos verte pronto en otra ocasión especial!
           </p>
           <p className="text-sm text-primary font-semibold mt-5">— Equipo Pequesaurios</p>
         </div>
@@ -67,9 +77,7 @@ const Gracias = () => {
             ¡Gracias, {nombre}!
           </h1>
           <p className="text-muted-foreground leading-relaxed">
-            {nino
-              ? `Fue un placer ser parte de la fiesta de ${nino}.`
-              : "Fue un placer ser parte de la fiesta especial de su pequeño."}
+            {getSubtitulo(tipo, nino)}
           </p>
         </div>
 
@@ -82,7 +90,6 @@ const Gracias = () => {
             Tu opinión nos ayuda a seguir mejorando
           </p>
 
-          {/* Stars */}
           <div className="flex justify-center gap-2 mb-2">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
@@ -108,7 +115,6 @@ const Gracias = () => {
             {LABELS[hover || rating]}
           </p>
 
-          {/* Content after rating */}
           {rating > 0 && (
             <div className="space-y-5 animate-fade-in">
               {isHighRating ? (

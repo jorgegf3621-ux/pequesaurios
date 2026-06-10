@@ -641,15 +641,17 @@ const GaleriaAdmin = () => {
 // ─── Link Generador de Reseña ─────────────────────────────────────────────────
 const LinkResena = () => {
   const [nombre, setNombre] = useState("");
-  const [nino, setNino] = useState("");
-  const [edad, setEdad] = useState("");
+  const [tipo,   setTipo]   = useState("");
+  const [nino,   setNino]   = useState("");
+  const [edad,   setEdad]   = useState("");
   const [copiado, setCopiado] = useState(false);
-  const BASE = "https://pequesaurios.pages.dev/gracias";
 
+  const BASE = "https://pequesaurios.pages.dev/gracias";
   const params = new URLSearchParams();
   if (nombre.trim()) params.set("nombre", nombre.trim());
-  if (nino.trim()) params.set("nino", nino.trim());
-  if (edad.trim()) params.set("edad", edad.trim());
+  if (tipo)          params.set("tipo",   tipo);
+  if (nino.trim())   params.set("nino",   nino.trim());
+  if (edad.trim())   params.set("edad",   edad.trim());
   const qs = params.toString();
   const link = qs ? `${BASE}?${qs}` : BASE;
 
@@ -660,9 +662,9 @@ const LinkResena = () => {
   };
 
   const saludo = nombre.trim() ? `¡Hola ${nombre.trim()}!` : "¡Hola!";
-  const festejo = nino.trim() ? `de ${nino.trim()}` : "de tu pequeño";
+  const festejo = nino.trim() ? `de ${nino.trim()}` : "de tu evento especial";
   const wa = `https://wa.me/?text=${encodeURIComponent(
-    `${saludo} Fue un placer ser parte de la fiesta ${festejo}. Te compartimos un link para que nos cuentes cómo te fue:\n\n${link}\n\n¡Solo toma un minuto y nos ayuda muchísimo!\n— Equipo Pequesaurios`
+    `${saludo} Fue un placer ser parte ${festejo}. Te compartimos un link para que nos cuentes cómo te fue:\n\n${link}\n\n¡Solo toma un minuto y nos ayuda muchísimo!\n— Equipo Pequesaurios`
   )}`;
 
   return (
@@ -671,43 +673,41 @@ const LinkResena = () => {
         <div className="bg-primary/10 rounded-full p-2"><MessageCircle size={22} className="text-primary" /></div>
         <div>
           <h2 className="font-heading font-bold text-lg">Generar link de reseña</h2>
-          <p className="text-xs text-muted-foreground">Personaliza el link con los datos del cliente y envíalo por WhatsApp</p>
+          <p className="text-xs text-muted-foreground">El cliente solo ve la página personalizada y deja su opinión</p>
         </div>
       </div>
 
       <div className="bg-white rounded-2xl border border-border p-5 shadow-sm space-y-4">
         <div>
-          <Label className="text-xs">Nombre de la mamá / cliente *</Label>
-          <Input
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            placeholder="Ej: Ana, María, Sofía..."
-            className="mt-1"
-            autoFocus
-          />
+          <Label className="text-xs">Nombre del cliente *</Label>
+          <Input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej: Ana, María, Sofía..." className="mt-1" autoFocus />
         </div>
+
+        <div>
+          <Label className="text-xs">Tipo de evento</Label>
+          <select
+            value={tipo}
+            onChange={(e) => setTipo(e.target.value)}
+            className="mt-1 w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+          >
+            <option value="">Sin especificar</option>
+            <option value="cumpleanos">Cumpleaños</option>
+            <option value="bautizo">Bautizo</option>
+            <option value="sin-motivo">Sin motivo especial</option>
+          </select>
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label className="text-xs">Nombre del festejado (opcional)</Label>
-            <Input
-              value={nino}
-              onChange={(e) => setNino(e.target.value)}
-              placeholder="Ej: Emilio, Luna..."
-              className="mt-1"
-            />
+            <Label className="text-xs">Festejado (opcional)</Label>
+            <Input value={nino} onChange={(e) => setNino(e.target.value)} placeholder="Ej: Emilio, Luna..." className="mt-1" />
           </div>
           <div>
             <Label className="text-xs">Edad (opcional)</Label>
-            <Input
-              value={edad}
-              onChange={(e) => setEdad(e.target.value)}
-              placeholder="Ej: 3, 4 años..."
-              className="mt-1"
-            />
+            <Input value={edad} onChange={(e) => setEdad(e.target.value)} placeholder="Ej: 3, 4 años..." className="mt-1" />
           </div>
         </div>
 
-        {/* Preview del link */}
         <div className="bg-muted/50 rounded-xl px-3 py-2 text-xs text-muted-foreground break-all font-mono border border-border">
           {link}
         </div>
@@ -724,7 +724,7 @@ const LinkResena = () => {
         </div>
 
         <p className="text-xs text-muted-foreground text-center">
-          La reseña quedará firmada con el nombre de la mamá y los datos del festejado.
+          La reseña se guarda con el nombre de la mamá y datos del festejado automáticamente.
         </p>
       </div>
     </div>
