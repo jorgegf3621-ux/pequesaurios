@@ -2,7 +2,7 @@ import React from "react";
 
 const RAZON_SOCIAL = "Jorge Gomez Fuentes";
 const DOMICILIO   = "Calle Puerto Mazatlán 4233, Colonia Las Brisas 4to Sector, Monterrey, Nuevo León, C.P. 64790, México";
-const EMAIL_ARCO  = "pequesauriosmx@gmail.com";
+const EMAIL_ARCO  = "pequesauriosmty@gmail.com";
 
 const Section = ({ num, title, children }: { num: string; title: string; children: React.ReactNode }) => (
   <div className="mb-8">

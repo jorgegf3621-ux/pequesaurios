@@ -142,7 +142,7 @@ const ContratoTemplate = ({
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
           <div>
             <div style={{ fontWeight: 700, fontSize: 11 }}>PROVEEDOR</div>
-            <div>Pequesaurios Mobiliario Infantil</div>
+            <div>Pequesaurios</div>
             <div style={{ color: "#666" }}>Tel: 818 054 0369 · @pequesaurioss</div>
             <div style={{ color: "#666" }}>Monterrey, Nuevo León</div>
           </div>
@@ -276,7 +276,7 @@ const ContratoTemplate = ({
         Al firmar este contrato, el cliente declara haber leído, entendido y aceptado todos los términos y condiciones descritos en este documento.
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48 }}>
-        {[`Proveedor\nPequesaurios Mobiliario Infantil`, `Cliente\n${reservation.customer_name}`].map((firma, i) => (
+        {[`Proveedor\nPequesaurios`, `Cliente\n${reservation.customer_name}`].map((firma, i) => (
           <div key={i} style={{ textAlign: "center" }}>
             <div style={{ height: 40 }} />
             <div style={{ borderTop: `1.5px solid ${pink}`, paddingTop: 6, whiteSpace: "pre-line", fontSize: 11, color: "#555" }}>{firma}</div>
@@ -286,7 +286,7 @@ const ContratoTemplate = ({
 
       {/* Footer */}
       <div style={{ marginTop: 20, paddingTop: 10, borderTop: "1px solid #eee", textAlign: "center", fontSize: 10, color: "#aaa" }}>
-        Pequesaurios Mobiliario Infantil · Monterrey, N.L. · 818 054 0369 · @pequesaurioss
+        Pequesaurios · Monterrey, N.L. · 818 054 0369 · @pequesaurioss
       </div>
     </div>
   );
