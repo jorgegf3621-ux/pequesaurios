@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Download, ChevronLeft, Eye } from "lucide-react";
+import { Download, ChevronLeft, Eye, MessageCircle } from "lucide-react";
 import logo from "@/assets/logo.png";
+import AddressAutocomplete from "@/components/AddressAutocomplete";
 
 type Reservation = {
   id: string;
@@ -338,6 +339,29 @@ const Contrato = ({ reservation, open, onClose, prefill }: Props) => {
     }
   };
 
+  const enviarWhatsApp = () => {
+    const fecha = format(parseISO(reservation.event_date + "T12:00:00"), "EEEE d 'de' MMMM 'de' yyyy", { locale: es });
+    const saldo = totalNum - anticipoNum;
+    const nombre = reservation.customer_name.split(" ")[0];
+    const serviciosTxt = serviciosSeleccionados
+      .map((id) => SERVICIOS_OPCIONES.find((o) => o.id === id)?.label)
+      .filter(Boolean)
+      .map((l) => `• ${l}`)
+      .join("\n");
+    const msg =
+      `¡Hola ${nombre}! 🎉 Te compartimos el resumen de tu *contrato de renta* con *Pequesaurios*.\n\n` +
+      `📋 Folio: ${folio}\n` +
+      `📅 Fecha: ${fecha}\n` +
+      (address ? `📍 Lugar: ${address}\n` : "") +
+      (hora ? `🕐 Horario: ${hora}${horaFin ? ` a ${horaFin}` : ""}\n` : "") +
+      `\n📦 *Artículos rentados:*\n${serviciosTxt}\n\n` +
+      `💳 *Pago:*\n• Total: $${totalNum.toLocaleString()} MXN\n• Anticipo pagado: $${anticipoNum.toLocaleString()} MXN\n• *Saldo al entregar: $${saldo.toLocaleString()} MXN*\n\n` +
+      `Por favor confírmanos de haber recibido este resumen. ¡Nos vemos pronto! 🦕\n— Pequesaurios`;
+    const phone = reservation.customer_phone.replace(/\D/g, "");
+    const phoneWithCode = phone.startsWith("52") ? phone : `52${phone}`;
+    window.open(`https://wa.me/${phoneWithCode}?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+
   const handleClose = () => {
     onClose(); setPreview(false); setAddress(""); setHora(""); setHoraFin("");
     setServiciosSeleccionados([]); setTotal(""); setAnticipo("");
@@ -356,7 +380,17 @@ const Contrato = ({ reservation, open, onClose, prefill }: Props) => {
               <div><Label>Hora de inicio</Label><Input value={hora} onChange={(e) => setHora(e.target.value)} placeholder="Ej: 2:00 pm" /></div>
               <div><Label>Hora de fin</Label><Input value={horaFin} onChange={(e) => setHoraFin(e.target.value)} placeholder="Ej: 7:00 pm" /></div>
             </div>
-            <div><Label>Dirección del evento</Label><Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Calle, colonia, municipio" /></div>
+            <div>
+              <Label>Dirección del evento</Label>
+              <div className="mt-1">
+                <AddressAutocomplete
+                  value={address}
+                  onSelect={(result) => setAddress(result.shortDisplay)}
+                  onClear={() => setAddress("")}
+                  placeholder="Calle, colonia, municipio"
+                />
+              </div>
+            </div>
 
             <div>
               <Label className="mb-2 block">Artículos rentados</Label>
@@ -395,10 +429,15 @@ const Contrato = ({ reservation, open, onClose, prefill }: Props) => {
                 <ContratoTemplate reservation={reservation} address={address} hora={hora} horaFin={horaFin} serviciosSeleccionados={serviciosSeleccionados} total={totalNum} anticipo={anticipoNum} folio={folio} />
               </div>
             </div>
-            <div className="flex gap-3 pt-2">
-              <Button variant="outline" className="flex-1" onClick={() => setPreview(false)}><ChevronLeft size={15} /> Editar</Button>
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" className="shrink-0" onClick={() => setPreview(false)}>
+                <ChevronLeft size={15} /> Editar
+              </Button>
+              <Button variant="whatsapp" className="flex-1" onClick={enviarWhatsApp}>
+                <MessageCircle size={15} /> Enviar por WhatsApp
+              </Button>
               <Button variant="hero" className="flex-1" onClick={descargarPDF} disabled={generating}>
-                <Download size={16} />{generating ? "Generando PDF..." : "Descargar contrato PDF"}
+                <Download size={15} />{generating ? "Generando..." : "Descargar PDF"}
               </Button>
             </div>
           </div>
