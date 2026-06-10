@@ -31,7 +31,7 @@ import HistorialView from "@/components/admin/HistorialView";
 import MensajesView from "@/components/admin/MensajesView";
 import CotizacionesView from "@/components/admin/CotizacionesView";
 
-const ADMIN_PASSWORD = "Chapis3621$";
+const ALLOWED_EMAIL = "pequesauriosmty@gmail.com";
 
 type CotizadorData = {
   servicios: Record<string, number>;
@@ -813,15 +813,23 @@ const MobiliarioAdmin = () => {
 // ─── Login ───────────────────────────────────────────────────────────────────
 const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      onLogin();
-    } else {
-      setError(true);
+    setLoading(true);
+    setError("");
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
+      email: ALLOWED_EMAIL,
+      password,
+    });
+    setLoading(false);
+    if (authError || !data.session) {
+      setError("Contraseña incorrecta");
       setPassword("");
+    } else {
+      onLogin();
     }
   };
 
@@ -840,12 +848,14 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
             <Label htmlFor="password">Contraseña</Label>
             <Input
               id="password" type="password" value={password}
-              onChange={(e) => { setPassword(e.target.value); setError(false); }}
+              onChange={(e) => { setPassword(e.target.value); setError(""); }}
               placeholder="••••••••" autoFocus className="mt-1"
             />
-            {error && <p className="text-red-500 text-xs mt-1">Contraseña incorrecta</p>}
+            {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
           </div>
-          <Button type="submit" variant="hero" className="w-full">Entrar</Button>
+          <Button type="submit" variant="hero" className="w-full" disabled={loading}>
+            {loading ? "Entrando..." : "Entrar"}
+          </Button>
         </form>
       </div>
     </div>
@@ -854,7 +864,8 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
 
 // ─── Main Admin ───────────────────────────────────────────────────────────────
 const Admin = () => {
-  const [authenticated, setAuthenticated] = useState(() => localStorage.getItem("admin_auth") === "true");
+  const [authenticated, setAuthenticated] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<AdminSection>("inicio");
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [contacts, setContacts]   = useState<ContactMessage[]>([]);
@@ -911,6 +922,17 @@ const Admin = () => {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setAuthenticated(!!session);
+      setAuthLoading(false);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthenticated(!!session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (authenticated) {
@@ -1029,8 +1051,12 @@ const Admin = () => {
   const unreadMessages = contacts.filter((c) => !c.read).length;
   const unreadQuotes   = quotes.filter((q) => !q.read).length;
 
+  if (authLoading) {
+    return <div className="min-h-screen flex items-center justify-center bg-background"><div className="text-muted-foreground text-sm">Verificando acceso...</div></div>;
+  }
+
   if (!authenticated) {
-    return <LoginScreen onLogin={() => { localStorage.setItem("admin_auth", "true"); setAuthenticated(true); }} />;
+    return <LoginScreen onLogin={() => setAuthenticated(true)} />;
   }
 
   const renderSection = () => {
@@ -1128,7 +1154,7 @@ const Admin = () => {
       activeSection={activeSection}
       setActiveSection={setActiveSection}
       onRefresh={() => { fetchReservations(); fetchContacts(); fetchQuotes(); }}
-      onLogout={() => { localStorage.removeItem("admin_auth"); setAuthenticated(false); }}
+      onLogout={() => { supabase.auth.signOut(); }}
       loading={loading}
       unreadMessages={unreadMessages}
       unreadQuotes={unreadQuotes}
