@@ -169,6 +169,7 @@ const Cotizador = () => {
     "San Pedro Garza García",
     "General Escobedo",
     "Apodaca",
+    "Santiago",
   ]);
   const esSanNicolas = municipio === "San Nicolás de los Garza";
   const enZonaCobertura = municipio !== "" && MUNICIPIOS_COBERTURA.has(municipio);

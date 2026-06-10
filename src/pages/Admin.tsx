@@ -65,8 +65,6 @@ type ContactMessage = {
 };
 
 // ─── Flete Calculator ──────────────────────────────────────────────────────────
-type MunicipioFlete = { id: string; nombre: string; distancia_km: number };
-
 const FleteCalculator = () => {
   const [gasolinaPrecio, setGasolinaPrecio] = useState(24.5);
   const [rendimiento, setRendimiento] = useState(14);
@@ -74,25 +72,18 @@ const FleteCalculator = () => {
   const [direccionBase, setDireccionBase] = useState("San Nicolás de los Garza, Nuevo León, México");
   const [savingConfig, setSavingConfig] = useState(false);
   const [loadingConfig, setLoadingConfig] = useState(true);
-  const [municipios, setMunicipios] = useState<MunicipioFlete[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingKm, setEditingKm] = useState("");
   const [km, setKm] = useState("");
   const [copiado, setCopiado] = useState(false);
 
   useEffect(() => {
     const load = async () => {
-      const [{ data: cfg }, { data: munis }] = await Promise.all([
-        (supabase as any).from("flete_config").select("*").eq("id", 1).single(),
-        (supabase as any).from("municipios_flete").select("*").order("sort_order"),
-      ]);
+      const { data: cfg } = await (supabase as any).from("flete_config").select("*").eq("id", 1).single();
       if (cfg) {
         setGasolinaPrecio(cfg.precio_gasolina);
         setRendimiento(cfg.rendimiento_kmpl);
         setMargen(cfg.margen_pct);
         if (cfg.direccion_base) setDireccionBase(cfg.direccion_base);
       }
-      if (munis) setMunicipios(munis);
       setLoadingConfig(false);
     };
     load();
@@ -109,28 +100,6 @@ const FleteCalculator = () => {
     });
     setSavingConfig(false);
     toast.success("Configuración guardada — el cotizador ya refleja los nuevos valores");
-  };
-
-  const startEdit = (m: MunicipioFlete) => {
-    setEditingId(m.id);
-    setEditingKm(String(m.distancia_km));
-  };
-
-  const saveDistancia = async (id: string) => {
-    const kmVal = parseFloat(editingKm);
-    if (isNaN(kmVal) || kmVal < 0) { toast.error("Distancia inválida"); return; }
-    await (supabase as any).from("municipios_flete").update({ distancia_km: kmVal }).eq("id", id);
-    setMunicipios((prev) => prev.map((m) => m.id === id ? { ...m, distancia_km: kmVal } : m));
-    setEditingId(null);
-    toast.success("Distancia actualizada");
-  };
-
-  const calcFlete = (kmDist: number) => {
-    if (kmDist === 0) return 0;
-    const kmTotal = kmDist * 2;
-    const litros = kmTotal / rendimiento;
-    const costoGas = litros * gasolinaPrecio;
-    return Math.ceil(costoGas * (1 + margen / 100));
   };
 
   const kmNum = parseFloat(km) || 0;
@@ -192,45 +161,6 @@ const FleteCalculator = () => {
           {savingConfig ? "Guardando..." : "Guardar configuración del vehículo"}
         </Button>
       </div>
-
-      {municipios.length > 0 && (
-        <div className="bg-white rounded-2xl border border-border p-5" style={{ boxShadow: "var(--shadow-card)" }}>
-          <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Distancias por municipio (km, solo ida)</p>
-          <p className="text-xs text-muted-foreground mb-4">El flete se calcula ida y vuelta automáticamente. San Nicolás = 0 km = sin flete.</p>
-          <div className="space-y-0.5">
-            {municipios.map((m) => {
-              const fleteM = calcFlete(m.distancia_km);
-              const isEditing = editingId === m.id;
-              return (
-                <div key={m.id} className="flex items-center gap-3 py-2.5 border-b border-border last:border-0">
-                  <span className="flex-1 text-sm font-medium">{m.nombre}</span>
-                  {isEditing ? (
-                    <>
-                      <Input type="number" min={0} step={0.5} value={editingKm}
-                        onChange={(e) => setEditingKm(e.target.value)}
-                        className="w-24 h-8 text-sm" autoFocus
-                        onKeyDown={(e) => { if (e.key === "Enter") saveDistancia(m.id); if (e.key === "Escape") setEditingId(null); }}
-                      />
-                      <Button size="sm" variant="hero" onClick={() => saveDistancia(m.id)}>Guardar</Button>
-                      <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>Cancelar</Button>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-xs text-muted-foreground w-14 text-right">{m.distancia_km} km</span>
-                      <span className={`text-sm font-bold w-20 text-right ${fleteM === 0 ? "text-green-600" : "text-primary"}`}>
-                        {fleteM === 0 ? "Incluido" : `$${fleteM}`}
-                      </span>
-                      <Button size="sm" variant="outline" className="h-7 px-2" onClick={() => startEdit(m)}>
-                        <Pencil size={12} />
-                      </Button>
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       <div className="bg-white rounded-2xl border border-border p-5" style={{ boxShadow: "var(--shadow-card)" }}>
         <p className="text-xs font-semibold text-muted-foreground uppercase mb-4">Calculadora manual (destino no listado)</p>
