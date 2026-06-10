@@ -117,7 +117,9 @@ export const AddressAutocomplete = ({ value, onSelect, onClear, placeholder, cla
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!value) { setQuery(""); setSelected(false); setSuggestions([]); setOpen(false); }
+    setQuery(value ?? "");
+    setSelected(!!value);
+    if (!value) { setSuggestions([]); setOpen(false); }
   }, [value]);
 
   useEffect(() => {
