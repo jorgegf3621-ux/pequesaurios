@@ -22,10 +22,6 @@ const faqs = [
     a: "Desde los 3 años en adelante. Para niños muy pequeños se recomienda supervisión de los padres.",
   },
   {
-    q: "¿Las pinturas son seguras?",
-    a: "Sí, usamos pinturas faciales hipoalergénicas y aprobadas para uso en piel infantil.",
-  },
-  {
     q: "¿Cuántos niños puede atender en 1.5 hrs?",
     a: "Aproximadamente 15–20 niños dependiendo de la complejidad del diseño.",
   },
