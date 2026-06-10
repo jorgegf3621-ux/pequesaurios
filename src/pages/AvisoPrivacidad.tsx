@@ -23,25 +23,23 @@ export default function AvisoPrivacidad() {
       <div className="prose-sm max-w-none">
 
         <p className="text-sm text-foreground/70 leading-relaxed mb-8">
-          <strong>Pequesaurios Mobiliario Infantil</strong> ({RAZON_SOCIAL}), con domicilio en {DOMICILIO}
-          (en adelante <strong>"Pequesaurios"</strong>), hace de su conocimiento que es responsable del
-          tratamiento de los Datos Personales (los "Datos") que le hayan sido proporcionados por las
-          personas físicas a quienes correspondan (el "Titular" o los "Titulares"), según se indica en
-          este instrumento.
+          <strong>Pequesaurios</strong> es un negocio dedicado a la renta de mobiliario infantil,
+          inflables y artículos recreativos para fiestas y eventos en Monterrey y área metropolitana.
+          El responsable del tratamiento de los Datos Personales es <strong>{RAZON_SOCIAL}</strong>,
+          persona física que opera bajo el nombre comercial <strong>Pequesaurios</strong>, con domicilio
+          en {DOMICILIO} (en adelante <strong>"Pequesaurios"</strong> o el <strong>"Responsable"</strong>).
         </p>
         <p className="text-sm text-foreground/70 leading-relaxed mb-8">
-          Pequesaurios se dedica a la renta de mobiliario infantil, inflables y artículos recreativos
-          para fiestas y eventos, en Monterrey y área metropolitana. Con motivo de dicha actividad, ha
-          recabado y recaba Datos mediante la interacción con los Titulares. En este Aviso de
-          Privacidad, Pequesaurios indica el tipo de Datos que recopila, el perfil de cada persona
-          física a quien pertenecen, así como el tratamiento y la finalidad para los cuales fueron o
-          son obtenidos.
+          En este Aviso de Privacidad se indica el tipo de Datos que se recopilan, el perfil de las
+          personas físicas a quienes pertenecen, así como el tratamiento y la finalidad para los cuales
+          fueron o son obtenidos, en cumplimiento de la Ley Federal de Protección de Datos Personales
+          en Posesión de los Particulares (LFPDPPP).
         </p>
 
-        <Section num="1" title="Datos de Clientes">
+        <Section num="1" title="Datos recabados">
           <p>
-            Pequesaurios recaba los Datos de los <strong>CLIENTES</strong> en forma directa, indirecta
-            o personal, en atención a lo siguiente:
+            Pequesaurios recaba los Datos de los <strong>CLIENTES</strong> en forma directa o personal,
+            en atención a lo siguiente:
           </p>
           <p>
             <strong>(i)</strong> Nombre completo, teléfono móvil, correo electrónico y dirección del
@@ -65,17 +63,7 @@ export default function AvisoPrivacidad() {
           </p>
         </Section>
 
-        <Section num="2" title="Datos de Proveedores">
-          <p>
-            Respecto de los Datos de <strong>PROVEEDORES</strong>, Pequesaurios recaba nombre completo
-            o razón social, teléfono, correo electrónico y, en su caso, Registro Federal de
-            Contribuyentes (RFC) y datos bancarios; lo anterior con la finalidad de identificar,
-            localizar y comunicarse con el Titular, y para la realización de pagos por los bienes o
-            servicios suministrados.
-          </p>
-        </Section>
-
-        <Section num="3" title="Medidas de seguridad">
+        <Section num="2" title="Medidas de seguridad">
           <p>
             Pequesaurios implementará y mantendrá acciones y mecanismos de protección adecuados,
             consistentes en medidas administrativas, físicas y técnicas, con el propósito de garantizar
@@ -83,7 +71,7 @@ export default function AvisoPrivacidad() {
           </p>
         </Section>
 
-        <Section num="4" title="Derechos ARCO">
+        <Section num="3" title="Derechos ARCO">
           <p>
             El Titular podrá en todo momento ejercer sus derechos de <strong>Acceso, Rectificación,
             Cancelación u Oposición (ARCO)</strong> respecto de sus Datos, mediante solicitud escrita
@@ -106,7 +94,7 @@ export default function AvisoPrivacidad() {
           </p>
         </Section>
 
-        <Section num="5" title="Transferencia de datos">
+        <Section num="4" title="Transferencia de datos">
           <p>
             Pequesaurios podrá ceder y/o transferir los Datos a personas físicas o morales con las que
             mantiene relaciones comerciales, con la finalidad de mejorar la prestación del servicio o
@@ -120,7 +108,7 @@ export default function AvisoPrivacidad() {
           </p>
         </Section>
 
-        <Section num="6" title="Cambios al Aviso de Privacidad">
+        <Section num="5" title="Cambios al Aviso de Privacidad">
           <p>
             Cualquier modificación al presente Aviso de Privacidad será notificada a través del sitio
             web <strong>pequesaurios.com</strong> o mediante comunicación directa al correo registrado
