@@ -213,6 +213,9 @@ const ContratoTemplate = ({
             })}
           </tbody>
         </table>
+        <div style={{ marginTop: 6, fontSize: 10, color: "#888", fontStyle: "italic" }}>
+          El valor unitario aplica por artículo dañado o extraviado individualmente. El valor total del paquete aplica únicamente en caso de pérdida o daño total del conjunto.
+        </div>
       </div>
 
       {/* Condiciones */}
