@@ -166,31 +166,29 @@ const ContratoTemplate = ({
       </div>
 
       {/* Artículos */}
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ background: "#fff5f9", border: `1px solid ${pink}`, borderRadius: 8, padding: "12px 16px", marginBottom: 16 }}>
         <div style={{ fontWeight: 700, color: pink, fontSize: 10, textTransform: "uppercase", marginBottom: 8, letterSpacing: 0.5 }}>Artículos rentados — desglose de reposición</div>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
           <thead>
-            <tr style={{ background: pink }}>
-              <th style={{ color: "#fff", padding: "7px 10px", textAlign: "left", fontWeight: 600 }}>Artículo</th>
-              <th style={{ color: "#fff", padding: "7px 10px", textAlign: "center", fontWeight: 600, width: 40 }}>Cant.</th>
-              <th style={{ color: "#fff", padding: "7px 10px", textAlign: "right", fontWeight: 600, width: 90 }}>Val. unitario</th>
-              <th style={{ color: "#fff", padding: "7px 10px", textAlign: "right", fontWeight: 600, width: 90 }}>Subtotal</th>
+            <tr style={{ background: "#fce0ee" }}>
+              <th style={{ padding: "6px 10px", textAlign: "left", fontWeight: 600, color: "#c0397a" }}>Artículo</th>
+              <th style={{ padding: "6px 10px", textAlign: "center", fontWeight: 600, color: "#c0397a", width: 40 }}>Cant.</th>
+              <th style={{ padding: "6px 10px", textAlign: "right", fontWeight: 600, color: "#c0397a", width: 90 }}>Val. unitario</th>
+              <th style={{ padding: "6px 10px", textAlign: "right", fontWeight: 600, color: "#c0397a", width: 90 }}>Subtotal</th>
             </tr>
           </thead>
           <tbody>
             {serviciosSeleccionados.map((id) => {
               const s = SERVICIOS_OPCIONES.find((o) => o.id === id);
               if (!s) return null;
-              const total = calcTotal(s.componentes);
+              const paqueteTotal = calcTotal(s.componentes);
               return (
                 <React.Fragment key={id}>
-                  {/* Encabezado del paquete */}
                   <tr style={{ background: "#fce0ee" }}>
                     <td colSpan={4} style={{ padding: "5px 10px", fontWeight: 700, color: "#c0397a", fontSize: 10 }}>
                       {s.label}
                     </td>
                   </tr>
-                  {/* Componentes individuales */}
                   {s.componentes.map((c, ci) => (
                     <tr key={ci} style={{ background: ci % 2 === 0 ? "#fff" : "#fdf2f7" }}>
                       <td style={{ ...cell, paddingLeft: 18 }}>{c.nombre}</td>
@@ -199,13 +197,12 @@ const ContratoTemplate = ({
                       <td style={{ ...cell, textAlign: "right" }}>${(c.cantidad * c.valorUnitario).toLocaleString()}</td>
                     </tr>
                   ))}
-                  {/* Total del paquete */}
                   <tr style={{ background: "#fff5f9", borderTop: "1.5px solid #f4c0d8" }}>
                     <td colSpan={3} style={{ padding: "5px 10px", textAlign: "right", fontSize: 10, color: "#c0397a", fontWeight: 700 }}>
                       Valor total de reposición del paquete:
                     </td>
                     <td style={{ padding: "5px 10px", textAlign: "right", fontWeight: 800, color: "#c0397a" }}>
-                      ${total.toLocaleString()} MXN
+                      ${paqueteTotal.toLocaleString()} MXN
                     </td>
                   </tr>
                 </React.Fragment>
@@ -213,7 +210,7 @@ const ContratoTemplate = ({
             })}
           </tbody>
         </table>
-        <div style={{ marginTop: 6, fontSize: 10, color: "#888", fontStyle: "italic" }}>
+        <div style={{ marginTop: 8, fontSize: 10, color: "#888", fontStyle: "italic" }}>
           El valor unitario aplica por artículo dañado o extraviado individualmente. El valor total del paquete aplica únicamente en caso de pérdida o daño total del conjunto.
         </div>
       </div>
@@ -254,42 +251,6 @@ const ContratoTemplate = ({
             "En caso de cancelación por el cliente, el anticipo no es reembolsable.",
             "El saldo restante debe liquidarse al momento de entrega de los artículos.",
           ].map((c, i) => <div key={i} style={{ paddingLeft: 12, color: "#444", marginBottom: 2 }}>• {c}</div>)}
-        </div>
-      </div>
-
-      {/* Penalizaciones */}
-      <div style={{ background: "#fff5f9", border: `1px solid ${pink}`, borderRadius: 8, padding: "12px 16px", marginBottom: 16 }}>
-        <div style={{ fontWeight: 700, color: pink, fontSize: 10, textTransform: "uppercase", marginBottom: 8, letterSpacing: 0.5 }}>Penalizaciones por daños</div>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
-          <thead>
-            <tr style={{ background: "#fce0ee" }}>
-              <th style={{ padding: "6px 10px", textAlign: "left", fontWeight: 600, color: "#c0397a" }}>Situación</th>
-              <th style={{ padding: "6px 10px", textAlign: "right", fontWeight: 600, color: "#c0397a" }}>Cargo</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              { s: "Daño parcial reparable (costura, vinilo, patas)", c: "Costo de reparación a precio de taller" },
-              { s: "Daño mayor que inutiliza el artículo (daño total)", c: "100% del valor de reposición del artículo" },
-              { s: "Artículo extraviado o robado", c: "100% del valor de reposición del artículo" },
-              { s: "Inflable con suciedad excesiva que requiere lavado especial", c: "$300 – $500 MXN adicionales" },
-              { s: "Mesa sola (sin sillas) — pérdida o daño total", c: "$4,500 MXN" },
-              { s: "Silla de plástico rota por mal uso", c: "$300 MXN por pieza" },
-              { s: "Silla de madera rota por mal uso", c: "$500 MXN por pieza" },
-              { s: "Letrero del inflable — pérdida o daño total", c: "$300 MXN" },
-              { s: "Pelotas — pérdida o destrucción total del conjunto", c: "$1,300 MXN" },
-              { s: "Motor del inflable — daño o pérdida", c: "$1,000 MXN" },
-              { s: "Retención del equipo más allá del horario acordado sin aviso", c: "$200 MXN por hora adicional" },
-            ].map((r, i) => (
-              <tr key={i} style={{ background: i % 2 === 0 ? "#fff" : "#fdf2f7" }}>
-                <td style={cell}>{r.s}</td>
-                <td style={{ ...cell, textAlign: "right", fontWeight: 600, color: "#c0397a" }}>{r.c}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div style={{ marginTop: 8, fontSize: 11, color: "#888", fontStyle: "italic" }}>
-          El cliente acepta cubrir cualquier cargo por daño antes o al momento de la devolución del equipo.
         </div>
       </div>
 

@@ -1304,8 +1304,9 @@ const Admin = () => {
                           title="Generar contrato de renta"
                           onClick={() => {
                             setContratoPrefill({
-                              servicios: [],
-                              skipToPreview: true,
+                              servicios: cd ? Object.keys(cd.servicios).filter((id) => cd.servicios[id] > 0) : [],
+                              address: cd?.direccion ?? "",
+                              skipToPreview: false,
                             });
                             setContratoReservation(r);
                           }}
