@@ -1327,6 +1327,7 @@ const Admin = () => {
                           className="text-purple-500 hover:text-purple-700"
                           title="Generar contrato de renta"
                           onClick={() => {
+                            const cd = r.cotizador_data;
                             setContratoPrefill({
                               servicios: cd ? Object.keys(cd.servicios).filter((id) => cd.servicios[id] > 0) : [],
                               address: cd?.direccion ?? "",
