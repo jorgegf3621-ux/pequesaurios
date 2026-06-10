@@ -1,47 +1,35 @@
 import { useState, useEffect, useRef } from "react";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
+import { isSameDay } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Calendar } from "@/components/ui/calendar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
+  AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Lock, LogOut, CalendarOff, Trash2, RefreshCw, FileText, MessageCircle, Mail, CheckCheck, Copy, Fuel, PlusCircle, ScrollText, ShoppingBag, CheckCircle2, History, Pencil, Image as ImageIcon, ImagePlus, LayoutTemplate } from "lucide-react";
+import {
+  Lock, Pencil, Image as ImageIcon, ImagePlus, ShoppingBag,
+  LayoutTemplate, Fuel, MessageCircle, Copy, PlusCircle, Trash2,
+} from "lucide-react";
+
 import AdminProductos from "@/components/AdminProductos";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
 import NotaPago from "@/components/NotaPago";
 import Contrato from "@/components/Contrato";
 import ReservacionManual, { type NotaData } from "@/components/ReservacionManual";
-import { isSameDay } from "date-fns";
+
+import AdminShell, { type AdminSection } from "@/components/admin/AdminShell";
+import DashboardInicio from "@/components/admin/DashboardInicio";
+import ReservacionesView from "@/components/admin/ReservacionesView";
+import CalendarioView from "@/components/admin/CalendarioView";
+import HistorialView from "@/components/admin/HistorialView";
+import MensajesView from "@/components/admin/MensajesView";
+import CotizacionesView from "@/components/admin/CotizacionesView";
 
 const ADMIN_PASSWORD = "Chapis3621$";
 
@@ -66,25 +54,17 @@ type Reservation = {
   cotizador_data?: CotizadorData | null;
 };
 
-type ContactMessage = { id: string; name: string; email: string; phone: string | null; message: string; created_at: string; read: boolean };
-
-const statusColors: Record<string, string> = {
-  pendiente: "bg-yellow-100 text-yellow-800 border-yellow-300",
-  confirmada: "bg-green-100 text-green-800 border-green-300",
-  cancelada: "bg-red-100 text-red-800 border-red-300",
-  completada: "bg-blue-100 text-blue-800 border-blue-300",
+type ContactMessage = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  message: string;
+  created_at: string;
+  read: boolean;
 };
 
-const packageLabels: Record<string, string> = {
-  inflable: "Inflable Castillo",
-  mobiliario: "Mobiliario Infantil",
-  pintacaritas: "Pintacaritas",
-  yesitos: "Kit de Yesitos",
-  "paquete-completo": "Paquete Completo",
-  bloqueado: "🔒 Fecha Bloqueada",
-};
-
-// ─── Configuración de Flete ──────────────────────────────────────────────────
+// ─── Flete Calculator ──────────────────────────────────────────────────────────
 type MunicipioFlete = { id: string; nombre: string; distancia_km: number };
 
 const FleteCalculator = () => {
@@ -94,11 +74,9 @@ const FleteCalculator = () => {
   const [direccionBase, setDireccionBase] = useState("San Nicolás de los Garza, Nuevo León, México");
   const [savingConfig, setSavingConfig] = useState(false);
   const [loadingConfig, setLoadingConfig] = useState(true);
-
   const [municipios, setMunicipios] = useState<MunicipioFlete[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingKm, setEditingKm] = useState("");
-
   const [km, setKm] = useState("");
   const [copiado, setCopiado] = useState(false);
 
@@ -155,7 +133,6 @@ const FleteCalculator = () => {
     return Math.ceil(costoGas * (1 + margen / 100));
   };
 
-  // Calculadora manual
   const kmNum = parseFloat(km) || 0;
   const kmTotal = kmNum * 2;
   const litros = kmTotal / rendimiento;
@@ -168,24 +145,19 @@ const FleteCalculator = () => {
     setTimeout(() => setCopiado(false), 2000);
   };
 
-  if (loadingConfig) {
-    return <div className="text-center py-10 text-muted-foreground">Cargando configuración...</div>;
-  }
+  if (loadingConfig) return <div className="text-center py-10 text-muted-foreground">Cargando configuración...</div>;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-5">
       <div className="flex items-center gap-3 mb-2">
-        <div className="bg-primary/10 rounded-full p-2">
-          <Fuel size={22} className="text-primary" />
-        </div>
+        <div className="bg-primary/10 rounded-xl p-2.5"><Fuel size={20} className="text-primary" /></div>
         <div>
-          <h2 className="font-heading font-bold text-lg">Configuración de Flete</h2>
+          <h2 className="font-heading font-bold text-base">Configuración de Flete</h2>
           <p className="text-xs text-muted-foreground">Los cambios se aplican automáticamente en el cotizador del cliente</p>
         </div>
       </div>
 
-      {/* Parámetros del vehículo */}
-      <div className="bg-white rounded-2xl border border-border p-5 shadow-sm">
+      <div className="bg-white rounded-2xl border border-border p-5" style={{ boxShadow: "var(--shadow-card)" }}>
         <p className="text-xs font-semibold text-muted-foreground uppercase mb-4">Parámetros del vehículo</p>
         <div className="mb-4">
           <Label className="text-xs">Dirección base (tu punto de salida)</Label>
@@ -221,12 +193,11 @@ const FleteCalculator = () => {
         </Button>
       </div>
 
-      {/* Distancias por municipio */}
       {municipios.length > 0 && (
-        <div className="bg-white rounded-2xl border border-border p-5 shadow-sm">
+        <div className="bg-white rounded-2xl border border-border p-5" style={{ boxShadow: "var(--shadow-card)" }}>
           <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Distancias por municipio (km, solo ida)</p>
           <p className="text-xs text-muted-foreground mb-4">El flete se calcula ida y vuelta automáticamente. San Nicolás = 0 km = sin flete.</p>
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             {municipios.map((m) => {
               const fleteM = calcFlete(m.distancia_km);
               const isEditing = editingId === m.id;
@@ -235,15 +206,10 @@ const FleteCalculator = () => {
                   <span className="flex-1 text-sm font-medium">{m.nombre}</span>
                   {isEditing ? (
                     <>
-                      <Input
-                        type="number" min={0} step={0.5} value={editingKm}
+                      <Input type="number" min={0} step={0.5} value={editingKm}
                         onChange={(e) => setEditingKm(e.target.value)}
-                        className="w-24 h-8 text-sm"
-                        autoFocus
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") saveDistancia(m.id);
-                          if (e.key === "Escape") setEditingId(null);
-                        }}
+                        className="w-24 h-8 text-sm" autoFocus
+                        onKeyDown={(e) => { if (e.key === "Enter") saveDistancia(m.id); if (e.key === "Escape") setEditingId(null); }}
                       />
                       <Button size="sm" variant="hero" onClick={() => saveDistancia(m.id)}>Guardar</Button>
                       <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>Cancelar</Button>
@@ -266,16 +232,13 @@ const FleteCalculator = () => {
         </div>
       )}
 
-      {/* Calculadora manual */}
-      <div className="bg-white rounded-2xl border border-border p-5 shadow-sm">
+      <div className="bg-white rounded-2xl border border-border p-5" style={{ boxShadow: "var(--shadow-card)" }}>
         <p className="text-xs font-semibold text-muted-foreground uppercase mb-4">Calculadora manual (destino no listado)</p>
         <div>
           <Label>Distancia al destino (km, solo ida)</Label>
           <Input type="number" min={0} value={km} onChange={(e) => setKm(e.target.value)}
             placeholder="Ej: 18" className="mt-1" autoFocus />
-          {kmNum > 0 && (
-            <p className="text-xs text-muted-foreground mt-1">Recorrido total: {kmTotal} km (ida y vuelta)</p>
-          )}
+          {kmNum > 0 && <p className="text-xs text-muted-foreground mt-1">Recorrido total: {kmTotal} km (ida y vuelta)</p>}
         </div>
         {kmNum > 0 && (
           <div className="mt-4 bg-primary/5 border border-primary/20 rounded-xl p-4">
@@ -325,7 +288,6 @@ const ServiciosAdmin = () => {
     if (data) setCards(data);
     setLoading(false);
   };
-
   useEffect(() => { loadCards(); }, []);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -380,24 +342,24 @@ const ServiciosAdmin = () => {
   if (loading) return <div className="text-center py-8 text-muted-foreground">Cargando...</div>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="bg-primary/10 rounded-full p-2"><ShoppingBag size={20} className="text-primary" /></div>
+          <div className="bg-primary/10 rounded-xl p-2"><ShoppingBag size={18} className="text-primary" /></div>
           <div>
-            <h2 className="font-heading font-bold text-lg">Tarjetas de Servicios</h2>
+            <h2 className="font-heading font-bold text-base">Tarjetas de Servicios</h2>
             <p className="text-xs text-muted-foreground">Aparecen como historias en "Nuestros Servicios" en el inicio</p>
           </div>
         </div>
         {!isAdding && (
-          <Button variant="hero" size="sm" onClick={() => setIsAdding(true)}><PlusCircle size={15} /> Agregar</Button>
+          <Button variant="hero" size="sm" onClick={() => setIsAdding(true)}><PlusCircle size={14} /> Agregar</Button>
         )}
       </div>
 
       {isAdding && (
-        <div className="bg-white rounded-2xl border border-border p-5 shadow-sm space-y-4">
-          <p className="text-xs font-semibold text-muted-foreground uppercase">{editing ? "Editar servicio" : "Nuevo servicio"}</p>
-          <div className="flex gap-4 items-start">
+        <div className="bg-white rounded-2xl border border-border p-5" style={{ boxShadow: "var(--shadow-card)" }}>
+          <p className="text-xs font-semibold text-muted-foreground uppercase mb-4">{editing ? "Editar servicio" : "Nuevo servicio"}</p>
+          <div className="flex gap-4 items-start mb-4">
             <div className="w-20 flex-none rounded-xl overflow-hidden bg-muted border border-border" style={{ aspectRatio: "9/16" }}>
               {form.img_url ? (
                 <img src={form.img_url} alt="preview" className="w-full h-full object-cover" />
@@ -413,17 +375,17 @@ const ServiciosAdmin = () => {
               <Input value={form.img_url ?? ""} onChange={(e) => setForm((f) => ({ ...f, img_url: e.target.value || null }))} placeholder="o pegar URL" className="text-xs" />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 mb-3">
             <div><Label className="text-xs">Título *</Label><Input value={form.titulo} onChange={(e) => setForm((f) => ({ ...f, titulo: e.target.value }))} placeholder="Baby Play Zone" className="mt-1 text-sm" /></div>
             <div><Label className="text-xs">Subtítulo / Badge</Label><Input value={form.subtitulo} onChange={(e) => setForm((f) => ({ ...f, subtitulo: e.target.value }))} placeholder="Inflable Castillo" className="mt-1 text-sm" /></div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 mb-3">
             <div><Label className="text-xs">Precio / Desde</Label><Input value={form.desde} onChange={(e) => setForm((f) => ({ ...f, desde: e.target.value }))} placeholder="Desde $800" className="mt-1 text-sm" /></div>
             <div><Label className="text-xs">Enlace</Label><Input value={form.href} onChange={(e) => setForm((f) => ({ ...f, href: e.target.value }))} placeholder="/servicios" className="mt-1 text-sm" /></div>
           </div>
-          <div>
+          <div className="mb-4">
             <Label className="text-xs">Descripción</Label>
-            <textarea value={form.descripcion} onChange={(e) => setForm((f) => ({ ...f, descripcion: e.target.value }))} placeholder="Describe el servicio..." className="mt-1 w-full text-sm border border-input rounded-md px-3 py-2 resize-none h-20 focus:outline-none focus:ring-2 focus:ring-ring" />
+            <textarea value={form.descripcion} onChange={(e) => setForm((f) => ({ ...f, descripcion: e.target.value }))} placeholder="Describe el servicio..." className="mt-1 w-full text-sm border border-input rounded-xl px-3 py-2 resize-none h-20 focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
           <div className="flex gap-2 justify-end">
             <Button variant="outline" size="sm" onClick={() => { setIsAdding(false); setEditing(null); setForm(emptyServicio()); }}>Cancelar</Button>
@@ -434,11 +396,11 @@ const ServiciosAdmin = () => {
 
       {cards.length === 0 ? (
         <div className="text-center py-10 text-muted-foreground border-2 border-dashed border-border rounded-2xl">
-          <ShoppingBag size={36} className="mx-auto mb-2 opacity-25" />
+          <ShoppingBag size={32} className="mx-auto mb-2 opacity-25" />
           <p className="text-sm">No hay tarjetas todavía</p>
         </div>
       ) : (
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
           {cards.map((card) => (
             <div key={card.id} className={`relative group rounded-2xl overflow-hidden border-2 ${card.activa ? "border-border" : "border-red-200 opacity-60"}`} style={{ aspectRatio: "9/16" }}>
               {card.img_url ? (
@@ -498,7 +460,6 @@ const GaleriaAdmin = () => {
     if (data) setItems(data);
     setLoading(false);
   };
-
   useEffect(() => { loadGaleria(); }, []);
 
   const handleFileUpload = async (e: { target: HTMLInputElement }) => {
@@ -507,11 +468,7 @@ const GaleriaAdmin = () => {
     setUploading(true);
     const fileName = `${Date.now()}-${file.name.replace(/[^a-z0-9.]/gi, "_")}`;
     const { data, error } = await supabase.storage.from("galeria").upload(fileName, file);
-    if (error) {
-      toast.error("Error al subir la imagen");
-      setUploading(false);
-      return;
-    }
+    if (error) { toast.error("Error al subir la imagen"); setUploading(false); return; }
     const { data: { publicUrl } } = supabase.storage.from("galeria").getPublicUrl(data.path);
     const maxOrden = items.length > 0 ? Math.max(...items.map((i) => i.orden)) + 1 : 1;
     await (supabase as any).from("galeria").insert({ url: publicUrl, alt: altInput || file.name, orden: maxOrden });
@@ -526,8 +483,7 @@ const GaleriaAdmin = () => {
     if (!urlInput.trim()) return;
     const maxOrden = items.length > 0 ? Math.max(...items.map((i) => i.orden)) + 1 : 1;
     await (supabase as any).from("galeria").insert({ url: urlInput.trim(), alt: altInput || "Foto Pequesaurios", orden: maxOrden });
-    setUrlInput("");
-    setAltInput("");
+    setUrlInput(""); setAltInput("");
     await loadGaleria();
     toast.success("Foto agregada");
   };
@@ -550,19 +506,16 @@ const GaleriaAdmin = () => {
   if (loading) return <div className="text-center py-10 text-muted-foreground">Cargando galería...</div>;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <div className="flex items-center gap-3 mb-2">
-        <div className="bg-primary/10 rounded-full p-2">
-          <ImageIcon size={22} className="text-primary" />
-        </div>
+    <div className="space-y-5">
+      <div className="flex items-center gap-3">
+        <div className="bg-primary/10 rounded-xl p-2.5"><ImageIcon size={18} className="text-primary" /></div>
         <div>
-          <h2 className="font-heading font-bold text-lg">Galería de Fotos</h2>
+          <h2 className="font-heading font-bold text-base">Galería de Fotos</h2>
           <p className="text-xs text-muted-foreground">Las fotos activas aparecen en "Nuestros eventos" en la página de inicio</p>
         </div>
       </div>
 
-      {/* Agregar foto */}
-      <div className="bg-white rounded-2xl border border-border p-5 shadow-sm space-y-4">
+      <div className="bg-white rounded-2xl border border-border p-5 space-y-4" style={{ boxShadow: "var(--shadow-card)" }}>
         <p className="text-xs font-semibold text-muted-foreground uppercase">Agregar foto</p>
         <div>
           <Label className="text-xs">Descripción (opcional)</Label>
@@ -574,8 +527,7 @@ const GaleriaAdmin = () => {
           <div className="mt-1">
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
             <Button variant="outline" className="w-full" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-              <ImagePlus size={16} />
-              {uploading ? "Subiendo..." : "Seleccionar imagen (JPG, PNG, WebP)"}
+              <ImagePlus size={16} /> {uploading ? "Subiendo..." : "Seleccionar imagen (JPG, PNG, WebP)"}
             </Button>
           </div>
         </div>
@@ -592,22 +544,19 @@ const GaleriaAdmin = () => {
         </div>
       </div>
 
-      {/* Grid de fotos */}
       {items.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground border-2 border-dashed border-border rounded-2xl">
-          <ImageIcon size={40} className="mx-auto mb-2 opacity-30" />
+          <ImageIcon size={36} className="mx-auto mb-2 opacity-30" />
           <p className="text-sm">No hay fotos en la galería todavía</p>
           <p className="text-xs mt-1">Sube o pega un link arriba para comenzar</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {items.map((item) => (
-            <div key={item.id}
-              className={`relative group rounded-xl overflow-hidden border-2 ${item.activa ? "border-border" : "border-red-200 opacity-60"}`}>
+            <div key={item.id} className={`relative group rounded-2xl overflow-hidden border-2 ${item.activa ? "border-border" : "border-red-200 opacity-60"}`}>
               <img src={item.url} alt={item.alt} className="w-full h-36 object-cover" />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                <Button size="sm" className="h-7 text-xs bg-white text-black hover:bg-gray-100 border-0"
-                  onClick={() => toggleActive(item)}>
+                <Button size="sm" className="h-7 text-xs bg-white text-black hover:bg-gray-100 border-0" onClick={() => toggleActive(item)}>
                   {item.activa ? "Ocultar" : "Mostrar"}
                 </Button>
                 <AlertDialog>
@@ -626,9 +575,7 @@ const GaleriaAdmin = () => {
                   </AlertDialogContent>
                 </AlertDialog>
               </div>
-              {!item.activa && (
-                <div className="absolute top-1 left-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded">Oculta</div>
-              )}
+              {!item.activa && <div className="absolute top-1 left-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded">Oculta</div>}
               {item.alt && <p className="text-xs text-muted-foreground px-2 py-1 truncate bg-white/90">{item.alt}</p>}
             </div>
           ))}
@@ -664,33 +611,28 @@ const LinkResena = () => {
   return (
     <div className="max-w-lg mx-auto space-y-5">
       <div className="flex items-center gap-3 mb-2">
-        <div className="bg-primary/10 rounded-full p-2"><MessageCircle size={22} className="text-primary" /></div>
+        <div className="bg-primary/10 rounded-xl p-2.5"><MessageCircle size={18} className="text-primary" /></div>
         <div>
-          <h2 className="font-heading font-bold text-lg">Generar link de reseña</h2>
+          <h2 className="font-heading font-bold text-base">Generar link de reseña</h2>
           <p className="text-xs text-muted-foreground">El cliente solo ve la página personalizada y deja su opinión</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-border p-5 shadow-sm space-y-4">
+      <div className="bg-white rounded-2xl border border-border p-5 space-y-4" style={{ boxShadow: "var(--shadow-card)" }}>
         <div>
           <Label className="text-xs">Nombre del cliente *</Label>
           <Input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej: Ana, María, Sofía..." className="mt-1" autoFocus />
         </div>
-
         <div>
           <Label className="text-xs">Tipo de evento</Label>
-          <select
-            value={tipo}
-            onChange={(e) => setTipo(e.target.value)}
-            className="mt-1 w-full border border-input rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-          >
+          <select value={tipo} onChange={(e) => setTipo(e.target.value)}
+            className="mt-1 w-full border border-input rounded-xl px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30">
             <option value="">Sin especificar</option>
             <option value="cumpleanos">Cumpleaños</option>
             <option value="bautizo">Bautizo</option>
             <option value="sin-motivo">Sin motivo especial</option>
           </select>
         </div>
-
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs">Festejado (opcional)</Label>
@@ -701,11 +643,9 @@ const LinkResena = () => {
             <Input value={edad} onChange={(e) => setEdad(e.target.value)} placeholder="Ej: 3, 4 años..." className="mt-1" />
           </div>
         </div>
-
         <div className="bg-muted/50 rounded-xl px-3 py-2 text-xs text-muted-foreground break-all font-mono border border-border">
           {link}
         </div>
-
         <div className="grid grid-cols-2 gap-3">
           <Button variant="outline" className="w-full" onClick={copiar}>
             <Copy size={15} /> {copiado ? "¡Copiado!" : "Copiar link"}
@@ -716,7 +656,6 @@ const LinkResena = () => {
             </a>
           </Button>
         </div>
-
         <p className="text-xs text-muted-foreground text-center">
           La reseña se guarda con el nombre de la mamá y datos del festejado automáticamente.
         </p>
@@ -725,7 +664,7 @@ const LinkResena = () => {
   );
 };
 
-// ─── Mobiliario Infantil Admin ────────────────────────────────────────────────
+// ─── Mobiliario Admin ─────────────────────────────────────────────────────────
 type MobCfg = {
   badge: string; titulo: string; descripcion: string; precio: number;
   features: string[]; img_hero: string | null;
@@ -735,12 +674,12 @@ type MobCfg = {
 
 const MOB_DEFAULT: MobCfg = {
   badge: "Favorito Mamás", titulo: "Mesita de Madera Blanca",
-  descripcion: "Mesa de madera color blanco acompañada de 8 sillas infantiles a juego. Ideal para snacks, pastel, actividades creativas y más.",
+  descripcion: "Mesa de madera color blanco acompañada de 8 sillas infantiles a juego.",
   precio: 500,
   features: ["1 mesita de madera color blanco", "8 sillas infantiles incluidas", "Disponibles hasta 2 mesas", "Entrega y recolección incluidas"],
   img_hero: null,
-  silla1_titulo: "Sillas Pasteles", silla1_desc: "Sillas de colores suaves: rosa, lila, menta y amarillo. Perfectas para cualquier temática.", silla1_img: null,
-  silla2_titulo: "Sillas Conejito & Arcoíris", silla2_desc: "Figuras blancas en forma de conejito y arcoíris. Adorables para fiestas con temáticas tiernas y coloridas.", silla2_img: null,
+  silla1_titulo: "Sillas Pasteles", silla1_desc: "Sillas de colores suaves: rosa, lila, menta y amarillo.", silla1_img: null,
+  silla2_titulo: "Sillas Conejito & Arcoíris", silla2_desc: "Figuras blancas en forma de conejito y arcoíris.", silla2_img: null,
 };
 
 const MobiliarioAdmin = () => {
@@ -789,15 +728,15 @@ const MobiliarioAdmin = () => {
     <div>
       <Label className="text-xs">{label}</Label>
       <div className="mt-1 flex gap-2 items-start">
-        <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted border border-border flex items-center justify-center flex-shrink-0">
-          {src ? <img src={src} alt={label} className="w-full h-full object-cover" /> : <ImageIcon size={16} className="text-muted-foreground" />}
+        <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted border border-border flex items-center justify-center flex-shrink-0">
+          {src ? <img src={src} alt={label} className="w-full h-full object-cover" /> : <ImageIcon size={14} className="text-muted-foreground" />}
         </div>
         <div className="flex-1 space-y-1">
           <input ref={inputRef} type="file" accept="image/*" className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImg(f, field); }} />
           <Button variant="outline" size="sm" className="w-full text-xs"
             onClick={() => inputRef.current?.click()} disabled={uploading === field}>
-            <ImagePlus size={13} /> {uploading === field ? "Subiendo..." : "Subir foto"}
+            <ImagePlus size={12} /> {uploading === field ? "Subiendo..." : "Subir foto"}
           </Button>
           <Input value={src ?? ""} onChange={(e) => setCfg((c) => ({ ...c, [field]: e.target.value || null }))}
             placeholder="o pegar URL" className="text-xs" />
@@ -811,15 +750,14 @@ const MobiliarioAdmin = () => {
   return (
     <div className="max-w-2xl mx-auto space-y-5">
       <div className="flex items-center gap-3 mb-2">
-        <div className="bg-primary/10 rounded-full p-2"><LayoutTemplate size={22} className="text-primary" /></div>
+        <div className="bg-primary/10 rounded-xl p-2.5"><LayoutTemplate size={18} className="text-primary" /></div>
         <div>
-          <h2 className="font-heading font-bold text-lg">Página Mobiliario Infantil</h2>
+          <h2 className="font-heading font-bold text-base">Página Mobiliario Infantil</h2>
           <p className="text-xs text-muted-foreground">Edita el contenido y fotos de /mobiliario-infantil</p>
         </div>
       </div>
 
-      {/* Info principal */}
-      <div className="bg-white rounded-2xl border border-border p-5 shadow-sm space-y-4">
+      <div className="bg-white rounded-2xl border border-border p-5 space-y-4" style={{ boxShadow: "var(--shadow-card)" }}>
         <p className="text-xs font-semibold text-muted-foreground uppercase">Información principal</p>
         <div className="grid grid-cols-2 gap-3">
           <div><Label className="text-xs">Badge / Etiqueta</Label><Input value={cfg.badge} onChange={(e) => setCfg((c) => ({ ...c, badge: e.target.value }))} className="mt-1 text-sm" /></div>
@@ -829,18 +767,17 @@ const MobiliarioAdmin = () => {
         <div>
           <Label className="text-xs">Descripción</Label>
           <textarea value={cfg.descripcion} onChange={(e) => setCfg((c) => ({ ...c, descripcion: e.target.value }))}
-            className="mt-1 w-full text-sm border border-input rounded-md px-3 py-2 resize-none h-20 focus:outline-none focus:ring-2 focus:ring-ring" />
+            className="mt-1 w-full text-sm border border-input rounded-xl px-3 py-2 resize-none h-20 focus:outline-none focus:ring-2 focus:ring-ring" />
         </div>
         <div>
           <Label className="text-xs">Características (una por línea)</Label>
           <textarea value={featText} onChange={(e) => setFeatText(e.target.value)}
-            className="mt-1 w-full text-sm border border-input rounded-md px-3 py-2 resize-none h-28 focus:outline-none focus:ring-2 focus:ring-ring" />
+            className="mt-1 w-full text-sm border border-input rounded-xl px-3 py-2 resize-none h-24 focus:outline-none focus:ring-2 focus:ring-ring" />
         </div>
         <ImgField field="img_hero" label="Foto principal del producto" inputRef={heroRef} src={cfg.img_hero} />
       </div>
 
-      {/* Estilos de sillas */}
-      <div className="bg-white rounded-2xl border border-border p-5 shadow-sm space-y-4">
+      <div className="bg-white rounded-2xl border border-border p-5 space-y-4" style={{ boxShadow: "var(--shadow-card)" }}>
         <p className="text-xs font-semibold text-muted-foreground uppercase">Estilos de sillas</p>
         <div className="grid sm:grid-cols-2 gap-5">
           <div className="space-y-2">
@@ -849,7 +786,7 @@ const MobiliarioAdmin = () => {
             <div>
               <Label className="text-xs">Descripción</Label>
               <textarea value={cfg.silla1_desc} onChange={(e) => setCfg((c) => ({ ...c, silla1_desc: e.target.value }))}
-                className="mt-1 w-full text-sm border border-input rounded-md px-3 py-2 resize-none h-16 focus:outline-none focus:ring-2 focus:ring-ring" />
+                className="mt-1 w-full text-sm border border-input rounded-xl px-3 py-2 resize-none h-16 focus:outline-none focus:ring-2 focus:ring-ring" />
             </div>
             <ImgField field="silla1_img" label="Foto Opción A" inputRef={s1Ref} src={cfg.silla1_img} />
           </div>
@@ -859,7 +796,7 @@ const MobiliarioAdmin = () => {
             <div>
               <Label className="text-xs">Descripción</Label>
               <textarea value={cfg.silla2_desc} onChange={(e) => setCfg((c) => ({ ...c, silla2_desc: e.target.value }))}
-                className="mt-1 w-full text-sm border border-input rounded-md px-3 py-2 resize-none h-16 focus:outline-none focus:ring-2 focus:ring-ring" />
+                className="mt-1 w-full text-sm border border-input rounded-xl px-3 py-2 resize-none h-16 focus:outline-none focus:ring-2 focus:ring-ring" />
             </div>
             <ImgField field="silla2_img" label="Foto Opción B" inputRef={s2Ref} src={cfg.silla2_img} />
           </div>
@@ -889,10 +826,10 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30">
-      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm border border-border">
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="bg-white rounded-2xl p-8 w-full max-w-sm border border-border" style={{ boxShadow: "var(--shadow-float)" }}>
         <div className="flex flex-col items-center mb-6">
-          <div className="bg-primary/10 rounded-full p-4 mb-3">
+          <div className="bg-primary/10 rounded-2xl p-4 mb-3">
             <Lock size={28} className="text-primary" />
           </div>
           <h1 className="font-heading text-2xl font-bold">Admin Pequesaurios</h1>
@@ -902,20 +839,13 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
           <div>
             <Label htmlFor="password">Contraseña</Label>
             <Input
-              id="password"
-              type="password"
-              value={password}
+              id="password" type="password" value={password}
               onChange={(e) => { setPassword(e.target.value); setError(false); }}
-              placeholder="••••••••"
-              autoFocus
+              placeholder="••••••••" autoFocus className="mt-1"
             />
-            {error && (
-              <p className="text-red-500 text-xs mt-1">Contraseña incorrecta</p>
-            )}
+            {error && <p className="text-red-500 text-xs mt-1">Contraseña incorrecta</p>}
           </div>
-          <Button type="submit" variant="hero" className="w-full">
-            Entrar
-          </Button>
+          <Button type="submit" variant="hero" className="w-full">Entrar</Button>
         </form>
       </div>
     </div>
@@ -925,10 +855,11 @@ const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
 // ─── Main Admin ───────────────────────────────────────────────────────────────
 const Admin = () => {
   const [authenticated, setAuthenticated] = useState(() => localStorage.getItem("admin_auth") === "true");
+  const [activeSection, setActiveSection] = useState<AdminSection>("inicio");
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [contacts, setContacts] = useState<ContactMessage[]>([]);
-  const [quotes, setQuotes] = useState<Record<string, unknown>[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [contacts, setContacts]   = useState<ContactMessage[]>([]);
+  const [quotes, setQuotes]       = useState<Record<string, unknown>[]>([]);
+  const [loading, setLoading]     = useState(false);
   const [blockedDate, setBlockedDate] = useState<Date | undefined>();
   const [blockReason, setBlockReason] = useState("");
   const [notaReservation, setNotaReservation] = useState<Reservation | null>(null);
@@ -973,7 +904,6 @@ const Admin = () => {
       .from("reservations")
       .select("*")
       .order("event_date", { ascending: true });
-
     if (error) {
       toast.error("Error al cargar reservaciones");
     } else {
@@ -991,34 +921,24 @@ const Admin = () => {
   }, [authenticated]);
 
   const updateStatus = async (id: string, newStatus: string) => {
-    const { error } = await supabase
-      .from("reservations")
-      .update({ status: newStatus })
-      .eq("id", id);
-
+    const { error } = await supabase.from("reservations").update({ status: newStatus }).eq("id", id);
     if (error) {
       toast.error(`Error al actualizar: ${error.message}`);
-      fetchReservations(); // Refrescar para ver estado actual
+      fetchReservations();
     } else {
-      // Verificar que realmente se actualizó
-      const { data: check } = await supabase
-        .from("reservations")
-        .select("status")
-        .eq("id", id)
-        .single();
-
+      const { data: check } = await supabase.from("reservations").select("status").eq("id", id).single();
       if (check?.status === newStatus) {
         toast.success("Estado actualizado");
         fetchReservations();
       } else {
-        toast.error("No se pudo actualizar. Verifica las políticas RLS en Supabase:\n\n1. Ve a Supabase → Authentication → Policies\n2. En la tabla 'reservations', asegúrate de tener:\n   - Política UPDATE habilitada para usuarios autenticados\n   - O deshabilita RLS temporalmente para pruebas");
+        toast.error("No se pudo actualizar. Verifica las políticas RLS en Supabase.");
         fetchReservations();
       }
     }
   };
 
   const notifyClient = (r: Reservation, tipo: "confirmada" | "cancelada") => {
-    const packageLabels: Record<string, string> = {
+    const pkgLabels: Record<string, string> = {
       inflable: "Inflable Castillo Blanco",
       mobiliario: "Mobiliario Infantil",
       pintacaritas: "Pintacaritas",
@@ -1028,44 +948,25 @@ const Admin = () => {
     const [year, month, day] = r.event_date.split("-");
     const fecha = `${day}/${month}/${year}`;
     const nombre = r.customer_name.split(" ")[0];
-    const paquete = packageLabels[r.package] ?? r.package;
-
+    const paquete = pkgLabels[r.package] ?? r.package;
     const notasLinea = r.notes ? `\n*Detalle:* ${r.notes}` : "";
-
     const mensaje = tipo === "confirmada"
       ? `¡Hola ${nombre}! Queremos confirmarte que recibimos tu reservación con *Pequesaurios*\n\n*Fecha:* ${fecha}\n*Servicios:* ${paquete}${notasLinea}\n\nPara agendar tu espacio y confirmar la reservación es necesario realizar el anticipo del *50%* a la siguiente cuenta:\n\n*Nombre:* Elena Estefania Saldivar Martinez\n*Banco:* BBVA\n*Tarjeta:* 4152 3141 0801 077\n*Concepto:* ${r.customer_name}\n\nPor favor envianos foto del comprobante de transferencia para confirmar tu lugar.\n\nSi tienes alguna duda o cambio, escribenos aqui mismo. Nos vemos pronto!`
       : `Hola ${nombre}, te informamos que tu reservación del *${fecha}* con *Pequesaurios* ha sido *cancelada*.\n\nSi deseas reagendar o tienes alguna pregunta, con gusto te ayudamos.`;
-
     const phone = r.customer_phone.replace(/\D/g, "");
     const phoneWithCode = phone.startsWith("52") ? phone : `52${phone}`;
     window.open(`https://wa.me/${phoneWithCode}?text=${encodeURIComponent(mensaje)}`, "_blank");
   };
 
   const deleteReservation = async (id: string) => {
-    const { error } = await supabase
-      .from("reservations")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      toast.error(`Error al eliminar: ${error.message}`);
-      fetchReservations();
-      return;
-    }
-
-    // Verificar que realmente se eliminó haciendo un query directo
-    const { data: check } = await supabase
-      .from("reservations")
-      .select("id")
-      .eq("id", id)
-      .single();
-
+    const { error } = await supabase.from("reservations").delete().eq("id", id);
+    if (error) { toast.error(`Error al eliminar: ${error.message}`); fetchReservations(); return; }
+    const { data: check } = await supabase.from("reservations").select("id").eq("id", id).single();
     if (check) {
-      toast.error("No se pudo eliminar. Verifica las políticas RLS en Supabase:\n\n1. Ve a Supabase → Authentication → Policies\n2. En la tabla 'reservations', asegúrate de tener:\n   - Política DELETE habilitada para usuarios autenticados\n   - O deshabilita RLS temporalmente para pruebas");
+      toast.error("No se pudo eliminar. Verifica las políticas RLS en Supabase.");
     } else {
       toast.success("Eliminado correctamente");
     }
-    
     fetchReservations();
   };
 
@@ -1082,7 +983,6 @@ const Admin = () => {
       metodoPago: notaData.metodoPago,
       skipToPreview: Object.values(notaData.servicios).some((v) => v > 0),
     });
-    // También prellenar el contrato con los servicios seleccionados
     setContratoPrefill({
       address: notaData.address,
       hora: notaData.hora,
@@ -1095,22 +995,11 @@ const Admin = () => {
   };
 
   const addBlockedDate = async () => {
-    if (!blockedDate) {
-      toast.error("Selecciona una fecha");
-      return;
-    }
-
+    if (!blockedDate) { toast.error("Selecciona una fecha"); return; }
     const alreadyBlocked = reservations.some(
-      (r) =>
-        isSameDay(parseISO(r.event_date + "T12:00:00"), blockedDate) &&
-        r.package === "bloqueado"
+      (r) => isSameDay(parseISO(r.event_date + "T12:00:00"), blockedDate) && r.package === "bloqueado"
     );
-
-    if (alreadyBlocked) {
-      toast.error("Esa fecha ya está bloqueada");
-      return;
-    }
-
+    if (alreadyBlocked) { toast.error("Esa fecha ya está bloqueada"); return; }
     const { error } = await supabase.from("reservations").insert({
       customer_name: "Bloqueado (Admin)",
       customer_phone: "000",
@@ -1119,7 +1008,6 @@ const Admin = () => {
       notes: blockReason || null,
       status: "confirmada",
     });
-
     if (error) {
       toast.error("Error al bloquear fecha");
     } else {
@@ -1130,653 +1018,124 @@ const Admin = () => {
     }
   };
 
-  // Separate actual reservations from admin-blocked dates
-  const realReservations = reservations.filter((r) => r.package !== "bloqueado");
-  const activeReservations = realReservations.filter((r) => r.status !== "completada");
-  const completedReservations = realReservations.filter((r) => r.status === "completada");
-  const blockedDates = reservations.filter((r) => r.package === "bloqueado");
+  const realReservations       = reservations.filter((r) => r.package !== "bloqueado");
+  const activeReservations     = realReservations.filter((r) => r.status !== "completada");
+  const completedReservations  = realReservations.filter((r) => r.status === "completada");
+  const blockedDates           = reservations.filter((r) => r.package === "bloqueado");
   const bookedDatesForCalendar = reservations
     .filter((r) => r.status === "pendiente" || r.status === "confirmada")
     .map((r) => new Date(r.event_date + "T12:00:00"));
+
+  const unreadMessages = contacts.filter((c) => !c.read).length;
+  const unreadQuotes   = quotes.filter((q) => !q.read).length;
 
   if (!authenticated) {
     return <LoginScreen onLogin={() => { localStorage.setItem("admin_auth", "true"); setAuthenticated(true); }} />;
   }
 
+  const renderSection = () => {
+    switch (activeSection) {
+      case "inicio":
+        return (
+          <DashboardInicio
+            reservations={realReservations}
+            contacts={contacts}
+            quotes={quotes}
+            notifyClient={notifyClient}
+            setActiveSection={setActiveSection}
+          />
+        );
+      case "reservaciones":
+        return (
+          <ReservacionesView
+            reservations={activeReservations}
+            loading={loading}
+            updateStatus={updateStatus}
+            notifyClient={notifyClient}
+            deleteReservation={deleteReservation}
+            setNotaReservation={setNotaReservation}
+            setNotaPrefill={setNotaPrefill}
+            setContratoReservation={setContratoReservation}
+            setContratoPrefill={setContratoPrefill}
+            setReservacionManualOpen={setReservacionManualOpen}
+          />
+        );
+      case "calendario":
+        return (
+          <CalendarioView
+            reservations={reservations}
+            blockedDate={blockedDate}
+            setBlockedDate={setBlockedDate}
+            blockReason={blockReason}
+            setBlockReason={setBlockReason}
+            addBlockedDate={addBlockedDate}
+            deleteReservation={deleteReservation}
+            bookedDatesForCalendar={bookedDatesForCalendar}
+            blockedDates={blockedDates}
+          />
+        );
+      case "historial":
+        return (
+          <HistorialView
+            reservations={completedReservations}
+            updateStatus={updateStatus}
+            deleteReservation={deleteReservation}
+            setNotaReservation={setNotaReservation}
+            setNotaPrefill={setNotaPrefill}
+          />
+        );
+      case "mensajes":
+        return (
+          <MensajesView
+            contacts={contacts}
+            markContactRead={markContactRead}
+            deleteContact={deleteContact}
+          />
+        );
+      case "cotizaciones":
+        return (
+          <CotizacionesView
+            quotes={quotes}
+            markQuoteRead={markQuoteRead}
+            deleteQuote={deleteQuote}
+            setReservacionManualOpen={setReservacionManualOpen}
+          />
+        );
+      case "productos":
+        return <AdminProductos />;
+      case "galeria":
+        return (
+          <div className="space-y-8">
+            <GaleriaAdmin />
+            <div className="border-t border-border pt-8">
+              <ServiciosAdmin />
+            </div>
+          </div>
+        );
+      case "resenas":
+        return <LinkResena />;
+      case "mobiliario":
+        return <MobiliarioAdmin />;
+      case "flete":
+        return <FleteCalculator />;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="font-heading text-3xl font-bold">Panel de Admin</h1>
-          <p className="text-muted-foreground text-sm">Pequesaurios — Gestión interna</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={fetchReservations} disabled={loading}>
-            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-            Actualizar
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => { localStorage.removeItem("admin_auth"); setAuthenticated(false); }}
-          >
-            <LogOut size={15} /> Salir
-          </Button>
-        </div>
-      </div>
+    <AdminShell
+      activeSection={activeSection}
+      setActiveSection={setActiveSection}
+      onRefresh={() => { fetchReservations(); fetchContacts(); fetchQuotes(); }}
+      onLogout={() => { localStorage.removeItem("admin_auth"); setAuthenticated(false); }}
+      loading={loading}
+      unreadMessages={unreadMessages}
+      unreadQuotes={unreadQuotes}
+      historialCount={completedReservations.length}
+    >
+      {renderSection()}
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-        {[
-          { label: "Total", value: realReservations.length, color: "text-foreground" },
-          { label: "Pendientes", value: realReservations.filter((r) => r.status === "pendiente").length, color: "text-yellow-600" },
-          { label: "Confirmadas", value: realReservations.filter((r) => r.status === "confirmada").length, color: "text-green-600" },
-          { label: "Canceladas", value: realReservations.filter((r) => r.status === "cancelada").length, color: "text-red-500" },
-          { label: "Completadas", value: completedReservations.length, color: "text-blue-600" },
-        ].map((s) => (
-          <div key={s.label} className="bg-white rounded-xl border border-border p-4 text-center shadow-sm">
-            <p className={`text-3xl font-bold ${s.color}`}>{s.value}</p>
-            <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
-          </div>
-        ))}
-      </div>
-
-      <Tabs defaultValue="reservaciones">
-        <TabsList className="mb-6">
-          <TabsTrigger value="reservaciones">Reservaciones</TabsTrigger>
-          <TabsTrigger value="bloquear">Bloquear Fechas</TabsTrigger>
-          <TabsTrigger value="mensajes" className="relative">
-            Mensajes
-            {contacts.filter((c) => !c.read).length > 0 && (
-              <span className="ml-2 bg-primary text-white text-xs rounded-full px-1.5 py-0.5">
-                {contacts.filter((c) => !c.read).length}
-              </span>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="cotizaciones" className="relative">
-            Cotizaciones
-            {quotes.filter((q) => !q.read).length > 0 && (
-              <span className="ml-2 bg-primary text-white text-xs rounded-full px-1.5 py-0.5">
-                {quotes.filter((q) => !q.read).length}
-              </span>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="productos">Productos</TabsTrigger>
-          <TabsTrigger value="flete">Flete</TabsTrigger>
-          <TabsTrigger value="galeria">Galería</TabsTrigger>
-          <TabsTrigger value="mobiliario">Mobiliario</TabsTrigger>
-          <TabsTrigger value="resenas">Reseñas</TabsTrigger>
-          <TabsTrigger value="historial" className="relative">
-            Historial
-            {completedReservations.length > 0 && (
-              <span className="ml-2 bg-blue-500 text-white text-xs rounded-full px-1.5 py-0.5">
-                {completedReservations.length}
-              </span>
-            )}
-          </TabsTrigger>
-        </TabsList>
-
-        {/* ── Tab 1: Reservaciones ── */}
-        <TabsContent value="reservaciones">
-          <div className="flex justify-end mb-4">
-            <Button variant="hero" size="sm" onClick={() => setReservacionManualOpen(true)}>
-              <PlusCircle size={15} /> Nueva reservación manual
-            </Button>
-          </div>
-          {activeReservations.length === 0 ? (
-            <div className="text-center py-16 text-muted-foreground">
-              {loading ? "Cargando..." : "No hay reservaciones activas"}
-            </div>
-          ) : (
-            <div className="rounded-xl border border-border overflow-hidden shadow-sm">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead>Fecha evento</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Contacto</TableHead>
-                    <TableHead>Paquete</TableHead>
-                    <TableHead>Notas</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {activeReservations.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell className="font-medium whitespace-nowrap">
-                        {format(parseISO(r.event_date + "T12:00:00"), "dd MMM yyyy", { locale: es })}
-                      </TableCell>
-                      <TableCell>{r.customer_name}</TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <a href={`tel:${r.customer_phone}`} className="text-primary hover:underline block">
-                            {r.customer_phone}
-                          </a>
-                          {r.customer_email && (
-                            <a href={`mailto:${r.customer_email}`} className="text-muted-foreground hover:underline text-xs block">
-                              {r.customer_email}
-                            </a>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {packageLabels[r.package] ?? r.package}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground max-w-[150px] truncate">
-                        {r.notes ?? "—"}
-                      </TableCell>
-                      <TableCell>
-                        <Select value={r.status} onValueChange={(val) => updateStatus(r.id, val)}>
-                          <SelectTrigger className={`w-32 text-xs border ${statusColors[r.status] ?? ""}`}>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="pendiente">Pendiente</SelectItem>
-                            <SelectItem value="confirmada">Confirmada</SelectItem>
-                            <SelectItem value="cancelada">Cancelada</SelectItem>
-                            <SelectItem value="completada">Completada</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-blue-500 hover:text-blue-700"
-                          title="Marcar como completada"
-                          onClick={() => updateStatus(r.id, "completada")}
-                        >
-                          <CheckCircle2 size={16} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-green-500 hover:text-green-700"
-                          title="Avisar confirmación por WhatsApp"
-                          onClick={() => notifyClient(r, "confirmada")}
-                        >
-                          <MessageCircle size={16} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-primary hover:text-primary/80"
-                          title="Crear nota de pago"
-                          onClick={() => {
-                            const cd = r.cotizador_data;
-                            setNotaPrefill({
-                              ...(cd ? {
-                                servicios: cd.servicios,
-                                precios: cd.precios,
-                                flete: cd.flete,
-                                address: cd.direccion,
-                                skipToPreview: true,
-                              } : { skipToPreview: false }),
-                            });
-                            setNotaReservation(r);
-                          }}
-                        >
-                          <FileText size={16} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-purple-500 hover:text-purple-700"
-                          title="Generar contrato de renta"
-                          onClick={() => {
-                            const cd = r.cotizador_data;
-                            setContratoPrefill({
-                              servicios: cd ? Object.keys(cd.servicios).filter((id) => cd.servicios[id] > 0) : [],
-                              address: cd?.direccion ?? "",
-                              skipToPreview: false,
-                            });
-                            setContratoReservation(r);
-                          }}
-                        >
-                          <ScrollText size={16} />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-600">
-                              <Trash2 size={16} />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>¿Eliminar reservación?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Se eliminará permanentemente la reservación de <strong>{r.customer_name}</strong> para el {format(parseISO(r.event_date + "T12:00:00"), "dd 'de' MMMM", { locale: es })}.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction
-                                className="bg-red-500 hover:bg-red-600"
-                                onClick={() => deleteReservation(r.id)}
-                              >
-                                Eliminar
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </TabsContent>
-
-        {/* ── Tab 2: Bloquear Fechas ── */}
-        <TabsContent value="bloquear">
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Calendar */}
-            <div>
-              <h2 className="font-heading font-bold text-lg mb-4">Selecciona una fecha para bloquear</h2>
-              <Calendar
-                mode="single"
-                selected={blockedDate}
-                onSelect={setBlockedDate}
-                locale={es}
-                disabled={(day) => day < new Date(new Date().setHours(0, 0, 0, 0))}
-                modifiers={{ booked: bookedDatesForCalendar }}
-                modifiersClassNames={{
-                  booked: "bg-primary/30 text-primary line-through",
-                }}
-                className="rounded-2xl border border-border shadow-sm p-4"
-              />
-
-              {blockedDate && (
-                <div className="mt-4 space-y-3">
-                  <p className="text-sm font-medium text-primary">
-                    Fecha seleccionada: {format(blockedDate, "EEEE d 'de' MMMM, yyyy", { locale: es })}
-                  </p>
-                  <div>
-                    <Label htmlFor="reason">Motivo (opcional)</Label>
-                    <Input
-                      id="reason"
-                      value={blockReason}
-                      onChange={(e) => setBlockReason(e.target.value)}
-                      placeholder="Ej: Evento privado, mantenimiento..."
-                    />
-                  </div>
-                  <Button onClick={addBlockedDate} className="w-full" variant="hero">
-                    <CalendarOff size={16} /> Bloquear esta fecha
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Blocked dates list */}
-            <div>
-              <h2 className="font-heading font-bold text-lg mb-4">Fechas bloqueadas manualmente</h2>
-              {blockedDates.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No hay fechas bloqueadas manualmente.</p>
-              ) : (
-                <div className="space-y-2">
-                  {blockedDates.map((b) => (
-                    <div
-                      key={b.id}
-                      className="flex items-center justify-between bg-red-50 border border-red-200 rounded-xl px-4 py-3"
-                    >
-                      <div>
-                        <p className="font-medium text-sm">
-                          {format(parseISO(b.event_date + "T12:00:00"), "EEEE d 'de' MMMM, yyyy", { locale: es })}
-                        </p>
-                        {b.notes && (
-                          <p className="text-xs text-muted-foreground">{b.notes}</p>
-                        )}
-                      </div>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-600">
-                            <Trash2 size={16} />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>¿Desbloquear fecha?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              La fecha {format(parseISO(b.event_date + "T12:00:00"), "dd 'de' MMMM", { locale: es })} quedará disponible nuevamente.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction
-                              className="bg-red-500 hover:bg-red-600"
-                              onClick={() => deleteReservation(b.id)}
-                            >
-                              Desbloquear
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </TabsContent>
-
-        {/* ── Tab 3: Mensajes ── */}
-        <TabsContent value="mensajes">
-          {contacts.length === 0 ? (
-            <div className="text-center py-16 text-muted-foreground">No hay mensajes aún</div>
-          ) : (
-            <div className="space-y-3">
-              {contacts.map((c) => (
-                <div
-                  key={c.id}
-                  className={`rounded-xl border p-5 transition-colors ${
-                    c.read ? "border-border bg-white" : "border-primary/30 bg-primary/5"
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        {!c.read && (
-                          <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
-                        )}
-                        <span className="font-semibold text-sm">{c.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {format(new Date(c.created_at), "dd MMM yyyy, HH:mm", { locale: es })}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2 break-words">{c.message}</p>
-                      <div className="flex gap-3 text-xs text-muted-foreground">
-                        <span>📧 {c.email}</span>
-                        {c.phone && <span>📞 {c.phone}</span>}
-                      </div>
-                    </div>
-                    <div className="flex gap-1 flex-shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-blue-500 hover:text-blue-700"
-                        title="Responder por email"
-                        onClick={() => {
-                          if (!c.read) markContactRead(c.id);
-                          window.open(
-                            `mailto:${c.email}?subject=Re: Tu mensaje a Pequesaurios&body=Hola ${c.name.split(" ")[0]},%0A%0AGracias por contactarnos. `,
-                            "_blank"
-                          );
-                        }}
-                      >
-                        <Mail size={16} />
-                      </Button>
-                      {c.phone && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-green-500 hover:text-green-700"
-                          title="Responder por WhatsApp"
-                          onClick={() => {
-                            if (!c.read) markContactRead(c.id);
-                            const phone = c.phone.replace(/\D/g, "");
-                            const phoneWithCode = phone.startsWith("52") ? phone : `52${phone}`;
-                            const msg = encodeURIComponent(`¡Hola ${c.name.split(" ")[0]}! Gracias por contactar a *Pequesaurios*. `);
-                            window.open(`https://wa.me/${phoneWithCode}?text=${msg}`, "_blank");
-                          }}
-                        >
-                          <MessageCircle size={16} />
-                        </Button>
-                      )}
-                      {!c.read && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-muted-foreground hover:text-foreground"
-                          title="Marcar como leído"
-                          onClick={() => markContactRead(c.id)}
-                        >
-                          <CheckCheck size={16} />
-                        </Button>
-                      )}
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-600">
-                            <Trash2 size={16} />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>¿Eliminar mensaje?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Se eliminará el mensaje de <strong>{c.name}</strong>.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={() => deleteContact(c.id)}>
-                              Eliminar
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        {/* ── Tab 4: Cotizaciones ── */}
-        <TabsContent value="cotizaciones">
-          {quotes.length === 0 ? (
-            <div className="text-center py-16 text-muted-foreground">No hay cotizaciones aún</div>
-          ) : (
-            <div className="space-y-3">
-              {quotes.map((q) => {
-                const qItems = q.items as { name: string; qty: number; subtotal: number }[];
-                return (
-                  <div
-                    key={q.id as string}
-                    className={`rounded-xl border p-5 transition-colors ${
-                      q.read ? "border-border bg-white" : "border-primary/30 bg-primary/5"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-3">
-                          {!q.read && <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />}
-                          <span className="text-xs text-muted-foreground">
-                            {format(new Date(q.created_at as string), "dd MMM yyyy, HH:mm", { locale: es })}
-                          </span>
-                        </div>
-                        <ul className="space-y-1 mb-3">
-                          {qItems.map((item, i) => (
-                            <li key={i} className="flex justify-between text-sm">
-                              <span className="text-foreground/80">{item.qty}x {item.name}</span>
-                              <span className="font-medium">${item.subtotal.toLocaleString()}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        <div className="flex justify-between font-bold text-primary border-t border-border pt-2">
-                          <span>Total estimado</span>
-                          <span>${(q.total as number).toLocaleString()} MXN</span>
-                        </div>
-                      </div>
-                      <div className="flex gap-1 flex-shrink-0">
-                        {!q.read && (
-                          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" title="Marcar como leída" onClick={() => markQuoteRead(q.id as string)}>
-                            <CheckCheck size={16} />
-                          </Button>
-                        )}
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-600">
-                              <Trash2 size={16} />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>¿Eliminar cotización?</AlertDialogTitle>
-                              <AlertDialogDescription>Se eliminará permanentemente esta cotización.</AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={() => deleteQuote(q.id as string)}>
-                                Eliminar
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </TabsContent>
-
-        {/* ── Tab 5: Productos ── */}
-        <TabsContent value="productos">
-          <AdminProductos />
-        </TabsContent>
-
-        {/* ── Tab 6: Flete ── */}
-        <TabsContent value="flete">
-          <FleteCalculator />
-        </TabsContent>
-
-        {/* ── Tab: Galería & Servicios ── */}
-        <TabsContent value="galeria">
-          <GaleriaAdmin />
-          <div className="border-t border-border mt-10 pt-10">
-            <ServiciosAdmin />
-          </div>
-        </TabsContent>
-
-        {/* ── Tab: Mobiliario ── */}
-        <TabsContent value="mobiliario">
-          <MobiliarioAdmin />
-        </TabsContent>
-
-        {/* ── Tab: Reseñas ── */}
-        <TabsContent value="resenas">
-          <LinkResena />
-        </TabsContent>
-
-        {/* ── Tab 7: Historial ── */}
-        <TabsContent value="historial">
-          <div className="flex items-center gap-2 mb-4">
-            <History size={18} className="text-blue-500" />
-            <h2 className="font-heading font-bold text-lg">Reservaciones completadas</h2>
-            <span className="text-xs text-muted-foreground">({completedReservations.length} eventos)</span>
-          </div>
-          {completedReservations.length === 0 ? (
-            <div className="text-center py-16 text-muted-foreground">
-              Aún no hay eventos completados. Marca una reservación confirmada con el ✓ azul para moverla aquí.
-            </div>
-          ) : (
-            <div className="rounded-xl border border-border overflow-hidden shadow-sm">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-blue-50/50">
-                    <TableHead>Fecha evento</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Contacto</TableHead>
-                    <TableHead>Paquete</TableHead>
-                    <TableHead>Notas</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {completedReservations.map((r) => (
-                    <TableRow key={r.id} className="bg-blue-50/20">
-                      <TableCell className="font-medium whitespace-nowrap">
-                        {format(parseISO(r.event_date + "T12:00:00"), "dd MMM yyyy", { locale: es })}
-                      </TableCell>
-                      <TableCell>{r.customer_name}</TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <a href={`tel:${r.customer_phone}`} className="text-primary hover:underline block">
-                            {r.customer_phone}
-                          </a>
-                          {r.customer_email && (
-                            <a href={`mailto:${r.customer_email}`} className="text-muted-foreground hover:underline text-xs block">
-                              {r.customer_email}
-                            </a>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm">{packageLabels[r.package] ?? r.package}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground max-w-[150px] truncate">
-                        {r.notes ?? "—"}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-yellow-500 hover:text-yellow-700"
-                            title="Regresar a confirmada"
-                            onClick={() => updateStatus(r.id, "confirmada")}
-                          >
-                            <RefreshCw size={15} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-primary hover:text-primary/80"
-                            title="Crear nota de pago"
-                            onClick={() => {
-                              const cd = r.cotizador_data;
-                              setNotaPrefill({
-                                ...(cd ? {
-                                  servicios: cd.servicios,
-                                  precios: cd.precios,
-                                  flete: cd.flete,
-                                  address: cd.direccion,
-                                  skipToPreview: true,
-                                } : { skipToPreview: false }),
-                              });
-                              setNotaReservation(r);
-                            }}
-                          >
-                            <FileText size={16} />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-600">
-                                <Trash2 size={16} />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>¿Eliminar del historial?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Se eliminará permanentemente el evento de <strong>{r.customer_name}</strong>.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={() => deleteReservation(r.id)}>
-                                  Eliminar
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-
-      {/* Nota de pago */}
       <NotaPago
         reservation={notaReservation}
         open={!!notaReservation}
@@ -1784,7 +1143,6 @@ const Admin = () => {
         prefill={notaPrefill}
       />
 
-      {/* Contrato de renta */}
       <Contrato
         reservation={contratoReservation}
         open={!!contratoReservation}
@@ -1792,14 +1150,13 @@ const Admin = () => {
         prefill={contratoPrefill}
       />
 
-      {/* Reservación manual */}
       <ReservacionManual
         open={reservacionManualOpen}
         onClose={() => setReservacionManualOpen(false)}
         bookedDates={bookedDatesForCalendar}
         onCreated={handleReservacionCreada}
       />
-    </div>
+    </AdminShell>
   );
 };
 
