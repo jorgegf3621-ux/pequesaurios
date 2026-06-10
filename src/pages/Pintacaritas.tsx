@@ -6,7 +6,7 @@ const incluye = [
   "Diseños en cara y mano de variados personajes",
   "Glitter tattoos infantiles",
   "Glitter para cabello",
-  "Materiales profesionales hipoalergénicos",
+  "Materiales profesionales",
   "Servicio de 1.5 horas continuas",
 ];
 
