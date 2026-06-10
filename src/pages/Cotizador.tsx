@@ -22,32 +22,25 @@ type FleteConfig = {
   direccion_base: string;
 };
 
-const items: Item[] = [
-  // Baby Play Zone
-  { id: "bpz-inflable",       name: "Baby Play Zone · Inflable Castillo (solo)",              price: 1000, unit: "renta 5hrs",  category: "Baby Play Zone" },
-  { id: "bpz-basico",         name: "Baby Play Zone · Paquete Básico (inflable + mesita)",    price: 1400, unit: "renta 5hrs",  category: "Baby Play Zone" },
-  { id: "bpz-plus",           name: "Baby Play Zone · Paquete Plus (inflable + mesita arte)", price: 1550, unit: "renta 5hrs",  category: "Baby Play Zone" },
-  // Caballetes
-  { id: "cab-dino-baby",      name: "Caballetes · Paquete Dino Baby",                         price: 900,  unit: "1.5 hrs",     category: "Caballetes" },
-  { id: "cab-dino-creativo",  name: "Caballetes · Paquete Dino Creativo (+ yesitos)",         price: 1300, unit: "1.5 hrs",     category: "Caballetes" },
-  { id: "cab-dino-fun",       name: "Caballetes · Paquete Dino Fun (+ pintacaritas)",         price: 1700, unit: "1.5 hrs",     category: "Caballetes" },
-  // Yesitos
-  { id: "yesito-basico",      name: "Kit Yesitos Básico (1 yesito + 1 pintura)",              price: 20,   unit: "kit", min: 10, category: "Yesitos" },
-  { id: "yesito-intermedio",  name: "Kit Yesitos Intermedio (2 yesitos + 2 pinturas)",        price: 25,   unit: "kit", min: 10, category: "Yesitos" },
-  { id: "yesito-completo",    name: "Kit Yesitos Completo (3 yesitos + 3 pinturas)",          price: 30,   unit: "kit", min: 10, category: "Yesitos" },
-  // Mesas
-  { id: "mesa-pastel",        name: "Mesa Infantil Pastel (6 sillas)",                        price: 500,  unit: "mesa",        category: "Mesas" },
-  { id: "mesa-blanca",        name: "Mesita Blanca (8 sillas madera)",                        price: 750,  unit: "mesa",        category: "Mesas" },
-  // Extras
-  { id: "globos",             name: "Guirnalda de Globos",                                    price: 200,  unit: "pieza",       category: "Extras" },
-  // Servicios
-  { id: "pintacaritas",       name: "Pintacaritas (1.5 hrs)",                                 price: 800,  unit: "servicio",    category: "Servicios" },
+const DEFAULT_ITEMS: Item[] = [
+  { id: "bpz-inflable",      name: "Baby Play Zone · Inflable Castillo (solo)",              price: 1000, unit: "renta 5hrs", category: "Baby Play Zone" },
+  { id: "bpz-basico",        name: "Baby Play Zone · Paquete Básico (inflable + mesita)",    price: 1400, unit: "renta 5hrs", category: "Baby Play Zone" },
+  { id: "bpz-plus",          name: "Baby Play Zone · Paquete Plus (inflable + mesita arte)", price: 1550, unit: "renta 5hrs", category: "Baby Play Zone" },
+  { id: "cab-dino-baby",     name: "Caballetes · Paquete Dino Baby",                          price: 900,  unit: "1.5 hrs",  category: "Caballetes" },
+  { id: "cab-dino-creativo", name: "Caballetes · Paquete Dino Creativo (+ yesitos)",          price: 1300, unit: "1.5 hrs",  category: "Caballetes" },
+  { id: "cab-dino-fun",      name: "Caballetes · Paquete Dino Fun (+ pintacaritas)",          price: 1700, unit: "1.5 hrs",  category: "Caballetes" },
+  { id: "yesito-basico",     name: "Kit Yesitos Básico (1 yesito + 1 pintura)",               price: 20,   unit: "kit", min: 10, category: "Yesitos" },
+  { id: "yesito-intermedio", name: "Kit Yesitos Intermedio (2 yesitos + 2 pinturas)",         price: 25,   unit: "kit", min: 10, category: "Yesitos" },
+  { id: "yesito-completo",   name: "Kit Yesitos Completo (3 yesitos + 3 pinturas)",           price: 30,   unit: "kit", min: 10, category: "Yesitos" },
+  { id: "mesa-pastel",       name: "Mesa Infantil Pastel (6 sillas)",                         price: 500,  unit: "mesa",     category: "Mesas" },
+  { id: "mesa-blanca",       name: "Mesita Blanca (8 sillas madera)",                         price: 500,  unit: "mesa",     category: "Mesas" },
+  { id: "globos",            name: "Guirnalda de Globos",                                     price: 200,  unit: "pieza",    category: "Extras" },
+  { id: "pintacaritas",      name: "Pintacaritas (1.5 hrs)",                                  price: 800,  unit: "servicio", category: "Servicios" },
 ];
-
 
 const IDS_ENTREGA_FISICA = ["bpz-inflable", "bpz-basico", "bpz-plus", "mesa-pastel", "mesa-blanca", "cab-dino-baby", "cab-dino-creativo", "cab-dino-fun"];
 const IDS_CON_MESITA = new Set(["mesa-pastel", "mesa-blanca", "bpz-basico", "bpz-plus"]);
-const MESA_EXTRA: Item = { id: "mesa-extra", name: "Mesa extra (segunda mesa)", price: 450, unit: "mesa", category: "Mesas" };
+const DEFAULT_MESA_EXTRA: Item = { id: "mesa-extra", name: "Mesa extra (segunda mesa)", price: 450, unit: "mesa", category: "Mesas" };
 
 // ─── Geocodificación base + distancia real ───────────────────────────────────
 
@@ -107,6 +100,9 @@ const Cotizador = () => {
   const [eventAddress, setEventAddress] = useState<AddressResult | null>(null);
   const [addressInput, setAddressInput] = useState("");
 
+  const [items, setItems] = useState<Item[]>(DEFAULT_ITEMS);
+  const [mesaExtra, setMesaExtra] = useState<Item>(DEFAULT_MESA_EXTRA);
+
   // Flete data from Supabase
   const [fleteConfig, setFleteConfig] = useState<FleteConfig | null>(null);
 
@@ -118,16 +114,24 @@ const Cotizador = () => {
   // Fallback si Nominatim falla: centro de San Nicolás de los Garza
   const DEFAULT_BASE: Coords = [-100.3000, 25.7333];
 
-  // Load flete config on mount
+  // Load flete config + cotizador prices on mount
   useEffect(() => {
     const load = async () => {
-      const { data: cfg } = await (supabase as any).from("flete_config").select("*").eq("id", 1).single();
+      const [{ data: cfg }, { data: precios }] = await Promise.all([
+        (supabase as any).from("flete_config").select("*").eq("id", 1).single(),
+        (supabase as any).from("cotizador_precios").select("id, price").order("sort_order"),
+      ]);
       if (cfg) {
         setFleteConfig(cfg);
         const coords = await geocodeBase(cfg.direccion_base || "San Nicolás de los Garza, NL");
         setBaseCoords(coords ?? DEFAULT_BASE);
       } else {
         setBaseCoords(DEFAULT_BASE);
+      }
+      if (precios && precios.length > 0) {
+        const map: Record<string, number> = Object.fromEntries(precios.map((p: { id: string; price: number }) => [p.id, p.price]));
+        setItems(DEFAULT_ITEMS.map((i) => map[i.id] !== undefined ? { ...i, price: map[i.id] } : i));
+        if (map["mesa-extra"] !== undefined) setMesaExtra({ ...DEFAULT_MESA_EXTRA, price: map["mesa-extra"] });
       }
     };
     load();
@@ -199,7 +203,7 @@ const Cotizador = () => {
   const selectedFinal = tieneMesita
     ? selected
     : Object.fromEntries(Object.entries(selected).filter(([id]) => id !== "mesa-extra"));
-  const allItems = tieneMesita ? [...items, MESA_EXTRA] : items;
+  const allItems = tieneMesita ? [...items, mesaExtra] : items;
 
   const total = Object.entries(selectedFinal).reduce((sum, [id, qty]) => {
     const item = allItems.find((i) => i.id === id);
@@ -304,7 +308,7 @@ const Cotizador = () => {
             {cat === "Mesas" && tieneMesita && (
               <div className="border-t border-dashed border-primary/30 pt-3 mt-1">
                 <p className="text-xs text-primary font-semibold mb-2 pl-1">+ Segunda mesa (máx. 1)</p>
-                {renderItem(MESA_EXTRA)}
+                {renderItem(mesaExtra)}
               </div>
             )}
           </div>

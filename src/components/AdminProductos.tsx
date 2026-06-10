@@ -262,23 +262,47 @@ const ExtraForm = ({ extra, onSave, onClose }: { extra: Partial<Extra> | null; o
   );
 };
 
+type CotizadorPrecio = { id: string; name: string; price: number; unit: string; category: string; min_qty: number; sort_order: number };
+
 // ── Componente principal ──────────────────────────────────────────────────────
 const AdminProductos = () => {
   const [packages, setPackages] = useState<Package[]>([]);
   const [extras, setExtras] = useState<Extra[]>([]);
+  const [cotizadorPrecios, setCotizadorPrecios] = useState<CotizadorPrecio[]>([]);
+  const [editingPrices, setEditingPrices] = useState<Record<string, string>>({});
+  const [savingPrices, setSavingPrices] = useState(false);
   const [editingPkg, setEditingPkg] = useState<Partial<Package> | null | undefined>(undefined);
   const [editingExtra, setEditingExtra] = useState<Partial<Extra> | null | undefined>(undefined);
 
   const fetchAll = async () => {
-    const [{ data: pkgs }, { data: exts }] = await Promise.all([
+    const [{ data: pkgs }, { data: exts }, { data: precios }] = await Promise.all([
       (supabase as any).from("packages").select("*").order("sort_order"),
       (supabase as any).from("extras").select("*").order("sort_order"),
+      (supabase as any).from("cotizador_precios").select("*").order("sort_order"),
     ]);
     if (pkgs) setPackages(pkgs);
     if (exts) setExtras(exts);
+    if (precios) {
+      setCotizadorPrecios(precios);
+      setEditingPrices(Object.fromEntries(precios.map((p: CotizadorPrecio) => [p.id, String(p.price)])));
+    }
   };
 
   useEffect(() => { fetchAll(); }, []);
+
+  const savePrecios = async () => {
+    setSavingPrices(true);
+    const updates = cotizadorPrecios.map((p) => ({
+      id: p.id,
+      price: parseInt(editingPrices[p.id] ?? String(p.price)) || p.price,
+    }));
+    for (const u of updates) {
+      await (supabase as any).from("cotizador_precios").update({ price: u.price }).eq("id", u.id);
+    }
+    setSavingPrices(false);
+    toast.success("Precios del cotizador actualizados");
+    fetchAll();
+  };
 
   const deletePkg = async (id: string) => {
     await (supabase as any).from("packages").delete().eq("id", id);
@@ -304,11 +328,53 @@ const AdminProductos = () => {
 
   return (
     <div>
-      <Tabs defaultValue="paquetes">
+      <Tabs defaultValue="cotizador">
         <TabsList className="mb-6">
+          <TabsTrigger value="cotizador">Precios del cotizador</TabsTrigger>
           <TabsTrigger value="paquetes">Paquetes ({packages.length})</TabsTrigger>
           <TabsTrigger value="extras">Extras ({extras.length})</TabsTrigger>
         </TabsList>
+
+        {/* ── Cotizador precios ── */}
+        <TabsContent value="cotizador">
+          <div className="space-y-2">
+            {Object.entries(
+              cotizadorPrecios.reduce((acc, p) => {
+                (acc[p.category] = acc[p.category] || []).push(p);
+                return acc;
+              }, {} as Record<string, CotizadorPrecio[]>)
+            ).map(([cat, items]) => (
+              <div key={cat} className="bg-white rounded-2xl border border-border overflow-hidden" style={{ boxShadow: "var(--shadow-card)" }}>
+                <div className="bg-muted/40 px-4 py-2.5 border-b border-border">
+                  <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{cat}</p>
+                </div>
+                <div className="divide-y divide-border">
+                  {items.map((p) => (
+                    <div key={p.id} className="flex items-center gap-4 px-4 py-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{p.name}</p>
+                        <p className="text-xs text-muted-foreground">por {p.unit}{p.min_qty > 1 ? ` · mín. ${p.min_qty}` : ""}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-xs text-muted-foreground">$</span>
+                        <Input
+                          type="number"
+                          className="w-24 h-8 text-sm text-right"
+                          value={editingPrices[p.id] ?? String(p.price)}
+                          onChange={(e) => setEditingPrices((prev) => ({ ...prev, [p.id]: e.target.value }))}
+                        />
+                        <span className="text-xs text-muted-foreground">MXN</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <Button variant="hero" className="w-full mt-4" onClick={savePrecios} disabled={savingPrices}>
+              {savingPrices ? "Guardando..." : "Guardar precios del cotizador"}
+            </Button>
+          </div>
+        </TabsContent>
 
         {/* ── Paquetes ── */}
         <TabsContent value="paquetes">
