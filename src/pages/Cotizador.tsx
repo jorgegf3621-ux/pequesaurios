@@ -103,6 +103,7 @@ const Cotizador = () => {
     return paquete ? { [paquete]: 1 } : {};
   });
   const [showMesaPrompt, setShowMesaPrompt] = useState(false);
+  const [intentoReservar, setIntentoReservar] = useState(false);
   const [eventAddress, setEventAddress] = useState<AddressResult | null>(null);
   const [addressInput, setAddressInput] = useState("");
 
@@ -232,6 +233,11 @@ const Cotizador = () => {
   };
 
   const handleReservar = () => {
+    if (!eventAddress) {
+      setIntentoReservar(true);
+      document.getElementById("campo-direccion")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     if (tieneMesita && !selectedFinal["mesa-extra"]) {
       setShowMesaPrompt(true);
       return;
@@ -312,9 +318,9 @@ const Cotizador = () => {
         </h2>
         <div className="space-y-3">
           {/* Buscador de dirección con Google Places */}
-          <div className="p-4 rounded-xl border border-border bg-card">
+          <div id="campo-direccion" className={`p-4 rounded-xl border bg-card transition-colors ${!eventAddress && haySeleccion ? "border-red-300" : "border-border"}`}>
             <label className="block text-sm font-semibold mb-1">
-              Dirección del evento
+              Dirección del evento <span className="text-red-500">*</span>
             </label>
             <p className="text-xs text-muted-foreground mb-3">
               Escribe tu calle y colonia — detectamos el municipio y calculamos el flete automáticamente.
@@ -324,6 +330,7 @@ const Cotizador = () => {
               onSelect={(result) => {
                 setAddressInput(result.shortDisplay);
                 setEventAddress(result);
+                setIntentoReservar(false);
               }}
               onClear={() => {
                 setAddressInput("");
@@ -332,6 +339,12 @@ const Cotizador = () => {
               }}
               placeholder="Ej. Av. Constitución 450, Col. Centro"
             />
+
+            {intentoReservar && !eventAddress && (
+              <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
+                <AlertCircle size={12} /> Ingresa la dirección del evento para continuar.
+              </p>
+            )}
 
             {/* Municipio detectado */}
             {eventAddress && (
