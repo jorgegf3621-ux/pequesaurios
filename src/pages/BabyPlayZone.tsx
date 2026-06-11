@@ -27,7 +27,7 @@ const paquetes = [
     subtitulo: "Inflable & mesita",
     precio: 1400,
     popular: false,
-    nota: "",
+    nota: "No incluye flete.",
     items: [
       "Inflable blanco 3×3 × 2.5 m con resbaladilla y alberca de pelotas",
       "Mesita de madera color blanco",
@@ -44,7 +44,7 @@ const paquetes = [
     subtitulo: "Inflable & mesita de arte",
     precio: 1550,
     popular: true,
-    nota: "",
+    nota: "No incluye flete.",
     items: [
       "Inflable blanco 3×3 × 2.5 m con resbaladilla y alberca de pelotas",
       "Mesita de madera color blanco",
